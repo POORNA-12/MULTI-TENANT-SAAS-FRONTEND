@@ -37,3 +37,12 @@ build/
 # =========================
 .DS_Store
 Thumbs.db
+
+# =========================         GIT INITIALIZATION COMMANDS
+# git init
+# git branch -M main
+# git remote add origin https://github.com/POORNA-12/MULTI-TENANT-SAAS-FRONTEND.git
+# git remote -v
+# git add .
+# git commit -m "Initial frontend setup with Vite + React + Tailwind v4"
+# git push -u origin main
