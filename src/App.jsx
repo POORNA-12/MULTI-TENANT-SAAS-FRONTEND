@@ -8,6 +8,11 @@ import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import SetPassword from "./pages/SetPassword";
 import Dashboard from "./pages/Dashboard";
+import Tenants from "./pages/Tenants";
+import AuthService from "./pages/AuthService";
+import SystemMetrics from "./pages/SystemMetrics";
+import RoleManagement from "./pages/RoleManagement.jsx";
+import Workflows from "./pages/Workflows";
 
 export default function App() {
   return (
@@ -20,7 +25,12 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/set-password" element={<SetPassword />} />
-      <Route path="/dashboard/*" element={<Dashboard />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard/tenants" element={<Tenants />} />
+      <Route path="/dashboard/auth" element={<AuthService />} />
+      <Route path="/dashboard/metrics" element={<SystemMetrics />} />
+      <Route path="/dashboard/roles" element={<RoleManagement />} />
+      <Route path="/dashboard/workflows" element={<Workflows />} />
     </Routes>
   );
 }

@@ -1,4 +1,5 @@
 import api from "./api";
+import Cookies from "js-cookie";
 
 const AuthService = {
     /**
@@ -9,8 +10,9 @@ const AuthService = {
     signUp: async (data) => {
         const response = await api.post("auth/signup", data);
         if (response.data.data?.access) {
-            localStorage.setItem("accessToken", response.data.data.access);
-            localStorage.setItem("refreshToken", response.data.data.refresh);
+            // Default to session cookies for signup
+            Cookies.set("accessToken", response.data.data.access);
+            Cookies.set("refreshToken", response.data.data.refresh);
         }
         return response.data;
     },
@@ -21,13 +23,24 @@ const AuthService = {
      * @param {string} password 
      * @returns {Promise<Object>} Response data
      */
-    signIn: async (email, password) => {
+    signIn: async (email, password, rememberMe = false) => {
         const response = await api.post("auth/signin", { email, password });
         if (response.data.data?.access) {
-            localStorage.setItem("accessToken", response.data.data.access);
-            localStorage.setItem("refreshToken", response.data.data.refresh);
+            const cookieOptions = rememberMe ? { expires: 7 } : {}; // 7 days if remember me, else session
+            Cookies.set("accessToken", response.data.data.access, cookieOptions);
+            Cookies.set("refreshToken", response.data.data.refresh, cookieOptions);
+            // Store email for display purposes since full profile might not be available immediately
+            Cookies.set("userEmail", email, cookieOptions);
         }
         return response.data;
+    },
+
+    /**
+     * Get the stored user email.
+     * @returns {string|null} User email or null
+     */
+    getUserEmail: () => {
+        return Cookies.get("userEmail");
     },
 
     /**
@@ -35,11 +48,15 @@ const AuthService = {
      * @returns {Promise<Object>} Response data
      */
     signOut: async () => {
-        const refreshToken = localStorage.getItem("refreshToken");
-        const response = await api.post("auth/signout", { refresh: refreshToken });
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        return response.data;
+        const refreshToken = Cookies.get("refreshToken");
+        if (refreshToken) {
+            // Optional: Call backend to blacklist/revoke token
+            await api.post("auth/signout", { refresh: refreshToken });
+        }
+        Cookies.remove("accessToken");
+        Cookies.remove("refreshToken");
+        Cookies.remove("userEmail");
+        return { message: "Signed out successfully" };
     },
 
     /**
@@ -47,10 +64,13 @@ const AuthService = {
      * @returns {Promise<Object>} Response data containing new access token
      */
     refreshToken: async () => {
-        const refreshToken = localStorage.getItem("refreshToken");
+        const refreshToken = Cookies.get("refreshToken");
         const response = await api.post("auth/refresh-access", { refresh: refreshToken });
         if (response.data.access) {
-            localStorage.setItem("accessToken", response.data.access);
+            // Maintain original expiration behavior if possible, or default to session/short-lived
+            // For simplicity here, we might just set it as session or match refresh token's existence
+            // But usually access tokens are short lived. We just set it.
+            Cookies.set("accessToken", response.data.access);
         }
         return response.data;
     },
@@ -95,12 +115,14 @@ const AuthService = {
         return response.data;
     },
 
+
+
     /**
      * Check if the user is authenticated.
      * @returns {boolean} True if access token exists
      */
     isAuthenticated: () => {
-        return !!localStorage.getItem("accessToken");
+        return !!Cookies.get("accessToken");
     },
 
     /**
@@ -108,7 +130,7 @@ const AuthService = {
      * @returns {string|null} Access token or null
      */
     getAccessToken: () => {
-        return localStorage.getItem("accessToken");
+        return Cookies.get("accessToken");
     }
 };
 

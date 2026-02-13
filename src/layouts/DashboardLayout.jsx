@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import AuthService from "../services/authService";
+import organizationService from "../services/organizationService";
 
 export default function DashboardLayout({ children }) {
     const navigate = useNavigate();
@@ -8,6 +9,36 @@ export default function DashboardLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [activeOrg, setActiveOrg] = useState(null);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        // Load user from cookie for display
+        const storedEmail = AuthService.getUserEmail();
+        if (storedEmail) {
+            setUser({ email: storedEmail });
+        }
+    }, []);
+
+    useEffect(() => {
+        const fetchActiveOrg = async () => {
+            try {
+                const data = await organizationService.getOrganizations();
+                const active = data.organizations?.find(org => org.is_active);
+                setActiveOrg(active || null);
+            } catch (error) {
+                console.error("Failed to fetch active organization:", error);
+            }
+        };
+        fetchActiveOrg();
+
+        // Listen for active org changes from other components
+        window.addEventListener("activeOrgChanged", fetchActiveOrg);
+
+        return () => {
+            window.removeEventListener("activeOrgChanged", fetchActiveOrg);
+        };
+    }, [location.pathname]);
 
     // Token Refresh Logic
     useEffect(() => {
@@ -36,7 +67,7 @@ export default function DashboardLayout({ children }) {
     // Close mobile menu on route change
     useEffect(() => {
         setMobileMenuOpen(false);
-    }, [location.pathname]);
+    }, [location.pathname, setMobileMenuOpen]);
 
     const handleSignOut = async () => {
         try {
@@ -52,7 +83,7 @@ export default function DashboardLayout({ children }) {
         { icon: "dashboard", label: "Dashboard", path: "/dashboard" },
         { icon: "group", label: "Tenant & User", path: "/dashboard/tenants" },
         { icon: "security", label: "Auth Service", path: "/dashboard/auth" },
-        { icon: "vpn_key", label: "Role Management", path: "/dashboard/roles" },
+        { icon: "vpn_key", label: "Role Management Service", path: "/dashboard/roles" },
         { icon: "hub", label: "Workflows", path: "/dashboard/workflows" },
         { icon: "history", label: "Audit Logs", path: "/dashboard/audit" },
     ];
@@ -102,14 +133,17 @@ export default function DashboardLayout({ children }) {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.pathname === item.path
-                                    ? "bg-blue-50 text-primary font-bold"
+                                className={`relative flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group overflow-hidden ${location.pathname === item.path
+                                    ? "text-primary font-bold bg-blue-50"
                                     : "text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b] font-medium"
                                     }`}
                                 title={(!sidebarOpen && !mobileMenuOpen) ? item.label : ""}
                             >
-                                <span className="material-symbols-outlined">{item.icon}</span>
-                                {(sidebarOpen || mobileMenuOpen) && <span>{item.label}</span>}
+                                {location.pathname === item.path && (
+                                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></span>
+                                )}
+                                <span className={`material-symbols-outlined relative z-10 transition-transform duration-200 ${location.pathname === item.path ? "scale-110" : "group-hover:scale-110"}`}>{item.icon}</span>
+                                {(sidebarOpen || mobileMenuOpen) && <span className="relative z-10">{item.label}</span>}
                             </Link>
                         ))}
                     </nav>
@@ -175,7 +209,9 @@ export default function DashboardLayout({ children }) {
                     <div className="flex items-center gap-3 lg:gap-6">
                         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full border border-slate-200">
                             <span className="material-symbols-outlined text-sm">public</span>
-                            <span className="text-xs font-bold text-[#0e141b]">Global Admin</span>
+                            <span className="text-xs font-bold text-[#0e141b]">
+                                {activeOrg ? `${activeOrg.name} (${activeOrg.slug})` : "Global Admin"}
+                            </span>
                         </div>
 
                         <div className="flex items-center gap-2 lg:gap-4 text-[#4e7397]">
@@ -196,8 +232,10 @@ export default function DashboardLayout({ children }) {
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                             >
                                 <div className="text-right hidden sm:block">
-                                    <p className="text-xs font-bold text-[#0e141b]">admin_user_01</p>
-                                    <p className="text-[10px] text-[#4e7397]">TenantX Root</p>
+                                    <p className="text-xs font-bold text-[#0e141b]">
+                                        {user?.email || "User"}
+                                    </p>
+                                    <p className="text-[10px] text-[#4e7397]">{user?.first_name || "TenantX User"}</p>
                                 </div>
                                 <div className="size-9 rounded-full bg-gradient-to-tr from-orange-400 to-yellow-400 border-2 border-white shadow-sm shrink-0"></div>
                             </div>
@@ -211,8 +249,10 @@ export default function DashboardLayout({ children }) {
                                     ></div>
                                     <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-[#d0dbe7] z-20 py-1 animate-in fade-in zoom-in-95 duration-100">
                                         <div className="px-4 py-2 border-b border-[#d0dbe7] sm:hidden">
-                                            <p className="text-xs font-bold text-[#0e141b]">admin_user_01</p>
-                                            <p className="text-[10px] text-[#4e7397]">TenantX Root</p>
+                                            <p className="text-xs font-bold text-[#0e141b]">
+                                                {user?.email || "User"}
+                                            </p>
+                                            <p className="text-[10px] text-[#4e7397]">{user?.first_name || "TenantX User"}</p>
                                         </div>
                                         <Link
                                             to="/dashboard/profile"

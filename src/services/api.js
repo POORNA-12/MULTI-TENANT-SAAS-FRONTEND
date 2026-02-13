@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 // Create an Axios instance with base configuration
 const api = axios.create({
@@ -11,7 +12,7 @@ const api = axios.create({
 // Request interceptor to add the access token to headers
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("accessToken");
+        const token = Cookies.get("accessToken");
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -35,7 +36,7 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const refreshToken = localStorage.getItem("refreshToken");
+                const refreshToken = Cookies.get("refreshToken");
                 if (refreshToken) {
                     // Call the refresh endpoint
                     const response = await axios.post("http://127.0.0.1:8000/auth/refresh-access", {
@@ -44,8 +45,11 @@ api.interceptors.response.use(
 
                     const { access } = response.data;
 
-                    // Update local storage with new access token
-                    localStorage.setItem("accessToken", access);
+                    // Update cookie with new access token
+                    // Try to maintain the session vs persistent nature if possible, 
+                    // otherwise default to session or fixed expiry.
+                    // For now, let's just set it.
+                    Cookies.set("accessToken", access);
 
                     // Update the header for the original request and retry it
                     originalRequest.headers.Authorization = `Bearer ${access}`;

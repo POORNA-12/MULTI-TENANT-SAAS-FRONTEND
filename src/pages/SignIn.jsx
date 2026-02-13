@@ -7,6 +7,7 @@ export default function SignIn() {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -16,7 +17,7 @@ export default function SignIn() {
         setLoading(true);
 
         try {
-            await AuthService.signIn(email, password);
+            await AuthService.signIn(email, password, rememberMe);
             navigate("/dashboard"); // Redirect to dashboard on success
         } catch (err) {
             console.error("Sign in failed", err);
@@ -89,13 +90,28 @@ export default function SignIn() {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <div className="mt-2 text-right">
-                        <Link
-                            to="/reset-password"
-                            className="text-xs text-primary hover:underline font-medium"
-                        >
-                            Forgot password?
-                        </Link>
+                    <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center">
+                            <input
+                                id="remember-me"
+                                name="remember-me"
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded cursor-pointer"
+                            />
+                            <label htmlFor="remember-me" className="ml-2 block text-sm text-[#0e141b] cursor-pointer select-none">
+                                Remember me
+                            </label>
+                        </div>
+                        <div className="text-right">
+                            <Link
+                                to="/reset-password"
+                                className="text-xs text-primary hover:underline font-medium"
+                            >
+                                Forgot password?
+                            </Link>
+                        </div>
                     </div>
                 </div>
                 <div className="pt-2">

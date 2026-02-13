@@ -1,6 +1,47 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
+import organizationService from "../services/organizationService";
+import roleService from "../services/roleService";
 
 export default function Dashboard() {
+    const navigate = useNavigate();
+    const [stats, setStats] = useState({
+        totalTenants: 0,
+        activeTenants: 0,
+        activeRoles: 0
+    });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const data = await organizationService.getOrganizations();
+                const total = data.organizations?.length || 0;
+                const active = data.organizations?.filter(org => org.is_active).length || 0;
+
+                let roleCount = 0;
+                const activeOrg = data.organizations?.find(org => org.is_active);
+                if (activeOrg) {
+                    try {
+                        const roleData = await roleService.getRoles(activeOrg.slug);
+                        roleCount = roleData.roles?.length || 0;
+                    } catch (err) {
+                        console.error("Failed to fetch roles for stats", err);
+                    }
+                }
+
+                setStats({
+                    totalTenants: total,
+                    activeTenants: active,
+                    activeRoles: roleCount
+                });
+            } catch (error) {
+                console.error("Failed to fetch dashboard stats:", error);
+            }
+        };
+        fetchStats();
+    }, []);
+
     return (
         <DashboardLayout>
             <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -13,12 +54,18 @@ export default function Dashboard() {
                     </p>
                 </div>
                 <div className="flex gap-3 w-full sm:w-auto">
-                    <button className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 border border-[#d0dbe7] bg-white rounded text-sm font-bold text-[#0e141b] hover:bg-slate-50 transition-colors shadow-sm">
+                    <button
+                        onClick={() => navigate("/dashboard/metrics")}
+                        className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 border border-[#d0dbe7] bg-white rounded text-sm font-bold text-[#0e141b] hover:bg-slate-50 transition-colors shadow-sm"
+                    >
                         <span className="material-symbols-outlined text-[18px]">bar_chart</span>
                         <span className="hidden sm:inline">View Metrics</span>
                         <span className="sm:hidden">Metrics</span>
                     </button>
-                    <button className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 bg-orange-500 rounded text-sm font-bold text-white hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/20">
+                    <button
+                        onClick={() => navigate("/dashboard/tenants")}
+                        className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 bg-orange-500 rounded text-sm font-bold text-white hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/20"
+                    >
                         <span className="material-symbols-outlined text-[18px]">add</span>
                         <span className="hidden sm:inline">Create New Tenant</span>
                         <span className="sm:hidden">New Tenant</span>
@@ -33,8 +80,8 @@ export default function Dashboard() {
                     statusColor="bg-green-100 text-green-700"
                     desc="Centralized control for provisioning, scaling, and managing multi-tenant lifecycle."
                     stats={[
-                        { label: "TOTAL TENANTS", value: "1,248" },
-                        { label: "PROVISIONING", value: "3 Pending", valueColor: "text-blue-600" }
+                        { label: "TOTAL TENANTS", value: stats.totalTenants.toLocaleString() },
+                        { label: "PROVISIONING", value: `${stats.activeTenants} Active`, valueColor: "text-blue-600" }
                     ]}
                     links={["View All Tenants", "Lifecycle Policies"]}
                     icon="corporate_fare"
@@ -55,19 +102,21 @@ export default function Dashboard() {
                     iconBg="bg-green-50 text-green-600"
                 />
 
-                <StatusCard
-                    title="Role Management"
-                    status="Secure"
-                    statusColor="bg-blue-100 text-blue-700"
-                    desc="Dynamic Role-Based Access Control. Define granular permissions and policies."
-                    stats={[
-                        { label: "ACTIVE ROLES", value: "156" },
-                        { label: "LAST SYNC", value: "4m ago" }
-                    ]}
-                    links={["Policy Editor", "Permission Audit"]}
-                    icon="vpn_key"
-                    iconBg="bg-purple-50 text-purple-600"
-                />
+                <div onClick={() => navigate('/role-management')} className="cursor-pointer">
+                    <StatusCard
+                        title="Role Management"
+                        status="Secure"
+                        statusColor="bg-blue-100 text-blue-700"
+                        desc="Dynamic Role-Based Access Control. Define granular permissions and policies."
+                        stats={[
+                            { label: "ACTIVE ROLES", value: stats.activeRoles.toString() },
+                            { label: "LAST SYNC", value: "Just now" }
+                        ]}
+                        links={["Policy Editor", "Permission Audit"]}
+                        icon="vpn_key"
+                        iconBg="bg-purple-50 text-purple-600"
+                    />
+                </div>
 
                 <StatusCard
                     title="Workflow Engine"
