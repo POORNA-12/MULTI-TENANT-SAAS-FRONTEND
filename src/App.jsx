@@ -13,6 +13,7 @@ import AuthService from "./pages/AuthService";
 import SystemMetrics from "./pages/SystemMetrics";
 import RoleManagement from "./pages/RoleManagement.jsx";
 import Workflows from "./pages/Workflows";
+import AuditLogs from "./pages/AuditLogs";
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
       <Route path="/dashboard/metrics" element={<SystemMetrics />} />
       <Route path="/dashboard/roles" element={<RoleManagement />} />
       <Route path="/dashboard/workflows" element={<Workflows />} />
+      <Route path="/dashboard/audit" element={<AuditLogs />} />
     </Routes>
   );
 }

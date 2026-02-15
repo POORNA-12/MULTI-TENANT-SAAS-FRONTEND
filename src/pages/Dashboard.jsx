@@ -1,46 +1,36 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
-import organizationService from "../services/organizationService";
-import roleService from "../services/roleService";
+import dashboardService from "../services/dashboardService";
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const [stats, setStats] = useState({
-        totalTenants: 0,
-        activeTenants: 0,
-        activeRoles: 0
-    });
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const data = await organizationService.getOrganizations();
-                const total = data.organizations?.length || 0;
-                const active = data.organizations?.filter(org => org.is_active).length || 0;
-
-                let roleCount = 0;
-                const activeOrg = data.organizations?.find(org => org.is_active);
-                if (activeOrg) {
-                    try {
-                        const roleData = await roleService.getRoles(activeOrg.slug);
-                        roleCount = roleData.roles?.length || 0;
-                    } catch (err) {
-                        console.error("Failed to fetch roles for stats", err);
-                    }
-                }
-
-                setStats({
-                    totalTenants: total,
-                    activeTenants: active,
-                    activeRoles: roleCount
-                });
+                const data = await dashboardService.getDashboardData();
+                setStats(data);
             } catch (error) {
                 console.error("Failed to fetch dashboard stats:", error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchStats();
     }, []);
+
+    if (loading) {
+        return (
+            <DashboardLayout>
+                <div className="flex items-center justify-center h-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+            </DashboardLayout>
+        );
+    }
 
     return (
         <DashboardLayout>
@@ -80,8 +70,8 @@ export default function Dashboard() {
                     statusColor="bg-green-100 text-green-700"
                     desc="Centralized control for provisioning, scaling, and managing multi-tenant lifecycle."
                     stats={[
-                        { label: "TOTAL TENANTS", value: stats.totalTenants.toLocaleString() },
-                        { label: "PROVISIONING", value: `${stats.activeTenants} Active`, valueColor: "text-blue-600" }
+                        { label: "TOTAL TENANTS", value: stats?.tenants?.total?.toLocaleString() || "0" },
+                        { label: "ACTIVE", value: stats?.tenants?.active?.toLocaleString() || "0", valueColor: "text-blue-600" }
                     ]}
                     links={["View All Tenants", "Lifecycle Policies"]}
                     icon="corporate_fare"
@@ -89,16 +79,16 @@ export default function Dashboard() {
                 />
 
                 <StatusCard
-                    title="Auth Services"
-                    status="Healthy"
+                    title="User Metrics"
+                    status="Active"
                     statusColor="bg-green-100 text-green-700"
-                    desc="Identity Provider (IdP) management, SSO configuration, and security authentication."
+                    desc="Overview of user adoption, active sessions, and system-wide user base."
                     stats={[
-                        { label: "AVG LATENCY", value: "42ms" },
-                        { label: "SUCCESS RATE", value: "99.99%" }
+                        { label: "TOTAL USERS", value: stats?.users?.total?.toLocaleString() || "0" },
+                        { label: "ACTIVE", value: stats?.users?.active?.toLocaleString() || "0" }
                     ]}
-                    links={["Auth Logs", "SSO Config"]}
-                    icon="security"
+                    links={["User Directory", "Access Logs"]}
+                    icon="group"
                     iconBg="bg-green-50 text-green-600"
                 />
 
@@ -109,8 +99,8 @@ export default function Dashboard() {
                         statusColor="bg-blue-100 text-blue-700"
                         desc="Dynamic Role-Based Access Control. Define granular permissions and policies."
                         stats={[
-                            { label: "ACTIVE ROLES", value: stats.activeRoles.toString() },
-                            { label: "LAST SYNC", value: "Just now" }
+                            { label: "DISTINCT ROLES", value: stats?.roles?.distinct_roles?.toString() || "0" },
+                            { label: "ASSIGNMENTS", value: stats?.roles?.total_role_assignments?.toString() || "0" }
                         ]}
                         links={["Policy Editor", "Permission Audit"]}
                         icon="vpn_key"
@@ -124,8 +114,8 @@ export default function Dashboard() {
                     statusColor="bg-orange-100 text-orange-700"
                     desc="Automate tenant operations and complex business logic using the TenantX engine."
                     stats={[
-                        { label: "RUNNING INSTANCES", value: "8.4k" },
-                        { label: "ERROR RATE", value: "0.02%", valueColor: "text-red-500" }
+                        { label: "TOTAL REQUESTS", value: stats?.workflows?.total?.toLocaleString() || "0" },
+                        { label: "PENDING", value: stats?.workflows?.submitted?.toLocaleString() || "0", valueColor: "text-orange-500" }
                     ]}
                     links={["Visual Designer", "Execution History"]}
                     icon="hub"
@@ -138,44 +128,27 @@ export default function Dashboard() {
                     <div className="p-4 border-b border-[#d0dbe7] flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-[#4e7397]">history</span>
-                            <h3 className="font-bold text-[#0e141b]">Audit Logs & Compliance</h3>
+                            <h3 className="font-bold text-[#0e141b]">Recent Activity & Logs</h3>
                         </div>
                         <div className="flex gap-4 text-xs font-bold text-primary cursor-pointer">
-                            <span className="hover:underline">Download Report</span>
-                            <span className="hover:underline">Go to Log Explorer</span>
+                            <span className="hover:underline">View All</span>
                         </div>
                     </div>
                     <div className="divide-y divide-[#d0dbe7]">
-                        <LogItem
-                            time="14:20:11"
-                            type="IDENTITY"
-                            desc="User 'sarah.smith' modified RBAC policy 'Reader-Default' for Tenant 'Acme-Corp'"
-                            status="SUCCESS"
-                            statusColor="text-green-600"
-                        />
-                        <LogItem
-                            time="14:18:45"
-                            type="WORKFLOW"
-                            desc="System triggered 'Auto-Scale-Database' event for 'Globex-Global'"
-                            status="SUCCESS"
-                            statusColor="text-green-600"
-                            typeColor="text-orange-600"
-                        />
-                        <LogItem
-                            time="14:15:02"
-                            type="SECURITY"
-                            desc="Unauthorized API access attempt detected from IP 192.168.1.1"
-                            status="BLOCKED"
-                            statusColor="text-red-600"
-                            typeColor="text-red-600"
-                        />
-                        <LogItem
-                            time="14:12:30"
-                            type="TENANT"
-                            desc="Provisioning started for new tenant 'TechFlow Inc.'"
-                            status="IN PROGRESS"
-                            statusColor="text-blue-600"
-                        />
+                        {stats?.recent_activity?.length > 0 ? (
+                            stats.recent_activity.map((log, index) => (
+                                <LogItem
+                                    key={index}
+                                    time={new Date(log.performed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    type={log.action}
+                                    desc={`${log.workflow} - ${log.performed_by}`}
+                                    status="LOGGED"
+                                    statusColor="text-gray-600"
+                                />
+                            ))
+                        ) : (
+                            <div className="p-4 text-sm text-[#4e7397] text-center">No recent activity</div>
+                        )}
                     </div>
                 </div>
 
@@ -186,10 +159,14 @@ export default function Dashboard() {
                             <span className="size-2 bg-green-500 rounded-full animate-pulse"></span>
                         </div>
                         <div className="space-y-3">
-                            <HealthItem label="Admin Console" status="OPERATIONAL" />
-                            <HealthItem label="Auth Engine" status="OPERATIONAL" />
-                            <HealthItem label="API Gateway" status="OPERATIONAL" />
-                            <HealthItem label="Workflow Runner" status="LATENCY" color="text-orange-500" />
+                            {stats?.system_health && Object.entries(stats.system_health).map(([key, value]) => (
+                                <HealthItem
+                                    key={key}
+                                    label={key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                    status={value}
+                                    color={value === 'OPERATIONAL' ? 'text-green-600' : 'text-orange-500'}
+                                />
+                            ))}
                         </div>
                     </div>
 

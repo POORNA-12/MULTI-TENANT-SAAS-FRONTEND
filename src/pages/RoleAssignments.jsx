@@ -3,6 +3,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import roleService from "../services/roleService";
 import organizationService from "../services/organizationService";
 import tenantUserService from "../services/tenantUserService";
+import AlertModal from "../components/AlertModal";
 
 const AssignRoleModal = ({ isOpen, onClose, onSubmit, isLoading, roles }) => {
     const [email, setEmail] = useState("");
@@ -145,6 +146,10 @@ export default function RoleAssignments() {
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Alert Modal State
+    const [alertData, setAlertData] = useState({ isOpen: false, title: "", message: "", type: "success" });
+    const showAlert = (title, message, type = "error") => setAlertData({ isOpen: true, title, message, type });
+
     const fetchRoles = async () => {
         try {
             const data = await roleService.getRoles();
@@ -203,12 +208,13 @@ export default function RoleAssignments() {
 
             if (!targetUser || !targetUser.id) {
                 console.warn("User ID not found for assignment");
-                alert("Could not find user details. Ensure user is already a member of this tenant.");
+                showAlert("User Not Found", "Could not find user details. Ensure user is already a member of this tenant.", "error");
                 setIsLoading(false);
                 return;
             }
 
             await roleService.assignRole({
+                organization_id: activeOrg.id,
                 tenant_user_id: targetUser.id,
                 role: assignData.role
             });
@@ -217,7 +223,7 @@ export default function RoleAssignments() {
             fetchAssignments(activeOrg.slug);
         } catch (error) {
             console.error("Failed to assign role:", error);
-            alert(error.response?.data?.message || "Failed to assign role");
+            showAlert("Error", error.response?.data?.message || "Failed to assign role.", "error");
         } finally {
             setIsLoading(false);
         }
@@ -225,6 +231,13 @@ export default function RoleAssignments() {
 
     return (
         <DashboardLayout>
+            <AlertModal
+                isOpen={alertData.isOpen}
+                onClose={() => setAlertData(prev => ({ ...prev, isOpen: false }))}
+                title={alertData.title}
+                message={alertData.message}
+                type={alertData.type}
+            />
             <div className="max-w-6xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-2xl font-black text-[#0e141b] tracking-tight">
@@ -255,8 +268,8 @@ export default function RoleAssignments() {
 
                 <RoleAssignmentTable
                     assignments={assignments}
-                    onEdit={(assignment) => alert(`Edit assignment for ${assignment.user_email}`)}
-                    onRemove={(assignment) => alert(`Remove assignment for ${assignment.user_email}`)}
+                    onEdit={(assignment) => showAlert("Info", `Edit assignment for ${assignment.user_email}`, "info")}
+                    onRemove={(assignment) => showAlert("Info", `Remove assignment for ${assignment.user_email}`, "info")}
                 />
 
                 <AssignRoleModal

@@ -4,10 +4,11 @@ import organizationService from "../services/organizationService";
 import tenantUserService from "../services/tenantUserService";
 import ConfirmationModal from "../components/ConfirmationModal";
 import AlertModal from "../components/AlertModal";
+import { useSearch } from "../context/SearchContext";
 
 export default function Tenants() {
+    const { searchQuery, setSearchQuery } = useSearch(); // Use global search
     const [activeTab, setActiveTab] = useState("tenants");
-    const [searchQuery, setSearchQuery] = useState("");
     const [organizations, setOrganizations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -241,7 +242,6 @@ export default function Tenants() {
             setNewUserEmail("");
             setNewUserRole("EMPLOYEE");
             fetchUsers();
-            alert("User invited successfully!");
             showAlert("success", "User Invited", "The user has been invited to the organization successfully.");
         } catch (error) {
             console.error("Failed to invite user:", error);

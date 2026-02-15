@@ -5,6 +5,8 @@ import organizationService from "../services/organizationService";
 import tenantUserService from "../services/tenantUserService";
 import ConfirmationModal from "../components/ConfirmationModal";
 import PermissionsViewModal from "../components/PermissionsViewModal";
+import AlertModal from "../components/AlertModal";
+import { useSearch } from "../context/SearchContext";
 
 
 // Helper to format permission codes into readable labels
@@ -306,6 +308,7 @@ const RoleTable = ({ roles, onDelete, onEdit, onViewPermissions }) => (
 
 export default function RoleManagement() {
     console.log("RoleManagement component mounting...");
+    const { searchQuery, setSearchQuery } = useSearch(); // Use global search
     const [activeTab, setActiveTab] = useState("roles");
     const [roles, setRoles] = useState([]);
     const [assignments, setAssignments] = useState([]);
@@ -315,7 +318,6 @@ export default function RoleManagement() {
     const [editingAssignment, setEditingAssignment] = useState(null); // Track assignment being edited
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
 
 
     // Confirmation Modal State
@@ -327,6 +329,10 @@ export default function RoleManagement() {
     const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
     const [viewPermissionsRole, setViewPermissionsRole] = useState(null);
     const [isPermissionLoading, setIsPermissionLoading] = useState(false);
+
+    // Alert Modal State
+    const [alertData, setAlertData] = useState({ isOpen: false, title: "", message: "", type: "success" });
+    const showAlert = (title, message, type = "error") => setAlertData({ isOpen: true, title, message, type });
 
     const fetchRoles = async (slug) => {
         if (!slug) return;
@@ -450,7 +456,7 @@ export default function RoleManagement() {
             if (activeOrg) fetchRoles(activeOrg.slug);
         } catch (error) {
             console.error("Failed to save role:", error);
-            alert(error.response?.data?.message || "Failed to save role");
+            showAlert("Error", error.response?.data?.message || "Failed to save role", "error");
         } finally {
             setIsLoading(false);
         }
@@ -480,7 +486,7 @@ export default function RoleManagement() {
             setAssignmentToDelete(null);
         } catch (error) {
             console.error("Failed to remove assignment:", error);
-            alert("Failed to remove user from tenant");
+            showAlert("Error", "Failed to remove user from tenant.", "error");
         } finally {
             setIsLoading(false);
         }
@@ -504,12 +510,13 @@ export default function RoleManagement() {
                 // If we can't find it, we can't proceed with standard API.
                 // Let's try to pass email as tenant_user_id if backend handles it, or just alert.
                 // Based on backend view, it expects "tenant_user_id". 
-                alert("Could not find user details. Ensure user is already a member of this tenant.");
+                showAlert("User Not Found", "Could not find user details. Ensure user is already a member of this tenant.", "error");
                 setIsLoading(false);
                 return;
             }
 
             await roleService.assignRole({
+                organization_id: activeOrg.id,
                 tenant_user_id: targetUser.id,
                 role: assignData.role
             });
@@ -518,7 +525,7 @@ export default function RoleManagement() {
             fetchAssignments(activeOrg.slug); // Reload data
         } catch (error) {
             console.error("Failed to assign role:", error);
-            alert(error.response?.data?.message || "Failed to assign role");
+            showAlert("Error", error.response?.data?.message || "Failed to assign role.", "error");
         } finally {
             setIsLoading(false);
         }
@@ -540,7 +547,7 @@ export default function RoleManagement() {
             setRoleToDelete(null);
         } catch (error) {
             console.error("Failed to delete role:", error);
-            alert("Failed to deactivate role");
+            showAlert("Error", "Failed to deactivate role.", "error");
         } finally {
             setIsLoading(false);
         }
@@ -566,6 +573,13 @@ export default function RoleManagement() {
 
     return (
         <DashboardLayout>
+            <AlertModal
+                isOpen={alertData.isOpen}
+                onClose={() => setAlertData(prev => ({ ...prev, isOpen: false }))}
+                title={alertData.title}
+                message={alertData.message}
+                type={alertData.type}
+            />
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
