@@ -34,12 +34,19 @@ export default function AuditLogs() {
                 }
 
                 // Normalize logs
+                // Normalize logs
                 const processedLogs = rawLogs.map((log, index) => ({
-                    ...log,
                     id: log.id || `log-${index}-${Date.now()}`,
-                    created_at: log.created_at || log.time,
-                    status: log.status || (log.success ? "Success" : "Failure"),
-                    details: log.details || `${log.method} ${log.endpoint}`
+                    created_at: log.time || log.created_at,
+                    user_email: log.user_email,
+                    user_type: log.user_type,
+                    tenant_name: log.tenant_name || "-",
+                    action: log.action,
+                    resource: log.resource,
+                    status: log.success ? "Success" : "Failure",
+                    status_code: log.status_code,
+                    details: log.details || `${log.method} ${log.endpoint}`,
+                    ip_address: log.ip_address
                 }));
                 setLogs(processedLogs);
 
@@ -355,6 +362,7 @@ export default function AuditLogs() {
                                             <tr className="bg-[#f6f7f8] border-b border-[#d0dbe7] text-[#4e7397] text-xs uppercase tracking-wider">
                                                 <th className="p-4 font-semibold">Time</th>
                                                 <th className="p-4 font-semibold">User</th>
+                                                <th className="p-4 font-semibold">Tenant</th>
                                                 <th className="p-4 font-semibold">Action</th>
                                                 <th className="p-4 font-semibold">Resource</th>
                                                 <th className="p-4 font-semibold">Status</th>
@@ -372,8 +380,14 @@ export default function AuditLogs() {
                                                         <td className="p-4 whitespace-nowrap text-sm text-[#4e7397]">
                                                             {new Date(log.created_at).toLocaleString()}
                                                         </td>
-                                                        <td className="p-4 whitespace-nowrap text-sm font-medium text-[#0e141b]">
-                                                            {log.user_email}
+                                                        <td className="p-4 whitespace-nowrap">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-medium text-[#0e141b]">{log.user_email}</span>
+                                                                <span className="text-[10px] text-[#4e7397] uppercase tracking-wide">{log.user_type?.replace('-', ' ') || 'Unknown'}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4 whitespace-nowrap text-sm text-[#0e141b]">
+                                                            {log.tenant_name}
                                                         </td>
                                                         <td className="p-4 whitespace-nowrap text-sm text-[#0e141b]">
                                                             {log.action}
@@ -383,7 +397,7 @@ export default function AuditLogs() {
                                                         </td>
                                                         <td className="p-4 whitespace-nowrap">
                                                             <span className={`px-2 py-1 rounded-full text-xs font-bold ${getStatusColor(log.status)}`}>
-                                                                {log.status}
+                                                                {log.status} {log.status_code && `(${log.status_code})`}
                                                             </span>
                                                         </td>
                                                         <td className="p-4 text-sm text-[#4e7397] max-w-xs truncate" title={log.details}>
