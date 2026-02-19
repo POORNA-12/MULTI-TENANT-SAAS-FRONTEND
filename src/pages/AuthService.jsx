@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import organizationService from "../services/organizationService";
 
-const ApiEndpoint = ({ method, url, title, description, body, headers }) => {
+const ApiEndpoint = ({ method, url, title, description, body, headers, successResponse, errorResponses }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const methodColors = {
@@ -30,31 +30,75 @@ const ApiEndpoint = ({ method, url, title, description, body, headers }) => {
                 </span>
             </button>
             {isOpen && (
-                <div className="p-6 border-t border-[#d0dbe7] bg-white">
-                    {description && <p className="text-sm text-[#4e7397] mb-4">{description}</p>}
+                <div className="p-6 border-t border-[#d0dbe7] bg-white space-y-6">
+                    {description && <p className="text-sm text-[#4e7397] leading-relaxed">{description}</p>}
 
-                    {headers && (
-                        <div className="mb-4">
-                            <h4 className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-2">Headers Required</h4>
-                            <div className="bg-[#f6f7f8] border border-[#d0dbe7] rounded p-3 font-mono text-xs text-[#0e141b]">
-                                {Object.entries(headers).map(([key, value]) => (
-                                    <div key={key} className="flex gap-2">
-                                        <span className="font-bold">{key}:</span>
-                                        <span>{value}</span>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Request Section */}
+                        <div className="space-y-4">
+                            <h4 className="text-xs font-bold text-[#0e141b] uppercase tracking-wider border-b border-[#d0dbe7] pb-2">Request</h4>
+
+                            {headers && (
+                                <div>
+                                    <h5 className="text-[10px] font-bold text-[#4e7397] uppercase mb-2">Headers</h5>
+                                    <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded p-3 font-mono text-xs text-[#334155]">
+                                        {Object.entries(headers).map(([key, value]) => (
+                                            <div key={key} className="flex gap-2">
+                                                <span className="font-bold text-[#0f172a]">{key}:</span>
+                                                <span className="break-all">{value}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                                </div>
+                            )}
 
-                    {body && (
-                        <div>
-                            <h4 className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-2">Request Body</h4>
-                            <pre className="bg-[#f6f7f8] border border-[#d0dbe7] rounded p-4 overflow-x-auto text-xs font-mono text-[#0e141b]">
-                                {JSON.stringify(body, null, 2)}
-                            </pre>
+                            {body && (
+                                <div>
+                                    <h5 className="text-[10px] font-bold text-[#4e7397] uppercase mb-2">Body</h5>
+                                    <pre className="bg-[#f8fafc] border border-[#e2e8f0] rounded p-3 overflow-x-auto text-xs font-mono text-[#334155] custom-scrollbar">
+                                        {JSON.stringify(body, null, 2)}
+                                    </pre>
+                                </div>
+                            )}
                         </div>
-                    )}
+
+                        {/* Response Section */}
+                        <div className="space-y-6">
+                            <h4 className="text-xs font-bold text-[#0e141b] uppercase tracking-wider border-b border-[#d0dbe7] pb-2">Responses</h4>
+
+                            {successResponse && (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">
+                                            {successResponse.code || 200}
+                                        </span>
+                                        <span className="text-[10px] font-bold text-green-700 uppercase">Success</span>
+                                    </div>
+                                    <pre className="bg-[#f0fdf4] border border-green-100 rounded p-3 overflow-x-auto text-xs font-mono text-[#166534] custom-scrollbar">
+                                        {JSON.stringify(successResponse.data, null, 2)}
+                                    </pre>
+                                </div>
+                            )}
+
+                            {errorResponses && errorResponses.length > 0 && (
+                                <div className="space-y-3">
+                                    {errorResponses.map((err, idx) => (
+                                        <div key={idx}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">
+                                                    {err.code || 400}
+                                                </span>
+                                                <span className="text-[10px] font-bold text-red-700 uppercase">Error</span>
+                                            </div>
+                                            <pre className="bg-[#fef2f2] border border-red-100 rounded p-3 overflow-x-auto text-xs font-mono text-[#991b1b] custom-scrollbar">
+                                                {JSON.stringify(err.data, null, 2)}
+                                            </pre>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
@@ -86,115 +130,241 @@ export default function AuthService() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-5xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            {/* Inject Custom Scrollbar Styles for code blocks */}
+            <style>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    height: 8px;
+                    width: 8px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: #cbd5e1;
+                    border-radius: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background-color: #94a3b8;
+                }
+            `}</style>
+
+            <div className="max-w-6xl mx-auto space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-black text-[#0e141b] tracking-tight">
                             Auth Service API Reference
                         </h1>
-                        <p className="text-sm text-[#4e7397] mt-1">
+                        <p className="text-sm text-[#4e7397] mt-1 max-w-3xl">
                             Detailed technical documentation for the authentication service. Manage user lifecycles, token issuance, and multi-tenant security sessions.
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded shadow-sm transition-colors">
+                        <button className="px-4 py-2 bg-white border border-[#d0dbe7] hover:bg-slate-50 text-[#0e141b] text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors">
                             Export OpenAPI
                         </button>
-                        <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded shadow-sm transition-colors">
+                        <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors shadow-orange-500/20">
                             Authorize
                         </button>
                     </div>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-8 flex items-start gap-3">
-                    <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
-                    <div>
-                        <h3 className="text-sm font-bold text-blue-900">Base URL Pattern</h3>
-                        <p className="text-sm text-blue-800 mt-1">
-                            <code>/api/{activeSlug}/auth/</code> - Replace <code>{activeSlug}</code> with actual tenant slug (example: <code>acme-corp</code>)
-                        </p>
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                    <div className="flex items-start gap-4">
+                        <div className="size-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined">dns</span>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wide">Base URL Pattern</h3>
+                            <div className="mt-2 flex items-center gap-2 bg-white px-3 py-2 rounded border border-blue-200 shadow-sm">
+                                <code className="text-sm font-mono text-blue-800">/api/{activeSlug}/auth/</code>
+                            </div>
+                            <p className="text-xs text-blue-700/70 mt-2">
+                                Replace <code>{activeSlug}</code> with your actual tenant slug (e.g. <code>acme-corp</code>)
+                            </p>
+                        </div>
+                    </div>
+                    <div className="text-right hidden md:block">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                            <span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                            System Operational
+                        </span>
+                        <p className="text-xs text-blue-800/60 mt-2">v1.2.0 • TAS-Auth-Service</p>
                     </div>
                 </div>
 
                 <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-[#0e141b] flex items-center gap-2">
-                        <span className="material-symbols-outlined">lock</span>
-                        TENANT AUTH APIs
-                    </h2>
+                    <div className="flex items-center gap-2 pb-2 border-b border-[#d0dbe7]">
+                        <span className="material-symbols-outlined text-[#4e7397]">lock_person</span>
+                        <h2 className="text-sm font-bold text-[#0e141b] uppercase tracking-wider">
+                            Tenant Authentication Endpoints
+                        </h2>
+                    </div>
 
+                    {/* 1. Tenant Signup */}
                     <ApiEndpoint
                         method="POST"
                         url={`/api/${activeSlug}/auth/signup/`}
                         title="Tenant Signup"
-                        description="Register a new user to a specific tenant. This is the initial request to send an OTP."
+                        description="Register a new user to a specific tenant. This initiates the process and sends an OTP to the provided email."
                         body={{
                             email: "user@example.com",
                             password: "StrongPassword@123",
                             reenter_password: "StrongPassword@123"
                         }}
+                        successResponse={{
+                            code: 200,
+                            data: {
+                                "message": "Verification code sent"
+                            }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 400,
+                                data: { "message": "Missing signup details" }
+                            },
+                            {
+                                code: 400,
+                                data: { "message": "User already exists" }
+                            }
+                        ]}
                     />
 
+                    {/* 2. Tenant Signup Verify */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/signup/ (Verify)`}
-                        title="Tenant Signup (Create Account)"
-                        description="Complete signed up by verifying the OTP."
+                        url={`/api/${activeSlug}/auth/signup/`}
+                        title="Complete Signup (Verify OTP)"
+                        description="Complete the registration by verifying the OTP sent to the email. Returns JWT tokens upon success."
                         body={{
                             email: "user@example.com",
                             password: "StrongPassword@123",
                             reenter_password: "StrongPassword@123",
                             verification_key: "123456"
                         }}
+                        successResponse={{
+                            code: 201,
+                            data: {
+                                "message": "Tenant user created successfully",
+                                "data": {
+                                    "access": "jwt_access_token",
+                                    "refresh": "jwt_refresh_token"
+                                }
+                            }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 400,
+                                data: { "message": "Invalid or expired verification code" }
+                            },
+                            {
+                                code: 400,
+                                data: { "message": "Passwords do not match" }
+                            }
+                        ]}
                     />
 
+                    {/* 3. Send Verification Token */}
                     <ApiEndpoint
                         method="POST"
                         url={`/api/${activeSlug}/auth/send-verification/`}
-                        title="Send Email Verification"
+                        title="Send Verification Token"
+                        description="Resend the email verification code to the user."
                         body={{
                             email: "user@example.com",
                             tenant_slug: activeSlug === "{tenant_slug}" ? "acme-corp" : activeSlug
                         }}
+                        successResponse={{
+                            code: 200,
+                            data: { "message": "Verification code sent successfully" }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 400,
+                                data: { "message": "Invalid email or tenant" }
+                            }
+                        ]}
                     />
 
+                    {/* 4. Tenant Signin */}
                     <ApiEndpoint
                         method="POST"
                         url={`/api/${activeSlug}/auth/signin/`}
                         title="Tenant Signin"
-                        description="Authenticate a user and retrieve access tokens."
+                        description="Authenticate a user and retrieve access and refresh tokens."
                         body={{
                             email: "user@example.com",
                             password: "StrongPassword@123"
                         }}
+                        successResponse={{
+                            code: 200,
+                            data: {
+                                "message": "Tenant signin successful",
+                                "data": {
+                                    "access": "jwt_access_token",
+                                    "refresh": "jwt_refresh_token"
+                                },
+                                "roles": ["manager"]
+                            }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 401,
+                                data: { "message": "Invalid credentials" }
+                            }
+                        ]}
                     />
 
+                    {/* 5. Signout */}
                     <ApiEndpoint
                         method="POST"
                         url={`/api/${activeSlug}/auth/signout/`}
-                        title="Tenant Signout"
-                        description="Invalidate current user session and tokens."
+                        title="Signout"
+                        description="Invalidate the current user session. Requires Refresh Token."
                         headers={{
                             Authorization: "Bearer <access_token>"
                         }}
                         body={{
                             refresh: "your_refresh_token_here"
                         }}
+                        successResponse={{
+                            code: 200,
+                            data: { "message": "Successfully logged out" }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 400,
+                                data: { "message": "Refresh token is required" }
+                            }
+                        ]}
                     />
 
+                    {/* 6. Token Refresh */}
                     <ApiEndpoint
                         method="POST"
                         url={`/api/${activeSlug}/auth/token-refresh/`}
                         title="Refresh Access Token"
-                        description="Obtain a new access token using a refresh token."
+                        description="Obtain a brand new access token using a valid refresh token."
                         body={{
                             refresh: "your_refresh_token_here"
                         }}
+                        successResponse={{
+                            code: 200,
+                            data: { "access": "new_access_token" }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 401,
+                                data: { "message": "Invalid or expired refresh token" }
+                            }
+                        ]}
                     />
 
+                    {/* 7. Change Password */}
                     <ApiEndpoint
                         method="POST"
                         url={`/api/${activeSlug}/auth/change-password/`}
                         title="Change Password"
+                        description="Update the current user's password."
                         headers={{
                             Authorization: "Bearer <access_token>"
                         }}
@@ -203,22 +373,50 @@ export default function AuthService() {
                             new_password: "NewPassword@123",
                             confirm_password: "NewPassword@123"
                         }}
+                        successResponse={{
+                            code: 200,
+                            data: { "message": "Password changed successfully" }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 400,
+                                data: { "message": "Old password is incorrect" }
+                            },
+                            {
+                                code: 400,
+                                data: { "message": "New passwords do not match" }
+                            }
+                        ]}
                     />
 
+                    {/* 8. Forgot Password */}
                     <ApiEndpoint
                         method="POST"
                         url={`/api/${activeSlug}/auth/forgot-password/`}
-                        title="Forgot Password (Send Reset OTP)"
+                        title="Forgot Password"
+                        description="Initiate password reset process by sending an OTP."
                         body={{
                             tenant_slug: activeSlug === "{tenant_slug}" ? "acme-corp" : activeSlug,
                             email: "user@example.com"
                         }}
+                        successResponse={{
+                            code: 200,
+                            data: { "message": "Password reset verification code sent" }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 400,
+                                data: { "message": "Tenant slug and valid email are required" }
+                            }
+                        ]}
                     />
 
+                    {/* 9. Reset Password */}
                     <ApiEndpoint
                         method="POST"
                         url={`/api/${activeSlug}/auth/reset-password/`}
-                        title="Reset Password (Using OTP)"
+                        title="Reset Password"
+                        description="Set a new password using the OTP received via email."
                         body={{
                             tenant_slug: activeSlug === "{tenant_slug}" ? "acme-corp" : activeSlug,
                             email: "user@example.com",
@@ -226,6 +424,16 @@ export default function AuthService() {
                             new_password: "NewPassword@123",
                             confirm_password: "NewPassword@123"
                         }}
+                        successResponse={{
+                            code: 200,
+                            data: { "message": "Password reset successful" }
+                        }}
+                        errorResponses={[
+                            {
+                                code: 400,
+                                data: { "message": "Invalid or expired OTP" }
+                            }
+                        ]}
                     />
                 </div>
             </div>

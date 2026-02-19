@@ -6,16 +6,14 @@ const dashboardService = {
         return response.data;
     },
 
-    getAuditLogs: async () => {
-        // path("audits/", include("audits.urls")) -> path("saas/audit/activity/", ...
-        // Combined: audits/saas/audit/activity/
-        const response = await api.get("audits/saas/audit/activity/");
+    getAuditLogs: async (params = {}) => {
+        // Combined path: audits/ + saas/audit/activity/
+        const response = await api.get("audits/saas/audit/activity/", { params });
         return response.data;
     },
 
     getAuditAnalytics: async () => {
-        // path("saas/audit/analytics/", SaaSActivityAnalyticsAPIView.as_view())
-        // Combined: audits/saas/audit/analytics/
+        // Combined path: audits/ + saas/audit/analytics/
         const response = await api.get("audits/saas/audit/analytics/");
         return response.data;
     }

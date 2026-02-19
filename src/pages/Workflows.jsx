@@ -6,6 +6,7 @@ import organizationService from "../services/organizationService";
 
 import AuthService from "../services/authService";
 import WorkflowWizard, { WORKFLOW_TEMPLATES } from "../components/WorkflowWizard";
+import WorkflowApiReference from "../components/WorkflowApiReference";
 import ConfirmModal from "../components/ConfirmModal";
 import AlertModal from "../components/AlertModal";
 import { useSearch } from "../context/SearchContext";
@@ -225,12 +226,12 @@ export default function Workflows() {
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-white rounded-xl shadow-sm border border-[#d0dbe7] p-1.5 inline-flex">
+                <div className="flex border-b border-[#d0dbe7] mb-6">
                     <button
                         onClick={() => setActiveTab("create")}
-                        className={`px-6 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 flex items-center gap-2 ${activeTab === "create"
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b]"
+                        className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === "create"
+                            ? "border-blue-500 text-blue-600"
+                            : "border-transparent text-[#4e7397] hover:text-[#0e141b]"
                             }`}
                     >
                         <span className="material-symbols-outlined text-lg">add_circle</span>
@@ -241,19 +242,29 @@ export default function Workflows() {
                             setActiveTab("templates");
                             fetchTemplates();
                         }}
-                        className={`px-6 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 flex items-center gap-2 ${activeTab === "templates"
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b]"
+                        className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === "templates"
+                            ? "border-blue-500 text-blue-600"
+                            : "border-transparent text-[#4e7397] hover:text-[#0e141b]"
                             }`}
                     >
                         <span className="material-symbols-outlined text-lg">list_alt</span>
                         Workflow Templates
                     </button>
+                    <button
+                        onClick={() => setActiveTab("api")}
+                        className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === "api"
+                            ? "border-blue-500 text-blue-600"
+                            : "border-transparent text-[#4e7397] hover:text-[#0e141b]"
+                            }`}
+                    >
+                        <span className="material-symbols-outlined text-lg">api</span>
+                        API Reference
+                    </button>
                 </div>
 
                 {/* Content: Create/Edit Wizard */}
                 {activeTab === "create" && (
-                    <div className="bg-white border border-[#d0dbe7] rounded-2xl shadow-sm p-6 lg:p-8 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="bg-white border border-[#d0dbe7] rounded-2xl shadow-sm p-6 lg:p-8">
                         <WorkflowWizard
                             roles={roles}
                             activeOrg={activeOrg}
@@ -273,7 +284,7 @@ export default function Workflows() {
 
                 {/* Content: Template List */}
                 {activeTab === "templates" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <div>
                         {hasMonitoringAccess() ? (
                             <div className="space-y-8">
                                 {/* Controls */}
@@ -458,6 +469,12 @@ export default function Workflows() {
                     </div>
                 )}
 
+                {/* Content: API Reference */}
+                {activeTab === "api" && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <WorkflowApiReference />
+                    </div>
+                )}
             </div>
         </DashboardLayout>
     );

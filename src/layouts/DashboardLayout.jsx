@@ -200,7 +200,7 @@ export default function DashboardLayout({ children }) {
             </aside>
 
             {/* Main Content Wrapper */}
-            <div className={`flex-1 flex flex-col transition-all duration-300 w-full ${sidebarOpen ? "lg:ml-64" : "lg:ml-20"}`}>
+            <div className={`flex-1 flex flex-col transition-all duration-300 w-full ml-0 ${sidebarOpen ? "lg:ml-64" : "lg:ml-20"}`}>
                 {/* Header */}
                 <header className="h-16 bg-white border-b border-[#d0dbe7] flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
                     <div className="flex items-center gap-4">
