@@ -253,7 +253,7 @@ export default function Workflows() {
 
                 {/* Content: Create/Edit Wizard */}
                 {activeTab === "create" && (
-                    <div className="bg-white border border-[#d0dbe7] rounded-2xl shadow-sm p-6 lg:p-8 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="bg-white border border-[#d0dbe7] rounded-2xl shadow-sm p-6 lg:p-8">
                         <WorkflowWizard
                             roles={roles}
                             activeOrg={activeOrg}
@@ -273,7 +273,7 @@ export default function Workflows() {
 
                 {/* Content: Template List */}
                 {activeTab === "templates" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <div>
                         {hasMonitoringAccess() ? (
                             <div className="space-y-8">
                                 {/* Controls */}

@@ -21,8 +21,29 @@ export default function AuditLogs() {
                     dashboardService.getAuditLogs(),
                     dashboardService.getAuditAnalytics()
                 ]);
-                setLogs(logsData);
-                setAnalytics(analyticsData);
+                // Handle logs data (support both array and paginated response)
+                let rawLogs = [];
+                if (Array.isArray(logsData)) {
+                    rawLogs = logsData;
+                } else if (logsData && Array.isArray(logsData.results)) {
+                    rawLogs = logsData.results;
+                } else if (logsData && Array.isArray(logsData.activity)) {
+                    rawLogs = logsData.activity;
+                } else {
+                    console.warn("Unexpected logs data format:", logsData);
+                }
+
+                // Normalize logs
+                const processedLogs = rawLogs.map((log, index) => ({
+                    ...log,
+                    id: log.id || `log-${index}-${Date.now()}`,
+                    created_at: log.created_at || log.time,
+                    status: log.status || (log.success ? "Success" : "Failure"),
+                    details: log.details || `${log.method} ${log.endpoint}`
+                }));
+                setLogs(processedLogs);
+
+                setAnalytics(analyticsData || null);
             } catch (err) {
                 console.error("Error fetching audit data:", err);
                 setError("Failed to load audit data.");
@@ -34,13 +55,34 @@ export default function AuditLogs() {
         fetchData();
     }, []);
 
-    // Reset to first page when search query changes
+    const [activeFilter, setActiveFilter] = useState("all");
+
+    // Reset to first page when search query or filter changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery]);
+    }, [searchQuery, activeFilter]);
 
-    // Filter logs based on search query
+    // Helper to categorize logs
+    const getLogCategory = (log) => {
+        const action = (log.action || "").toLowerCase();
+        const resource = (log.resource || "").toLowerCase();
+
+        if (action.includes("login") || action.includes("logout") || action.includes("auth") || resource.includes("auth")) return "auth";
+        if (resource.includes("tenant") || resource.includes("user") || action.includes("profile") || action.includes("tenant") || action.includes("user")) return "tenants";
+        if (resource.includes("role") || resource.includes("permission") || resource.includes("rbac") || action.includes("access") || action.includes("role") || action.includes("permission")) return "roles";
+        if (resource.includes("workflow") || resource.includes("approval") || action.includes("request") || action.includes("workflow")) return "workflows";
+        return "other";
+    };
+
+    // Filter logs based on search query AND active category filter
     const filteredLogs = logs.filter(log => {
+        // 1. Category Filter
+        if (activeFilter !== "all") {
+            const category = getLogCategory(log);
+            if (category !== activeFilter) return false;
+        }
+
+        // 2. Search Query
         if (!searchQuery) return true;
         const query = searchQuery.toLowerCase();
         return (
@@ -93,7 +135,7 @@ export default function AuditLogs() {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-1">Total Requests</p>
-                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-blue-600 transition-colors">{analytics.kpis.total_requests}</h3>
+                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-blue-600 transition-colors">{analytics?.kpis?.total_requests || 0}</h3>
                                     </div>
                                     <div className="bg-blue-50 p-2 rounded-md text-blue-600 group-hover:bg-blue-100 transition-colors">
                                         <span className="material-symbols-outlined">dataset</span>
@@ -108,21 +150,21 @@ export default function AuditLogs() {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-1">Active Tenants</p>
-                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-purple-600 transition-colors">{analytics.kpis.total_active_tenants}</h3>
+                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-purple-600 transition-colors">{analytics?.kpis?.total_active_tenants || 0}</h3>
                                     </div>
                                     <div className="bg-purple-50 p-2 rounded-md text-purple-600 group-hover:bg-purple-100 transition-colors">
                                         <span className="material-symbols-outlined">domain</span>
                                     </div>
                                 </div>
                                 <div className="flex -space-x-2 mt-2">
-                                    {[...Array(Math.min(3, analytics.kpis.total_active_tenants || 0))].map((_, i) => (
+                                    {[...Array(Math.min(3, analytics?.kpis?.total_active_tenants || 0))].map((_, i) => (
                                         <div key={i} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-gray-600">
                                             {String.fromCharCode(65 + i)}
                                         </div>
                                     ))}
-                                    {(analytics.kpis.total_active_tenants || 0) > 3 && (
+                                    {(analytics?.kpis?.total_active_tenants || 0) > 3 && (
                                         <div className="w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] text-gray-500">
-                                            +{analytics.kpis.total_active_tenants - 3}
+                                            +{(analytics?.kpis?.total_active_tenants || 0) - 3}
                                         </div>
                                     )}
                                 </div>
@@ -132,7 +174,7 @@ export default function AuditLogs() {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-1">Total Logins</p>
-                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-green-600 transition-colors">{analytics.kpis.logins}</h3>
+                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-green-600 transition-colors">{analytics?.kpis?.logins || 0}</h3>
                                     </div>
                                     <div className="bg-green-50 p-2 rounded-md text-green-600 group-hover:bg-green-100 transition-colors">
                                         <span className="material-symbols-outlined">login</span>
@@ -148,14 +190,14 @@ export default function AuditLogs() {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-1">Failed Requests</p>
-                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-red-600 transition-colors">{analytics.kpis.failed_requests}</h3>
+                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-red-600 transition-colors">{analytics?.kpis?.failed_requests || 0}</h3>
                                     </div>
                                     <div className="bg-red-50 p-2 rounded-md text-red-600 group-hover:bg-red-100 transition-colors">
                                         <span className="material-symbols-outlined">gpp_bad</span>
                                     </div>
                                 </div>
                                 <p className="text-xs text-red-500 font-bold flex items-center gap-1">
-                                    {analytics.kpis.failed_requests > 0 ? (
+                                    {(analytics?.kpis?.failed_requests || 0) > 0 ? (
                                         <>
                                             <span className="material-symbols-outlined text-sm">warning</span>
                                             Attention Needed
@@ -181,10 +223,12 @@ export default function AuditLogs() {
                                     </h3>
                                 </div>
                                 <div className="h-48 flex items-end gap-2 sm:gap-4 justify-between px-2">
-                                    {analytics.daily_activity && analytics.daily_activity.length > 0 ? (
+                                    {analytics?.daily_activity && analytics.daily_activity.length > 0 ? (
                                         analytics.daily_activity.map((day, i) => {
-                                            const max = Math.max(...analytics.daily_activity.map(d => d.count), 1);
-                                            const heightPercentage = Math.max((day.count / max) * 100, 5); // Min 5% height
+                                            // Safely calculate max
+                                            const counts = analytics.daily_activity.map(d => d.count || 0);
+                                            const max = Math.max(...counts, 1);
+                                            const heightPercentage = Math.max(((day.count || 0) / max) * 100, 5); // Min 5% height
                                             return (
                                                 <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
                                                     <div className="w-full relative h-[150px] flex items-end justify-center">
@@ -193,12 +237,12 @@ export default function AuditLogs() {
                                                             style={{ height: `${heightPercentage}%` }}
                                                         >
                                                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#0e141b] text-white text-[10px] font-bold px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                                                {day.count} Events
+                                                                {day.count || 0} Events
                                                                 <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#0e141b]"></div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <span className="text-[10px] font-bold text-[#4e7397] uppercase">{new Date(day.date).toLocaleDateString(undefined, { weekday: 'short' })}</span>
+                                                    <span className="text-[10px] font-bold text-[#4e7397] uppercase">{day.date ? new Date(day.date).toLocaleDateString(undefined, { weekday: 'short' }) : '-'}</span>
                                                 </div>
                                             );
                                         })
@@ -218,7 +262,7 @@ export default function AuditLogs() {
                                         Top Tenants
                                     </h3>
                                     <div className="space-y-3">
-                                        {analytics.top_tenants && analytics.top_tenants.length > 0 ? (
+                                        {analytics?.top_tenants && analytics.top_tenants.length > 0 ? (
                                             analytics.top_tenants.map((tenant, i) => (
                                                 <div key={i} className="flex items-center justify-between group">
                                                     <div className="flex items-center gap-3">
@@ -234,7 +278,7 @@ export default function AuditLogs() {
                                                                 style={{ width: `${Math.min((tenant.total / (analytics.top_tenants[0]?.total || 1)) * 100, 100)}%` }}
                                                             ></div>
                                                         </div>
-                                                        <span className="text-xs font-bold text-[#4e7397] w-8 text-right">{tenant.total}</span>
+                                                        <span className="text-xs font-bold text-[#4e7397] w-8 text-right">{tenant.total || 0}</span>
                                                     </div>
                                                 </div>
                                             ))
@@ -250,7 +294,7 @@ export default function AuditLogs() {
                                         Resource Usage
                                     </h3>
                                     <div className="space-y-3">
-                                        {analytics.resource_distribution && analytics.resource_distribution.slice(0, 5).map((resource, i) => (
+                                        {analytics?.resource_distribution && analytics.resource_distribution.slice(0, 5).map((resource, i) => (
                                             <div key={i} className="flex items-center justify-between">
                                                 <span className="text-sm text-[#4e7397] capitalize flex items-center gap-2">
                                                     <span className={`w-2 h-2 rounded-full ${['bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400', 'bg-red-400'][i % 5]}`}></span>
@@ -270,13 +314,34 @@ export default function AuditLogs() {
 
                 {/* Audit Logs Table Section */}
                 <div>
-                    <div className="flex items-center justify-between mb-4 mt-8">
-                        <h2 className="text-lg font-bold text-[#0e141b]">Detailed Logs</h2>
-                        {searchQuery && (
-                            <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-100">
-                                Filtering by: "{searchQuery}"
-                            </span>
-                        )}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 mt-8">
+                        <div>
+                            <h2 className="text-lg font-bold text-[#0e141b]">Detailed Logs</h2>
+                            <p className="text-sm text-[#4e7397]">Comprehensive record of all system activities</p>
+                        </div>
+
+                        {/* Filter Tabs */}
+                        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+                            {[
+                                { id: "all", label: "All Logs" },
+                                { id: "tenants", label: "Tenants & Users" },
+                                { id: "roles", label: "Roles & Permissions" },
+                                { id: "workflows", label: "Workflows" }
+                            ].map(filter => (
+                                <button
+                                    key={filter.id}
+                                    onClick={() => setActiveFilter(filter.id)}
+                                    className={`
+                                        px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors border
+                                        ${activeFilter === filter.id
+                                            ? "bg-[#0e141b] text-white border-[#0e141b]"
+                                            : "bg-white text-[#4e7397] border-[#d0dbe7] hover:bg-slate-50 hover:text-[#0e141b]"}
+                                    `}
+                                >
+                                    {filter.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="bg-white border border-[#d0dbe7] rounded-lg shadow-sm overflow-hidden">

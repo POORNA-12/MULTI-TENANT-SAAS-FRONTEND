@@ -60,6 +60,32 @@ const roleService = {
         // Expected data: { role_id, permissions: [], slug: "tenant-slug" } 
         const response = await api.post("/rbac/roles/assign-permissions/", data);
         return response.data;
+    },
+
+    // =====================================================
+    // ROLE ASSIGNMENT MANAGEMENT
+    // =====================================================
+
+    // List Role Assignments
+    getRoleAssignments: async (slug, params = {}) => {
+        const response = await api.get(`/rbac/${slug}/role-assignments/`, { params });
+        return response.data;
+    },
+
+    // Update Role Assignment (Edit Role)
+    updateRoleAssignment: async (slug, data) => {
+        // Expected data: { assignment_id, role }
+        const response = await api.patch(`/rbac/${slug}/role-assignments/`, data);
+        return response.data;
+    },
+
+    // Remove Role Assignment (Delete)
+    deleteRoleAssignment: async (slug, assignmentId) => {
+        // Sending assignment_id in data body as required by backend
+        const response = await api.delete(`/rbac/${slug}/role-assignments/`, {
+            data: { assignment_id: assignmentId }
+        });
+        return response.data;
     }
 };
 

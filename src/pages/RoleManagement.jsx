@@ -237,72 +237,74 @@ const CreateRoleModal = ({ isOpen, onClose, onSubmit, isLoading, initialData = n
 
 const RoleTable = ({ roles, onDelete, onEdit, onViewPermissions }) => (
     <div className="bg-white border border-[#d0dbe7] rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse">
-            <thead>
-                <tr className="bg-gray-50 border-b border-[#d0dbe7] text-xs font-bold text-[#4e7397] uppercase tracking-wider">
-                    <th className="p-4">Role Name</th>
-                    <th className="p-4">Description</th>
-                    <th className="p-4">Permissions</th>
-                    <th className="p-4 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody className="divide-y divide-[#d0dbe7]">
-                {roles.length === 0 ? (
-                    <tr>
-                        <td colSpan="4" className="p-8 text-center text-sm text-[#4e7397]">
-                            No roles found. Create a new role to get started.
-                        </td>
+        <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+                <thead>
+                    <tr className="bg-gray-50 border-b border-[#d0dbe7] text-xs font-bold text-[#4e7397] uppercase tracking-wider">
+                        <th className="p-4">Role Name</th>
+                        <th className="p-4">Description</th>
+                        <th className="p-4">Permissions</th>
+                        <th className="p-4 text-right">Actions</th>
                     </tr>
-                ) : (
-                    roles.map((role, index) => (
-                        <tr
-                            key={role.id}
-                            className="hover:bg-slate-50 transition-colors group animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-backwards"
-                            style={{ animationDelay: `${index * 50}ms` }}
-                        >
-                            <td className="p-4">
-                                <span className="font-bold text-[#0e141b] text-sm">{role.name}</span>
-                            </td>
-                            <td className="p-4">
-                                <span className="text-sm text-[#4e7397]">{role.description}</span>
-                            </td>
-                            <td className="p-4">
-                                {role.name === 'panel-admin' ? (
-                                    <span className="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-1 rounded">
-                                        All Permissions
-                                    </span>
-                                ) : (
-                                    <button
-                                        onClick={() => onViewPermissions(role)}
-                                        className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 hover:text-blue-800 transition-colors"
-                                    >
-                                        {(role.permissions || []).length} Permissions
-                                    </button>
-                                )}
-                            </td>
-                            <td className="p-4 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                    <button
-                                        onClick={() => onEdit(role)}
-                                        className="size-8 rounded flex items-center justify-center text-[#4e7397] hover:bg-slate-100 hover:text-blue-600 transition-colors"
-                                        title="Edit Role"
-                                    >
-                                        <span className="material-symbols-outlined text-sm">edit</span>
-                                    </button>
-                                    <button
-                                        onClick={() => onDelete(role.id)}
-                                        className="size-8 rounded flex items-center justify-center text-[#4e7397] hover:bg-red-50 hover:text-red-600 transition-colors"
-                                        title="Delete Role"
-                                    >
-                                        <span className="material-symbols-outlined text-sm">delete</span>
-                                    </button>
-                                </div>
+                </thead>
+                <tbody className="divide-y divide-[#d0dbe7]">
+                    {roles.length === 0 ? (
+                        <tr>
+                            <td colSpan="4" className="p-8 text-center text-sm text-[#4e7397]">
+                                No roles found. Create a new role to get started.
                             </td>
                         </tr>
-                    ))
-                )}
-            </tbody>
-        </table>
+                    ) : (
+                        roles.map((role, index) => (
+                            <tr
+                                key={role.id}
+                                className="hover:bg-slate-50 transition-colors group animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-backwards"
+                                style={{ animationDelay: `${index * 50}ms` }}
+                            >
+                                <td className="p-4">
+                                    <span className="font-bold text-[#0e141b] text-sm">{role.name}</span>
+                                </td>
+                                <td className="p-4">
+                                    <span className="text-sm text-[#4e7397]">{role.description}</span>
+                                </td>
+                                <td className="p-4">
+                                    {role.name === 'panel-admin' ? (
+                                        <span className="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-1 rounded">
+                                            All Permissions
+                                        </span>
+                                    ) : (
+                                        <button
+                                            onClick={() => onViewPermissions(role)}
+                                            className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 hover:text-blue-800 transition-colors"
+                                        >
+                                            {(role.permissions || []).length} Permissions
+                                        </button>
+                                    )}
+                                </td>
+                                <td className="p-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <button
+                                            onClick={() => onEdit(role)}
+                                            className="size-8 rounded flex items-center justify-center text-[#4e7397] hover:bg-slate-100 hover:text-blue-600 transition-colors"
+                                            title="Edit Role"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">edit</span>
+                                        </button>
+                                        <button
+                                            onClick={() => onDelete(role.id)}
+                                            className="size-8 rounded flex items-center justify-center text-[#4e7397] hover:bg-red-50 hover:text-red-600 transition-colors"
+                                            title="Delete Role"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">delete</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
+        </div>
     </div>
 );
 
@@ -363,22 +365,33 @@ export default function RoleManagement() {
     };
 
     // Fetch assignments (users) from the active organization
+    // Fetch assignments (users) from the active organization
     const fetchAssignments = async (orgSlug) => {
         try {
-            const data = await tenantUserService.getTenantUsers(orgSlug);
-            const users = Array.isArray(data.users) ? data.users : (Array.isArray(data) ? data : []);
+            // Use roleService to get assignments with support for search/pagination
+            const data = await roleService.getRoleAssignments(orgSlug, {
+                page: 1,
+                page_size: 10,
+                search: searchQuery
+            });
 
-            const mappedAssignments = users.map(user => ({
-                id: user.id || user.user_id, // Capture user ID
-                user_email: user.email,
-                role_name: user.role || "-",
-                scope: "Tenant",
-                assigned_at: user.created_at ? new Date(user.created_at).toLocaleDateString() : "-"
+            // Map the API results to our internal state structure
+            const mappedAssignments = (data.results || []).map(item => ({
+                // CRITICAL: user_id is fallback if assignment_id is missing from GET response.
+                // Ideally backend should provide assignment_id (TenantUserRole.id) for Update/Delete.
+                assignment_id: item.assignment_id, // CRITICAL: No fallback to user_id allowed
+                user_id: item.user_id,
+                user_email: item.email,
+                role_name: item.role || "-",
+                role_id: item.role_id,
+                permissions_count: item.permissions_count,
+                scope: item.scope,
+                assigned_at: item.date_joined
             }));
 
             setAssignments(mappedAssignments);
         } catch (error) {
-            console.error("Failed to fetch tenant users:", error);
+            console.error("Failed to fetch role assignments:", error);
             setAssignments([]);
         }
     };
@@ -439,7 +452,7 @@ export default function RoleManagement() {
                     description: roleData.description,
                     slug: activeOrg.slug
                 });
-                roleId = newRole.role.id; // Backend returns { role: { id: ... } }
+                roleId = newRole.role.id; // Backend returns {role: {id: ... } }
             }
 
             // Assign permissions
@@ -480,13 +493,16 @@ export default function RoleManagement() {
         if (!activeOrg) return;
         setIsLoading(true);
         try {
-            await tenantUserService.removeTenantUser(activeOrg.slug, assignmentToDelete.id);
+            // Use roleService.deleteRoleAssignment with the correct ID
+            // IMPORTANT: Uses assignment_id mapped during fetch
+            await roleService.deleteRoleAssignment(activeOrg.slug, assignmentToDelete.assignment_id);
             if (activeOrg) fetchAssignments(activeOrg.slug);
             setIsDeleteModalOpen(false);
             setAssignmentToDelete(null);
+            showAlert("Success", "Role assignment removed successfully", "success");
         } catch (error) {
             console.error("Failed to remove assignment:", error);
-            showAlert("Error", "Failed to remove user from tenant.", "error");
+            showAlert("Error", "Failed to remove role assignment.", "error");
         } finally {
             setIsLoading(false);
         }
@@ -498,30 +514,57 @@ export default function RoleManagement() {
         if (!activeOrg) return;
         setIsLoading(true);
         try {
-            // Find user ID from assignments list
-            const targetUser = assignments.find(u => u.user_email === assignData.email);
+            if (editingAssignment) {
+                // UPDATE existing assignment (PATCH)
+                // Need to find Role Name from ID selection (since API expects name)
+                const selectedRole = roles.find(r => r.id == assignData.role);
+                const roleName = selectedRole ? selectedRole.name : assignData.role;
 
-            if (!targetUser || !targetUser.id) {
-                // Fallback: If we can't find ID, we might need a dedicated lookup or API might accept email
-                // For now, show alert if ID missing
-                console.warn("User ID not found for assignment");
-                // Proceeding with email if API supports it, or failing.
-                // Assuming API needs tenant_user_id. 
-                // If we can't find it, we can't proceed with standard API.
-                // Let's try to pass email as tenant_user_id if backend handles it, or just alert.
-                // Based on backend view, it expects "tenant_user_id". 
-                showAlert("User Not Found", "Could not find user details. Ensure user is already a member of this tenant.", "error");
-                setIsLoading(false);
-                return;
+                await roleService.updateRoleAssignment(activeOrg.slug, {
+                    assignment_id: editingAssignment.assignment_id,
+                    role: roleName
+                });
+
+                showAlert("Success", "Role assignment updated successfully", "success");
+            } else {
+                // CREATE new assignment (or assign to user without role)
+
+                // If we clicked "Assign" on a user row (no role), we might have user object but no role
+                // We need the user's ID.
+                let targetUserId = null;
+
+                // If editingAssignment is set (from row click), use its user_id
+                if (editingAssignment && editingAssignment.user_id) {
+                    targetUserId = editingAssignment.user_id;
+                } else {
+                    // Manual "Assign" button - lookup by email
+                    try {
+                        // We need to fetch users to find ID by email if not available locally
+                        const usersData = await tenantUserService.getTenantUsers(activeOrg.slug);
+                        const allUsers = usersData.users || (Array.isArray(usersData) ? usersData : []);
+                        const user = allUsers.find(u => u.email === assignData.email);
+                        if (user) targetUserId = user.id || user.user_id;
+                    } catch (err) {
+                        console.error("Error looking up user:", err);
+                    }
+                }
+
+                if (!targetUserId) {
+                    showAlert("User Not Found", "Could not find user details.", "error");
+                    setIsLoading(false);
+                    return;
+                }
+
+                await roleService.assignRole({
+                    organization_id: activeOrg.id,
+                    tenant_user_id: targetUserId,
+                    role: assignData.role
+                });
+                showAlert("Success", "Role assigned successfully", "success");
             }
 
-            await roleService.assignRole({
-                organization_id: activeOrg.id,
-                tenant_user_id: targetUser.id,
-                role: assignData.role
-            });
-
             setIsAssignModalOpen(false);
+            setEditingAssignment(null);
             fetchAssignments(activeOrg.slug); // Reload data
         } catch (error) {
             console.error("Failed to assign role:", error);
@@ -752,74 +795,84 @@ const RoleAssignmentTable = ({ assignments, roles, onEdit, onRemove }) => {
 
     return (
         <div className="bg-white border border-[#d0dbe7] rounded-lg shadow-sm overflow-hidden">
-            <table className="w-full text-left border-collapse">
-                <thead>
-                    <tr className="bg-gray-50 border-b border-[#d0dbe7] text-xs font-bold text-[#4e7397] uppercase tracking-wider">
-                        <th className="p-4">User Email</th>
-                        <th className="p-4">Assigned Role</th>
-                        <th className="p-4">Permissions</th>
-                        <th className="p-4">Scope</th>
-                        <th className="p-4">Date Assigned</th>
-                        <th className="p-4 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-[#d0dbe7]">
-                    {assignments.length === 0 ? (
-                        <tr>
-                            <td colSpan="6" className="p-8 text-center text-sm text-[#4e7397]">
-                                No role assignments found.
-                            </td>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-gray-50 border-b border-[#d0dbe7] text-xs font-bold text-[#4e7397] uppercase tracking-wider">
+                            <th className="p-4">User Email</th>
+                            <th className="p-4">Assigned Role</th>
+                            <th className="p-4">Permissions</th>
+                            <th className="p-4">Scope</th>
+                            <th className="p-4">Date Assigned</th>
+                            <th className="p-4 text-right">Actions</th>
                         </tr>
-                    ) : (
-
-                        assignments.map((assignment, index) => (
-                            <tr
-                                key={index}
-                                className="hover:bg-slate-50 transition-colors group animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-backwards"
-                                style={{ animationDelay: `${index * 50}ms` }}
-                            >
-                                <td className="p-4">
-                                    <span className="font-bold text-[#0e141b] text-sm">{assignment.user_email}</span>
-                                </td>
-                                <td className="p-4">
-                                    <button className="text-sm font-bold text-blue-600 hover:underline">
-                                        {assignment.role_name}
-                                    </button>
-                                </td>
-                                <td className="p-4">
-                                    <span className={`text-xs font-bold px-2 py-1 rounded ${assignment.role_name === 'panel-admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-50 text-blue-600'}`}>
-                                        {getPermissionCount(assignment.role_name)}
-                                    </span>
-                                </td>
-                                <td className="p-4">
-                                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${assignment.scope === 'Global' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                        {assignment.scope || 'Tenant'}
-                                    </span>
-                                </td>
-                                <td className="p-4">
-                                    <span className="text-sm text-[#4e7397]">{assignment.assigned_at || '-'}</span>
-                                </td>
-                                <td className="p-4 text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <button
-                                            onClick={() => onEdit(assignment)}
-                                            className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-wider"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => onRemove(assignment)}
-                                            className="text-[10px] font-bold text-red-600 hover:text-red-800 uppercase tracking-wider"
-                                        >
-                                            Remove
-                                        </button>
-                                    </div>
+                    </thead>
+                    <tbody className="divide-y divide-[#d0dbe7]">
+                        {assignments.length === 0 ? (
+                            <tr>
+                                <td colSpan="6" className="p-8 text-center text-sm text-[#4e7397]">
+                                    No role assignments found.
                                 </td>
                             </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+                        ) : (
+
+                            assignments.map((assignment, index) => (
+                                <tr
+                                    key={index}
+                                    className="hover:bg-slate-50 transition-colors group animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-backwards"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                >
+                                    <td className="p-4">
+                                        <span className="font-bold text-[#0e141b] text-sm">{assignment.user_email}</span>
+                                    </td>
+                                    <td className="p-4">
+                                        <button className="text-sm font-bold text-blue-600 hover:underline">
+                                            {assignment.role_name}
+                                        </button>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className={`text-xs font-bold px-2 py-1 rounded ${assignment.role_name === 'panel-admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-50 text-blue-600'}`}>
+                                            {getPermissionCount(assignment.role_name)}
+                                        </span>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${assignment.scope === 'Global' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                            {assignment.scope || 'Tenant'}
+                                        </span>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="text-sm text-[#4e7397]">{assignment.assigned_at || '-'}</span>
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                            {assignment.assignment_id ? (
+                                                <>
+                                                    <button
+                                                        onClick={() => onEdit(assignment)}
+                                                        className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-wider"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => onRemove(assignment)}
+                                                        className="text-[10px] font-bold text-red-600 hover:text-red-800 uppercase tracking-wider"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider cursor-not-allowed" title="No role assignment ID (User has no explicit role)">
+                                                    No Actions
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
             <div className="p-4 border-t border-[#d0dbe7] bg-gray-50 flex justify-end">
                 {/* Pagination controls same as RoleTable */}
                 <div className="flex gap-2">
