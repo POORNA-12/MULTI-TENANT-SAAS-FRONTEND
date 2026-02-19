@@ -834,25 +834,26 @@ const RoleAssignmentTable = ({ assignments, roles, onEdit, onRemove }) => {
 
 const AssignRoleModal = ({ isOpen, onClose, onSubmit, isLoading, roles, initialData = null }) => {
     const [email, setEmail] = useState("");
-    const [selectedRole, setSelectedRole] = useState("");
+    const [selectedRoleId, setSelectedRoleId] = useState("");
 
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
                 setEmail(initialData.user_email || "");
-                setSelectedRole(initialData.role_name || "");
+                const foundRole = roles.find(r => r.name === initialData.role_name);
+                setSelectedRoleId(foundRole ? foundRole.id : "");
             } else {
                 setEmail("");
-                setSelectedRole("");
+                setSelectedRoleId("");
             }
         }
-    }, [isOpen, initialData]);
+    }, [isOpen, initialData, roles]);
 
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit({ email, role: selectedRole });
+        onSubmit({ email, role: selectedRoleId });
     };
 
     return (
@@ -892,14 +893,14 @@ const AssignRoleModal = ({ isOpen, onClose, onSubmit, isLoading, roles, initialD
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Select Role</label>
                             <div className="relative">
                                 <select
-                                    value={selectedRole}
-                                    onChange={(e) => setSelectedRole(e.target.value)}
+                                    value={selectedRoleId}
+                                    onChange={(e) => setSelectedRoleId(e.target.value)}
                                     className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
                                     required
                                 >
                                     <option value="">Select a role...</option>
                                     {roles.map(role => (
-                                        <option key={role.id} value={role.name}>{role.name}</option>
+                                        <option key={role.id} value={role.id}>{role.name}</option>
                                     ))}
                                 </select>
                                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xl">expand_more</span>

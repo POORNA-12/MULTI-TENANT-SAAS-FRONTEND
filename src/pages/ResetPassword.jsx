@@ -1,16 +1,31 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
+import AuthService from "../services/authService";
 
 export default function ResetPassword() {
     const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // In a real app, this would verify email first, but for prototype we can go to signin or stay here
-        // Let's assume it sends an email and stays here, or redirects to a confirmation page. 
-        // For now, let's just alert or do nothing visible, but we could redirect to signin.
-        // Let's redirect to SignIn for flow completion.
-        navigate("/signin");
+        setError("");
+        setMessage("");
+        setLoading(true);
+
+        try {
+            await AuthService.forgotPassword(email);
+            // Navigate to set password page with email in state
+            navigate("/set-password", { state: { email } });
+        } catch (err) {
+            console.error("Reset password request failed", err);
+            setError(err.response?.data?.message || "Failed to send reset code. Please check your email.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -24,6 +39,11 @@ export default function ResetPassword() {
                     password.
                 </p>
             </div>
+            {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded">
+                    {error}
+                </div>
+            )}
             <form className="space-y-6" onSubmit={handleSubmit}>
                 <div>
                     <label
@@ -36,16 +56,19 @@ export default function ResetPassword() {
                         className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
                         id="email"
                         placeholder="name@company.com"
-                        required=""
+                        required
                         type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
                 <div className="pt-2">
                     <button
-                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm shadow-sm"
+                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm shadow-sm disabled:opacity-50"
                         type="submit"
+                        disabled={loading}
                     >
-                        Send Reset Code
+                        {loading ? "Sending Reset Code..." : "Send Reset Code"}
                     </button>
                 </div>
                 <div className="border-t border-[#d0dbe7] pt-6 mt-6 flex flex-col items-center">

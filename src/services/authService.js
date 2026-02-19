@@ -3,16 +3,17 @@ import Cookies from "js-cookie";
 
 const AuthService = {
     /**
-     * Sign up a new user.
-     * @param {Object} data - Contains email, password, reenter_password, verification_key (optional), user_type.
+     * Sign up a new user (Step 1: Request OTP, Step 2: Verify & Create).
+     * @param {Object} data - Contains email, password, reenter_password, user_type, [verification_key].
      * @returns {Promise<Object>} Response data
      */
     signUp: async (data) => {
         const response = await api.post("auth/signup", data);
         if (response.data.data?.access) {
-            // Default to session cookies for signup
+            // Step 2 success: Store tokens
             Cookies.set("accessToken", response.data.data.access);
             Cookies.set("refreshToken", response.data.data.refresh);
+            Cookies.set("userEmail", data.email);
         }
         return response.data;
     },
@@ -23,14 +24,15 @@ const AuthService = {
      * @param {string} password 
      * @returns {Promise<Object>} Response data
      */
-    signIn: async (email, password, rememberMe = false) => {
+    signIn: async (email, password) => {
         const response = await api.post("auth/signin", { email, password });
         if (response.data.data?.access) {
-            const cookieOptions = rememberMe ? { expires: 7 } : {}; // 7 days if remember me, else session
-            Cookies.set("accessToken", response.data.data.access, cookieOptions);
-            Cookies.set("refreshToken", response.data.data.refresh, cookieOptions);
-            // Store email for display purposes since full profile might not be available immediately
-            Cookies.set("userEmail", email, cookieOptions);
+            Cookies.set("accessToken", response.data.data.access);
+            Cookies.set("refreshToken", response.data.data.refresh);
+            Cookies.set("userEmail", email);
+            if (response.data.user_type) {
+                Cookies.set("userType", response.data.user_type);
+            }
         }
         return response.data;
     },
@@ -49,14 +51,19 @@ const AuthService = {
      */
     signOut: async () => {
         const refreshToken = Cookies.get("refreshToken");
-        if (refreshToken) {
-            // Optional: Call backend to blacklist/revoke token
-            await api.post("auth/signout", { refresh: refreshToken });
+        try {
+            if (refreshToken) {
+                await api.post("auth/signout", { refresh: refreshToken });
+            }
+        } catch (error) {
+            console.error("Signout error:", error);
+        } finally {
+            Cookies.remove("accessToken");
+            Cookies.remove("refreshToken");
+            Cookies.remove("userEmail");
+            Cookies.remove("userType");
+            window.location.href = "/signin";
         }
-        Cookies.remove("accessToken");
-        Cookies.remove("refreshToken");
-        Cookies.remove("userEmail");
-        return { message: "Signed out successfully" };
     },
 
     /**
@@ -65,12 +72,16 @@ const AuthService = {
      */
     refreshToken: async () => {
         const refreshToken = Cookies.get("refreshToken");
+        if (!refreshToken) throw new Error("No refresh token available");
+
         const response = await api.post("auth/refresh-access", { refresh: refreshToken });
+
         if (response.data.access) {
-            // Maintain original expiration behavior if possible, or default to session/short-lived
-            // For simplicity here, we might just set it as session or match refresh token's existence
-            // But usually access tokens are short lived. We just set it.
             Cookies.set("accessToken", response.data.access);
+        }
+        // If backend rotates refresh token, it might return a new one. Update if present.
+        if (response.data.refresh) {
+            Cookies.set("refreshToken", response.data.refresh);
         }
         return response.data;
     },
@@ -106,16 +117,14 @@ const AuthService = {
     },
 
     /**
-     * Send verification token (for signup resend or initial verify flow? Depends on backend usage).
+     * Send verification token (Resend OTP).
      * @param {string} email 
      * @returns {Promise<Object>} Response data
      */
     sendVerificationToken: async (email) => {
-        const response = await api.post("auth/send-verification-token", { email });
+        const response = await api.post("auth/send-verification", { email });
         return response.data;
     },
-
-
 
     /**
      * Check if the user is authenticated.

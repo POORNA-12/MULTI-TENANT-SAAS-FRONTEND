@@ -1,12 +1,53 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
+import AuthService from "../services/authService";
 
 export default function SignUp() {
     const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+        reenter_password: "",
+        user_type: "saas-user"
+    });
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.id]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        navigate("/verify-email");
+        setError("");
+        setLoading(true);
+
+        if (formData.password !== formData.reenter_password) {
+            setError("Passwords do not match");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            // Step 1: Register User (Sends OTP)
+            await AuthService.signUp(formData);
+
+            // Navigate to verify email page with registration data
+            navigate("/verify-email", {
+                state: {
+                    email: formData.email,
+                    password: formData.password,
+                    reenter_password: formData.reenter_password,
+                    user_type: formData.user_type
+                }
+            });
+        } catch (err) {
+            console.error("Signup failed", err);
+            setError(err.response?.data?.message || "Signup failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -19,6 +60,11 @@ export default function SignUp() {
                     Get started with our enterprise-grade multi-tenant platform.
                 </p>
             </div>
+            {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded">
+                    {error}
+                </div>
+            )}
             <form className="space-y-5" onSubmit={handleSubmit}>
                 <div>
                     <label
@@ -32,6 +78,9 @@ export default function SignUp() {
                         id="email"
                         placeholder="name@company.com"
                         type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
                     />
                 </div>
                 <div>
@@ -46,42 +95,53 @@ export default function SignUp() {
                         id="password"
                         placeholder="At least 8 characters"
                         type="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
                     />
-                    <div className="mt-2 flex gap-1">
-                        <div className="h-1 flex-1 bg-aws-orange rounded-full"></div>
-                        <div className="h-1 flex-1 bg-aws-orange rounded-full"></div>
-                        <div className="h-1 flex-1 bg-gray-200 rounded-full"></div>
-                        <div className="h-1 flex-1 bg-gray-200 rounded-full"></div>
+                    <div className="mt-2"></div>
+                    <div>
+                        <label
+                            className="block text-sm font-bold text-[#0e141b] mb-1"
+                            htmlFor="reenter_password"
+                        >
+                            Confirm Password
+                        </label>
+                        <input
+                            className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
+                            id="reenter_password"
+                            placeholder="Re-enter password"
+                            type="password"
+                            value={formData.reenter_password}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
-                    <p className="text-[10px] text-[#4e7397] mt-1 font-medium">
-                        Password strength: <span className="text-aws-orange">Medium</span>
-                    </p>
                 </div>
                 <div>
                     <label
                         className="block text-sm font-bold text-[#0e141b] mb-1"
-                        htmlFor="user-type"
+                        htmlFor="user_type"
                     >
                         User Type
                     </label>
                     <select
                         className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
-                        id="user-type"
+                        id="user_type"
+                        value={formData.user_type}
+                        onChange={handleChange}
                     >
-                        <option selected="" value="saas_user">
-                            SaaS User
-                        </option>
-                        <option value="tenant_admin">Tenant Administrator</option>
-                        <option value="developer">Developer</option>
-                        <option value="auditor">Auditor</option>
+                        <option value="saas-user">SaaS User</option>
+                        <option value="tenant-user">Tenant User</option>
                     </select>
                 </div>
                 <div className="pt-2">
                     <button
-                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm shadow-sm"
+                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm shadow-sm disabled:opacity-50"
                         type="submit"
+                        disabled={loading}
                     >
-                        Sign Up
+                        {loading ? "Signing Up..." : "Sign Up"}
                     </button>
                 </div>
                 <p className="text-xs text-[#4e7397] text-center mt-4">

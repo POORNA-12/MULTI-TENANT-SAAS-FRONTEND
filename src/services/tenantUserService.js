@@ -12,7 +12,7 @@ const tenantUserService = {
     },
 
     removeTenantUser: async (slug, userId) => {
-        const response = await api.delete(`/tenant_auth/${slug}/users/${userId}/remove/`);
+        const response = await api.delete(`/tenant_auth/tenant/${slug}/users/${userId}/remove/`);
         return response.data;
     }
 };

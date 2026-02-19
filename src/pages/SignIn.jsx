@@ -17,7 +17,7 @@ export default function SignIn() {
         setLoading(true);
 
         try {
-            await AuthService.signIn(email, password, rememberMe);
+            await AuthService.signIn(email, password);
             navigate("/dashboard"); // Redirect to dashboard on success
         } catch (err) {
             console.error("Sign in failed", err);
@@ -27,12 +27,10 @@ export default function SignIn() {
                 setError(err.response.data.message || "Invalid credentials");
             } else if (err.request) {
                 // The request was made but no response was received
-                // `err.request` is an instance of XMLHttpRequest in the browser 
-                // and an instance of http.ClientRequest in node.js
                 setError("Unable to connect to the server. Please check if the backend is running and CORS is enabled.");
             } else {
                 // Something happened in setting up the request that triggered an Error
-                setError("An error occurred while setting up the request.");
+                setError("An error occurred. Please try again.");
             }
         } finally {
             setLoading(false);

@@ -23,7 +23,7 @@ api.interceptors.request.use(
     }
 );
 
-// Response interceptor to handle token expiration (optional but recommended)
+// Response interceptor to handle token expiration
 api.interceptors.response.use(
     (response) => {
         return response;
@@ -37,29 +37,36 @@ api.interceptors.response.use(
 
             try {
                 const refreshToken = Cookies.get("refreshToken");
-                if (refreshToken) {
-                    // Call the refresh endpoint
-                    const response = await axios.post("http://127.0.0.1:8000/auth/refresh-access", {
-                        refresh: refreshToken
-                    });
-
-                    const { access } = response.data;
-
-                    // Update cookie with new access token
-                    // Try to maintain the session vs persistent nature if possible, 
-                    // otherwise default to session or fixed expiry.
-                    // For now, let's just set it.
-                    Cookies.set("accessToken", access);
-
-                    // Update the header for the original request and retry it
-                    originalRequest.headers.Authorization = `Bearer ${access}`;
-                    return api(originalRequest);
+                if (!refreshToken) {
+                    throw new Error("No refresh token available");
                 }
+
+                // Call the refresh endpoint using axios directly to avoid circular dependency
+                // or infinite loops if the refresh endpoint itself returns 401
+                const response = await axios.post("http://127.0.0.1:8000/auth/refresh-access", {
+                    refresh: refreshToken
+                });
+
+                const { access } = response.data;
+
+                // Update cookie with new access token
+                Cookies.set("accessToken", access);
+
+                // If backend returns a new refresh token (rotation), update it
+                if (response.data.refresh) {
+                    Cookies.set("refreshToken", response.data.refresh);
+                }
+
+                // Update the header for the original request and retry it
+                originalRequest.headers.Authorization = `Bearer ${access}`;
+                return api(originalRequest);
             } catch (refreshError) {
-                // If refresh fails, we do NOT redirect to login automatically per user request.
-                // We just reject the promise. The user will have to manually sign out or 
-                // subsequent requests will fail.
-                console.error("Token refresh failed:", refreshError);
+                // If refresh fails, we force logout
+                Cookies.remove("accessToken");
+                Cookies.remove("refreshToken");
+                Cookies.remove("userEmail");
+                Cookies.remove("userType");
+                window.location.href = "/signin";
                 return Promise.reject(refreshError);
             }
         }

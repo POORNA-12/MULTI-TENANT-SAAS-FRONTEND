@@ -97,13 +97,12 @@ export default function WorkflowWizard({ roles = [], activeOrg, onSuccess, initi
     const [alertData, setAlertData] = useState({ isOpen: false, title: "", message: "", type: "success" });
     const [selectedTemplateId, setSelectedTemplateId] = useState(null);
     const [tenantSlug, setTenantSlug] = useState(null);
-    const [currentTenantUserId, setCurrentTenantUserId] = useState(null);
 
-    // Sync Tenant Slug from prop & Fetch Current Tenant User ID
+
+    // Sync Tenant Slug from prop
     useEffect(() => {
         if (activeOrg) {
             setTenantSlug(activeOrg.slug);
-            fetchCurrentTenantUser(activeOrg.slug);
         }
     }, [activeOrg]);
 
@@ -126,7 +125,7 @@ export default function WorkflowWizard({ roles = [], activeOrg, onSuccess, initi
             });
 
             setFormData({
-                title: initialData.definition_name || "",
+                title: initialData.template_name || initialData.definition_name || "",
                 description: initialData.description || "",
                 priority: "Standard", // Not in template response yet using default
                 workflowType: initialData.workflow_type || "",
@@ -137,27 +136,7 @@ export default function WorkflowWizard({ roles = [], activeOrg, onSuccess, initi
     }, [initialData, roles]);
 
 
-    const fetchCurrentTenantUser = async (slug) => {
-        try {
-            const myEmail = AuthService.getUserEmail();
-            if (!myEmail) return;
 
-            // Fetch all tenant users to find "me"
-            // Optimization: In real app, might want a specific /me endpoint relative to tenant
-            const data = await tenantUserService.getTenantUsers(slug);
-            // Assuming data is array or { users: [...] }
-            const users = Array.isArray(data) ? data : (data.users || []);
-
-            const me = users.find(u => u.email === myEmail); // Adjust if email is nested in u.user.email
-            if (me) {
-                setCurrentTenantUserId(me.id);
-            } else {
-                console.warn("Could not find current user in tenant user list.");
-            }
-        } catch (error) {
-            console.error("Failed to fetch tenant users for ID resolution:", error);
-        }
-    };
 
     // Load draft from cookie on mount (only if NOT editing)
     useEffect(() => {
@@ -274,10 +253,7 @@ export default function WorkflowWizard({ roles = [], activeOrg, onSuccess, initi
             return;
         }
 
-        if (!currentTenantUserId) {
-            showAlert("Configuration Error", "Could not identify your Tenant User ID. Please try refreshing.", "error");
-            return;
-        }
+
 
         // Validation for Step 3
         if (formData.approvers.length === 0) {

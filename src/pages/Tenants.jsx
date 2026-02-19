@@ -53,7 +53,7 @@ export default function Tenants() {
     };
 
     // Derived Active Organization
-    const activeOrg = organizations.find(org => org.is_active);
+    const activeOrg = organizations.find(org => org.current);
 
     useEffect(() => {
         if (activeTab === "users" && activeOrg) {
@@ -401,7 +401,7 @@ export default function Tenants() {
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-bold text-[#0e141b]">{org.name}</span>
-                                                        {org.is_active && (
+                                                        {org.current && (
                                                             <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-bold uppercase rounded border border-blue-100">Current</span>
                                                         )}
                                                     </div>
@@ -417,7 +417,7 @@ export default function Tenants() {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-2">
-                                                        {!org.is_active && (
+                                                        {!org.current && org.is_active && (
                                                             <button
                                                                 onClick={() => handleSetActive(org.id)}
                                                                 className="p-1 hover:bg-green-50 rounded text-[#4e7397] hover:text-green-600 transition-colors"
