@@ -8,6 +8,53 @@ import PermissionsViewModal from "../components/PermissionsViewModal";
 import AlertModal from "../components/AlertModal";
 import { useSearch } from "../context/SearchContext";
 
+/* ─── Inline JWT Guide helpers ──────────────────────────────────────────── */
+const JwtCodeBlock = ({ code, lang = "python" }) => {
+    const [copied, setCopied] = useState(false);
+    const handleCopy = () => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+    const bgMap = { python: "bg-[#1e293b] text-[#93c5fd]", javascript: "bg-[#1e1b4b] text-[#a5b4fc]", json: "bg-[#1a1a2e] text-[#86efac]" };
+    const label = lang === "javascript" ? "Node.js" : lang === "json" ? "JSON" : "Python";
+    return (
+        <div className="relative rounded-lg overflow-hidden border border-[#d0dbe7] shadow-sm">
+            <div className="flex items-center justify-between px-4 py-2 bg-[#0f172a] border-b border-white/10">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</span>
+                <button onClick={handleCopy} className="flex items-center gap-1 text-[10px] font-bold uppercase text-slate-400 hover:text-white transition-colors">
+                    <span className="material-symbols-outlined text-sm">{copied ? "check" : "content_copy"}</span>
+                    {copied ? "Copied!" : "Copy"}
+                </button>
+            </div>
+            <pre className={`p-4 overflow-x-auto text-xs font-mono leading-relaxed ${bgMap[lang] || bgMap.python}`} style={{ maxHeight: '320px', overflowY: 'auto' }}>{code}</pre>
+        </div>
+    );
+};
+
+const JwtInfoBox = ({ type = "info", children }) => {
+    const s = { info: "bg-blue-50 border-blue-200 text-blue-900", warning: "bg-amber-50 border-amber-200 text-amber-900", danger: "bg-red-50 border-red-200 text-red-800", success: "bg-green-50 border-green-200 text-green-900" };
+    const ic = { info: "info", warning: "warning", danger: "gpp_bad", success: "verified" };
+    return (<div className={`flex items-start gap-3 p-4 rounded-lg border ${s[type]}`}><span className="material-symbols-outlined mt-0.5 shrink-0 text-xl">{ic[type]}</span><p className="text-sm leading-relaxed">{children}</p></div>);
+};
+
+const JwtSection = ({ id, icon, badgeColor, badge, title, children }) => {
+    const [open, setOpen] = useState(true);
+    return (
+        <div id={id} className="bg-white border border-[#d0dbe7] rounded-xl shadow-sm overflow-hidden">
+            <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between p-5 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
+                <div className="flex items-center gap-3">
+                    <span className={`size-9 rounded-lg flex items-center justify-center shrink-0 ${badgeColor}`}>
+                        <span className="material-symbols-outlined text-lg">{icon}</span>
+                    </span>
+                    <div>
+                        <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded ${badgeColor} mr-2`}>{badge}</span>
+                        <span className="text-sm font-bold text-[#0e141b]">{title}</span>
+                    </div>
+                </div>
+                <span className={`material-symbols-outlined text-[#4e7397] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>expand_more</span>
+            </button>
+            {open && <div className="p-6 border-t border-[#d0dbe7] space-y-5">{children}</div>}
+        </div>
+    );
+};
+
 
 // Helper to format permission codes into readable labels
 const formatPermissionLabel = (code) => {
@@ -627,32 +674,24 @@ export default function RoleManagement() {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-2xl font-black text-[#0e141b] tracking-tight">
-                        {activeTab === "roles" ? "Role Management Service Hub" : "Role Assignment Management Hub"}
+                        {activeTab === "roles" ? "Role Management Service Hub" : activeTab === "assignment" ? "Role Assignment Management Hub" : "JWT Integration Guide"}
                     </h1>
                     <p className="text-sm text-[#4e7397] mt-1">
-                        Manage granular Role-Based Access Control (RBAC) and assign permissions across your tenants.
+                        {activeTab === "jwt" ? "A complete backend integration reference for JWT authentication & permission enforcement." : "Manage granular Role-Based Access Control (RBAC) and assign permissions across your tenants."}
                     </p>
                 </div>
 
                 {/* Tabs */}
                 <div className="flex border-b border-[#d0dbe7] mb-6">
-                    <button
-                        onClick={() => setActiveTab("roles")}
-                        className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "roles"
-                            ? "border-blue-500 text-blue-600"
-                            : "border-transparent text-[#4e7397] hover:text-[#0e141b]"
-                            }`}
-                    >
+                    <button onClick={() => setActiveTab("roles")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "roles" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
                         Roles
                     </button>
-                    <button
-                        onClick={() => setActiveTab("assignment")}
-                        className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "assignment"
-                            ? "border-blue-500 text-blue-600"
-                            : "border-transparent text-[#4e7397] hover:text-[#0e141b]"
-                            }`}
-                    >
+                    <button onClick={() => setActiveTab("assignment")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "assignment" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
                         Role Assignment
+                    </button>
+                    <button onClick={() => setActiveTab("jwt")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "jwt" ? "border-orange-500 text-orange-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
+                        <span className="material-symbols-outlined text-base">key</span>
+                        JWT Guide
                     </button>
                 </div>
 
@@ -724,6 +763,134 @@ export default function RoleManagement() {
                             onRemove={handleRemoveAssignment}
                         />
                     </>
+                )}
+
+                {/* ── JWT Integration Guide Tab ── */}
+                {activeTab === "jwt" && (
+                    <div className="space-y-6">
+                        <style>{`pre.jwt-pre::-webkit-scrollbar{height:8px;width:8px} pre.jwt-pre::-webkit-scrollbar-track{background:transparent} pre.jwt-pre::-webkit-scrollbar-thumb{background-color:#334155;border-radius:4px}`}</style>
+
+                        {/* Status bar */}
+                        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+                            <div className="flex items-start gap-4">
+                                <div className="size-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined">lock</span>
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-wide">Token Algorithm</h3>
+                                    <div className="mt-2 flex items-center gap-2 bg-white px-3 py-2 rounded border border-indigo-200 shadow-sm">
+                                        <code className="text-sm font-mono text-indigo-800">RS256 (RSA Signature with SHA-256)</code>
+                                    </div>
+                                    <p className="text-xs text-indigo-700/70 mt-2">Always use your tenant's public key to verify signatures.</p>
+                                </div>
+                            </div>
+                            <div className="text-right hidden md:block shrink-0">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                                    <span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                    Auth Service Active
+                                </span>
+                                <p className="text-xs text-indigo-800/60 mt-2">v1.2.0 · TAS-Auth-Service</p>
+                            </div>
+                        </div>
+
+                        {/* SECTION 1 — JWT VERIFY */}
+                        <JwtSection id="jwt-verify" icon="key" badgeColor="bg-yellow-100 text-yellow-700" badge="Step 2" title="Verify JWT in Your Backend">
+                            <JwtInfoBox type="danger">Your backend <strong>must verify the JWT signature</strong> before trusting any payload data. Skipping this allows attackers to forge tokens and impersonate any user.</JwtInfoBox>
+                            <p className="text-sm text-[#4e7397] leading-relaxed">After a tenant user authenticates, your backend receives a Bearer token. Use the tenant's <code className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono">public key</code> to verify the RS256 signature before processing any request.</p>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <JwtCodeBlock lang="python" code={`import jwt\n\nPUBLIC_KEY = "your-public-key"\n\ndef verify_token(token):\n    return jwt.decode(\n        token,\n        PUBLIC_KEY,\n        algorithms=["RS256"]\n    )`} />
+                                <JwtCodeBlock lang="javascript" code={`const jwt = require("jsonwebtoken");\n\nfunction verifyToken(token) {\n  return jwt.verify(token, PUBLIC_KEY);\n}`} />
+                            </div>
+                            <div className="bg-slate-50 border border-[#d0dbe7] rounded-lg p-4">
+                                <h4 className="text-xs font-bold text-[#0e141b] uppercase tracking-wider mb-3">JWT Payload Fields</h4>
+                                <table className="w-full text-left text-sm">
+                                    <thead><tr className="border-b border-[#d0dbe7] text-[10px] font-bold text-[#4e7397] uppercase tracking-wider"><th className="pb-2 pr-4">Field</th><th className="pb-2">Description</th></tr></thead>
+                                    <tbody className="divide-y divide-[#d0dbe7]">
+                                        {[["tenant_id", "Unique ID for the tenant organisation"], ["tenant_user_id", "Internal ID of the authenticated user"], ["roles", "List of assigned role identifiers"], ["permissions", "Flat list of permission strings"], ["perm_version", "Increments whenever roles/permissions change"], ["exp", "UNIX timestamp of token expiry"]].map(([f, d]) => (
+                                            <tr key={f} className="hover:bg-white transition-colors"><td className="py-2 pr-4"><code className="text-xs font-mono font-bold text-blue-600">{f}</code></td><td className="py-2 text-[#4e7397] text-xs">{d}</td></tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </JwtSection>
+
+                        {/* SECTION 2 — PERMISSION ENFORCEMENT */}
+                        <JwtSection id="perm-enforce" icon="shield" badgeColor="bg-green-100 text-green-700" badge="Step 3" title="Enforce Permissions in Your API">
+                            <JwtInfoBox type="info">Before executing any protected action, check that the verified token contains the required permission. <strong>Never rely on frontend checks alone.</strong></JwtInfoBox>
+                            <p className="text-sm text-[#4e7397] leading-relaxed">Wrap your route handlers with a middleware/decorator that extracts the Bearer token, verifies it, and checks whether the required permission exists in the decoded payload.</p>
+                            <JwtCodeBlock lang="python" code={`def require_permission(permission):\n    def decorator(func):\n        def wrapper(request):\n            token = request.headers["Authorization"].split(" ")[1]\n            decoded = verify_token(token)\n\n            if permission not in decoded.get("permissions", []):\n                return {"error": "Forbidden"}, 403\n\n            return func(request)\n        return wrapper\n    return decorator\n\n\n# Usage\n@require_permission("workflow.create")\ndef create_workflow(request):\n    # ... safe to proceed\n    pass`} />
+                            <JwtInfoBox type="warning">Always validate the <code className="mx-1 px-1.5 py-0.5 bg-amber-100 rounded text-xs font-mono">permissions</code> field from the <em>decoded & verified</em> token — not from a request body or query parameter.</JwtInfoBox>
+                        </JwtSection>
+
+                        {/* SECTION 3 — REFRESH FLOW */}
+                        <JwtSection id="jwt-refresh" icon="refresh" badgeColor="bg-cyan-100 text-cyan-700" badge="Step 4" title="Refresh Access Token">
+                            <div className="flex items-center gap-3 p-3 bg-slate-50 border border-[#d0dbe7] rounded-lg">
+                                <span className="px-2.5 py-1 rounded text-xs font-bold ring-1 ring-inset bg-green-100 text-green-700 border-green-200">POST</span>
+                                <code className="text-sm font-mono text-[#0e141b]">/tenant/refresh/</code>
+                            </div>
+                            <ul className="space-y-2">
+                                {[["timer", "Access token expires in <strong>7 minutes</strong> — plan your refresh strategy accordingly."], ["vpn_key", "Use the refresh token to obtain a new access token without re-authenticating."], ["block", "If a user's <strong>permissions changed</strong> since the refresh token was issued, the refresh may be rejected."]].map(([ic, txt]) => (
+                                    <li key={ic} className="flex items-start gap-3 text-sm text-[#4e7397]"><span className="material-symbols-outlined text-base text-orange-500 shrink-0 mt-0.5">{ic}</span><span dangerouslySetInnerHTML={{ __html: txt }} /></li>
+                                ))}
+                            </ul>
+                            <div><h4 className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-2">Request Body</h4>
+                                <JwtCodeBlock lang="json" code={`{\n  "refresh": "<refresh_token>"\n}`} /></div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">200</span><span className="text-[10px] font-bold text-green-700 uppercase">Success</span></div><JwtCodeBlock lang="json" code={`{\n  "access": "<new_access_token>"\n}`} /></div>
+                                <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">401</span><span className="text-[10px] font-bold text-red-700 uppercase">Error</span></div><JwtCodeBlock lang="json" code={`{\n  "message": "Invalid or expired refresh token"\n}`} /></div>
+                            </div>
+                        </JwtSection>
+
+                        {/* SECTION 4 — PERM VERSION */}
+                        <JwtSection id="perm-version" icon="published_with_changes" badgeColor="bg-purple-100 text-purple-700" badge="perm_version" title="Permission Version Behavior">
+                            <JwtInfoBox type="warning">If a user's role or permissions change, <strong>previously issued tokens may be invalidated automatically</strong>. Clients must handle <code className="mx-1 px-1.5 py-0.5 bg-amber-100 rounded text-xs font-mono">401</code> responses and prompt re-authentication if refresh also fails.</JwtInfoBox>
+                            <p className="text-sm text-[#4e7397] leading-relaxed">Each JWT contains a <code className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono text-[#0e141b]">perm_version</code> field. The backend compares the token's version against the stored value. A mismatch means the token is stale and the user must re-authenticate.</p>
+                            <div className="bg-slate-50 border border-[#d0dbe7] rounded-lg p-4 space-y-2">
+                                {[["Role assigned to user", "perm_version increments → old tokens rejected"], ["Role removed from user", "perm_version increments → old tokens rejected"], ["Permission added to a role", "perm_version increments for all users of that role"], ["No permission change", "perm_version unchanged → tokens remain valid"]].map(([ev, res]) => (
+                                    <div key={ev} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-[#d0dbe7] last:border-0">
+                                        <span className="text-xs font-bold text-[#0e141b]">{ev}</span>
+                                        <span className="text-xs text-[#4e7397]">{res}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </JwtSection>
+
+                        {/* SECTION 5 — ERROR HANDLING */}
+                        <JwtSection id="jwt-errors" icon="error" badgeColor="bg-red-100 text-red-700" badge="Errors" title="Error Handling Guide">
+                            <div className="bg-white border border-[#d0dbe7] rounded-lg overflow-hidden">
+                                <table className="w-full text-left text-sm">
+                                    <thead><tr className="bg-gray-50 border-b border-[#d0dbe7]"><th className="p-4 text-xs font-bold text-[#4e7397] uppercase tracking-wider w-24">Status</th><th className="p-4 text-xs font-bold text-[#4e7397] uppercase tracking-wider">Meaning</th><th className="p-4 text-xs font-bold text-[#4e7397] uppercase tracking-wider hidden md:table-cell">Common Cause</th></tr></thead>
+                                    <tbody className="divide-y divide-[#d0dbe7]">
+                                        {[["200", "bg-green-100 text-green-700", "Success", "Request completed successfully"], ["400", "bg-orange-100 text-orange-700", "Bad Request", "Missing or malformed request body"], ["401", "bg-red-100 text-red-700", "Invalid Token", "Token missing, expired, or signature mismatch"], ["403", "bg-red-100 text-red-700", "Permission Denied", "Verified token lacks required permission"], ["500", "bg-gray-100 text-gray-700", "Server Error", "Unexpected backend failure — contact support"]].map(([code, cls, meaning, cause]) => (
+                                            <tr key={code} className="hover:bg-slate-50 transition-colors">
+                                                <td className="p-4"><span className={`px-2 py-0.5 rounded text-[10px] font-bold ${cls}`}>{code}</span></td>
+                                                <td className="p-4 text-sm font-bold text-[#0e141b]">{meaning}</td>
+                                                <td className="p-4 text-sm text-[#4e7397] hidden md:table-cell">{cause}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </JwtSection>
+
+                        {/* SECTION 6 — SECURITY BEST PRACTICES */}
+                        <JwtSection id="jwt-security" icon="verified_user" badgeColor="bg-orange-100 text-orange-700" badge="Security" title="Security Best Practices">
+                            <JwtInfoBox type="success">Following these practices ensures your integration meets enterprise-grade SaaS security standards.</JwtInfoBox>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {[{ ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Always verify JWT signature", d: "Use the RS256 public key on every request — never skip signature verification." }, { ic: "cancel", cl: "text-red-600", bg: "bg-red-50 border-red-200", t: "Never trust frontend permission checks", d: "Frontend checks improve UX only. All access decisions must be enforced server-side." }, { ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Always validate permission server-side", d: "Extract permissions from the verified token payload, not from req.body or query strings." }, { ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Store refresh tokens securely", d: "Use HttpOnly cookies or secure storage. Never store refresh tokens in localStorage." }, { ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Handle token expiry gracefully", d: "Implement background refresh logic. Show re-login prompt only when refresh also fails." }, { ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Rotate public keys periodically", d: "Subscribe to TenantX JWKS endpoint for automatic key rotation without downtime." }].map(item => (
+                                    <div key={item.t} className={`flex items-start gap-3 p-4 rounded-lg border ${item.bg} hover:shadow-sm transition-shadow`}>
+                                        <span className={`material-symbols-outlined shrink-0 mt-0.5 ${item.cl}`}>{item.ic}</span>
+                                        <div><p className="text-sm font-bold text-[#0e141b]">{item.t}</p><p className="text-xs text-[#4e7397] mt-0.5 leading-relaxed">{item.d}</p></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </JwtSection>
+
+                        <div className="flex items-center justify-between text-xs text-[#4e7397] pb-2">
+                            <span>TenantX Platform · JWT Integration Guide</span>
+                            <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>v1.2.0</span>
+                        </div>
+                    </div>
                 )}
             </div>
 
