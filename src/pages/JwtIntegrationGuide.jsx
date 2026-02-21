@@ -312,14 +312,30 @@ def has_permission(request, permission_code):
                                 </div>
 
                                 <DenseTable
-                                    headers={["Condition", "Status", "Response"]}
-                                    rows={[
-                                        ["Refresh token missing", "400", <code>{"message":"Refresh token is required"}</code>],
-                                        ["Refresh token invalid/expired", "400", <code>{"message": "Invalid or expired refresh token"}</code>],
-                                        ["User inactive", "401", <code>{"message": "User no longer active"}</code>],
-                                        ["perm_version mismatch", "401", <code>{"message": "Permissions changed. Please login again."}</code>],
-                                    ]}
-                                />
+                                        headers={["Condition", "Status", "Response"]}
+                                        rows={[
+                                            [
+                                                "Refresh token missing",
+                                                "400",
+                                                <code>{`{"message": "Refresh token is required"}`}</code>
+                                            ],
+                                            [
+                                                "Refresh token invalid/expired",
+                                                "400",
+                                                <code>{`{"message": "Invalid or expired refresh token"}`}</code>
+                                            ],
+                                            [
+                                                "User inactive",
+                                                "401",
+                                                <code>{`{"message": "User no longer active"}`}</code>
+                                            ],
+                                            [
+                                                "perm_version mismatch",
+                                                "401",
+                                                <code>{`{"message": "Permissions changed. Please login again."}`}</code>
+                                            ],
+                                        ]}
+                                    />
                             </Section>
 
                             <Section id="errors" badge="6. Client Handling" title="Error Matrix (Compact)">
