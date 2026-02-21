@@ -689,7 +689,7 @@ export default function RoleManagement() {
                     <button onClick={() => setActiveTab("assignment")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "assignment" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
                         Role Assignment
                     </button>
-                    <button onClick={() => setActiveTab("jwt")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "jwt" ? "border-orange-500 text-orange-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
+                    <button onClick={() => setActiveTab("jwt")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "jwt" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
                         <span className="material-symbols-outlined text-base">key</span>
                         JWT Guide
                     </button>

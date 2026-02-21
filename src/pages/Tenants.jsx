@@ -314,20 +314,20 @@ export default function Tenants() {
             <div className="border-b border-[#d0dbe7] mb-6 flex gap-8">
                 <button
                     onClick={() => setActiveTab("tenants")}
-                    className={`pb-3 text-sm font-bold relative transition-colors ${activeTab === "tenants" ? "text-orange-600" : "text-[#4e7397] hover:text-[#0e141b]"}`}
+                    className={`pb-3 text-sm font-bold relative transition-colors ${activeTab === "tenants" ? "text-blue-600" : "text-[#4e7397] hover:text-[#0e141b]"}`}
                 >
                     Tenants
                     {activeTab === "tenants" && (
-                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-600 rounded-t-full"></span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></span>
                     )}
                 </button>
                 <button
                     onClick={() => setActiveTab("users")}
-                    className={`pb-3 text-sm font-bold relative transition-colors ${activeTab === "users" ? "text-orange-600" : "text-[#4e7397] hover:text-[#0e141b]"}`}
+                    className={`pb-3 text-sm font-bold relative transition-colors ${activeTab === "users" ? "text-blue-600" : "text-[#4e7397] hover:text-[#0e141b]"}`}
                 >
                     Users
                     {activeTab === "users" && (
-                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-600 rounded-t-full"></span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></span>
                     )}
                 </button>
             </div>
