@@ -174,7 +174,7 @@ const WorkflowApiReference = () => {
                     <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                         <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">Base URL Pattern</h3>
                         <code className="block bg-white border border-slate-200 rounded p-2 text-sm font-mono text-slate-700 break-all">
-                            /api/{activeSlug}/workflows/
+                            /workflows/{activeSlug}/
                         </code>
                         <p className="text-xs text-slate-400 mt-2">Replace <code>{activeSlug}</code> with your actual tenant slug.</p>
                     </div>
@@ -196,7 +196,7 @@ const WorkflowApiReference = () => {
 
                 <ApiEndpoint
                     method="GET"
-                    url={`/api/${activeSlug}/workflows/templates/`}
+                    url={`/workflows/${activeSlug}/templates/`}
                     title="Get Templates"
                     description="Fetches all available workflow templates for the tenant."
                     successResponse={{
@@ -225,7 +225,7 @@ const WorkflowApiReference = () => {
 
                 <ApiEndpoint
                     method="POST"
-                    url={`/api/${activeSlug}/workflows/workflows/<definitionId>/apply/`}
+                    url={`/workflows/${activeSlug}/workflows/<definitionId>/apply/`}
                     title="Apply for Workflow"
                     description="Creates a new workflow request based on a template."
                     note="Some components use description instead of requester_description in the body. Please standardize to one field."
@@ -262,37 +262,54 @@ const WorkflowApiReference = () => {
 
                 <ApiEndpoint
                     method="GET"
-                    url={`/api/${activeSlug}/workflows/workflows/my/`}
-                    title="My Requests"
-                    description="Returns all workflow requests created by the logged-in user."
+                    url={`/workflows/${activeSlug}/my-requests/`}
+                    title="My Requests (All)"
+                    description="Returns all workflow requests created by the current user."
                     successResponse={{
                         code: 200,
                         data: {
-                            "requests": [
-                                {
-                                    "id": 23,
-                                    "title": "Leave Request - March",
-                                    "status": "submitted",
-                                    "created_at": "2026-02-19T10:30:00Z"
-                                }
-                            ]
+                            "count": 5,
+                            "results": [{ "request_id": 23, "title": "Leave Request", "status": "pending" }]
                         }
                     }}
-                    errorResponses={[
-                        {
-                            code: 403,
-                            data: { "message": "Unauthorized tenant access" }
-                        },
-                        {
-                            code: 404,
-                            data: { "detail": "Not found." }
-                        }
-                    ]}
                 />
 
                 <ApiEndpoint
                     method="GET"
-                    url={`/api/${activeSlug}/workflows/workflows/all/`}
+                    url={`/workflows/${activeSlug}/my-requests/?status=pending`}
+                    title="My Requests (Pending)"
+                    description="Returns user's pending workflow requests."
+                    successResponse={{
+                        code: 200,
+                        data: { "count": 2, "results": [{ "status": "pending" }] }
+                    }}
+                />
+
+                <ApiEndpoint
+                    method="GET"
+                    url={`/workflows/${activeSlug}/my-requests/?status=approved`}
+                    title="My Requests (Approved)"
+                    description="Returns user's approved workflow requests."
+                    successResponse={{
+                        code: 200,
+                        data: { "count": 1, "results": [{ "status": "approved" }] }
+                    }}
+                />
+
+                <ApiEndpoint
+                    method="GET"
+                    url={`/workflows/${activeSlug}/my-requests/?status=rejected`}
+                    title="My Requests (Rejected)"
+                    description="Returns user's rejected workflow requests."
+                    successResponse={{
+                        code: 200,
+                        data: { "count": 0, "results": [] }
+                    }}
+                />
+
+                <ApiEndpoint
+                    method="GET"
+                    url={`/workflows/${activeSlug}/workflows/all/`}
                     title="All Tenant Workflows"
                     description="Fetches all workflow requests within the tenant (requires specific permissions)."
                     successResponse={{
@@ -322,7 +339,7 @@ const WorkflowApiReference = () => {
 
                 <ApiEndpoint
                     method="GET"
-                    url={`/api/${activeSlug}/workflows/workflows/<requestId>/status/`}
+                    url={`/workflows/${activeSlug}/workflows/<requestId>/status/`}
                     title="Request Status"
                     description="Fetches detailed request status including approval steps and timeline."
                     successResponse={{
@@ -366,33 +383,40 @@ const WorkflowApiReference = () => {
 
                 <ApiEndpoint
                     method="GET"
-                    url={`/api/${activeSlug}/workflows/workflows/pending/`}
-                    title="Pending Approvals"
-                    description="Returns workflow requests waiting for the current user's approval."
+                    url={`/workflows/${activeSlug}/my-approvals/?status=pending`}
+                    title="My Approvals (Pending)"
+                    description="Returns workflow requests waiting for approval."
                     successResponse={{
                         code: 200,
-                        data: {
-                            "pending_requests": [
-                                {
-                                    "id": 23,
-                                    "title": "Leave Request - March",
-                                    "requested_by": "employee@acme.com",
-                                    "submitted_at": "2026-02-19T09:00:00Z"
-                                }
-                            ]
-                        }
+                        data: { "count": 3, "results": [{ "status": "pending" }] }
                     }}
-                    errorResponses={[
-                        {
-                            code: 403,
-                            data: { "message": "Unauthorized tenant access" }
-                        }
-                    ]}
+                />
+
+                <ApiEndpoint
+                    method="GET"
+                    url={`/workflows/${activeSlug}/my-approvals/?status=approved`}
+                    title="My Approvals (Approved)"
+                    description="Returns workflow requests already approved."
+                    successResponse={{
+                        code: 200,
+                        data: { "count": 5, "results": [{ "status": "approved" }] }
+                    }}
+                />
+
+                <ApiEndpoint
+                    method="GET"
+                    url={`/workflows/${activeSlug}/my-approvals/?status=rejected`}
+                    title="My Approvals (Rejected)"
+                    description="Returns workflow requests rejected."
+                    successResponse={{
+                        code: 200,
+                        data: { "count": 2, "results": [{ "status": "rejected" }] }
+                    }}
                 />
 
                 <ApiEndpoint
                     method="POST"
-                    url={`/api/${activeSlug}/workflows/workflows/<requestId>/approve/`}
+                    url={`/workflows/${activeSlug}/workflows/<requestId>/approve/`}
                     title="Approve Request"
                     description="Approves the workflow request at the current approval step."
                     successResponse={{
@@ -421,7 +445,7 @@ const WorkflowApiReference = () => {
 
                 <ApiEndpoint
                     method="POST"
-                    url={`/api/${activeSlug}/workflows/workflows/<requestId>/reject/`}
+                    url={`/workflows/${activeSlug}/workflows/<requestId>/reject/`}
                     title="Reject Request"
                     description="Rejects the workflow request with a reason."
                     body={{ "description": "Insufficient documentation" }}

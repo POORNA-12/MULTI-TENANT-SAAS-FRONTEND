@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 // Create an Axios instance with base configuration
 const api = axios.create({
-    baseURL: "http://127.0.0.1:8000/", // Replace with env variable in production
+    baseURL: "/", // Use relative path for Vite proxy
     headers: {
         "Content-Type": "application/json",
     },
@@ -12,9 +12,15 @@ const api = axios.create({
 // Request interceptor to add the access token to headers
 api.interceptors.request.use(
     (config) => {
-        const token = Cookies.get("accessToken");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Skip Authorization header for auth endpoints
+        const authEndpoints = ["auth/signin", "auth/signup", "auth/refresh-access"];
+        const isAuthEndpoint = authEndpoints.some(endpoint => config.url.includes(endpoint));
+
+        if (!isAuthEndpoint) {
+            const token = Cookies.get("accessToken");
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
         return config;
     },
@@ -43,7 +49,7 @@ api.interceptors.response.use(
 
                 // Call the refresh endpoint using axios directly to avoid circular dependency
                 // or infinite loops if the refresh endpoint itself returns 401
-                const response = await axios.post("http://127.0.0.1:8000/auth/refresh-access", {
+                const response = await axios.post("/auth/refresh-access", {
                     refresh: refreshToken
                 });
 
