@@ -263,7 +263,7 @@ export default function SystemMetrics() {
 
     // 2. Active Tenant Ratio
     // Use the count fetched from organizationService if available, otherwise fallback to KPI
-    const activeTenants = activeTenantCount > 0 ? activeTenantCount : (kpis?.total_active_tenants || 0);
+    const activeTenants = activeTenantCount > 0 ? activeTenantCount : (kpis?.active_tenants || 0);
     // Arbitrary scaling: 20 tenants = 100% capacity usage goal
     const tenantScore = Math.min(activeTenants * 5, 100);
 
@@ -322,10 +322,9 @@ export default function SystemMetrics() {
                 <div className="bg-white p-5 border border-[#d0dbe7] rounded shadow-sm border-t-4 border-t-green-500">
                     <p className="text-[10px] font-bold text-gray-500 uppercase mb-1">SUCCESSFUL LOGINS</p>
                     <div className="flex items-baseline justify-between">
-                        <h3 className="text-3xl font-black text-gray-900">{(kpis?.saas_logins || 0) + (kpis?.tenant_logins || 0)}</h3>
-                        <div className="flex flex-col items-end text-[10px] font-medium text-gray-500">
-                            <span>{kpis?.saas_logins || 0} SaaS</span>
-                            <span>{kpis?.tenant_logins || 0} Tenant</span>
+                        <h3 className="text-3xl font-black text-gray-900">{kpis?.total_logins || 0}</h3>
+                        <div className="flex flex-col items-end text-[10px] font-medium text-blue-600">
+                            <span className="material-symbols-outlined">login</span>
                         </div>
                     </div>
                 </div>

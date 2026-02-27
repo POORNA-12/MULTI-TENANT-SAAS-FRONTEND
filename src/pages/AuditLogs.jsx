@@ -157,21 +157,21 @@ export default function AuditLogs() {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-1">Active Tenants</p>
-                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-purple-600 transition-colors">{analytics?.kpis?.total_active_tenants || 0}</h3>
+                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-purple-600 transition-colors">{analytics?.kpis?.active_tenants || 0}</h3>
                                     </div>
                                     <div className="bg-purple-50 p-2 rounded-md text-purple-600 group-hover:bg-purple-100 transition-colors">
                                         <span className="material-symbols-outlined">domain</span>
                                     </div>
                                 </div>
                                 <div className="flex -space-x-2 mt-2">
-                                    {[...Array(Math.min(3, analytics?.kpis?.total_active_tenants || 0))].map((_, i) => (
+                                    {[...Array(Math.min(3, analytics?.kpis?.active_tenants || 0))].map((_, i) => (
                                         <div key={i} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-gray-600">
                                             {String.fromCharCode(65 + i)}
                                         </div>
                                     ))}
-                                    {(analytics?.kpis?.total_active_tenants || 0) > 3 && (
+                                    {(analytics?.kpis?.active_tenants || 0) > 3 && (
                                         <div className="w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] text-gray-500">
-                                            +{(analytics?.kpis?.total_active_tenants || 0) - 3}
+                                            +{(analytics?.kpis?.active_tenants || 0) - 3}
                                         </div>
                                     )}
                                 </div>
@@ -181,7 +181,7 @@ export default function AuditLogs() {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-1">Total Logins</p>
-                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-green-600 transition-colors">{analytics?.kpis?.logins || 0}</h3>
+                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-green-600 transition-colors">{analytics?.kpis?.total_logins || 0}</h3>
                                     </div>
                                     <div className="bg-green-50 p-2 rounded-md text-green-600 group-hover:bg-green-100 transition-colors">
                                         <span className="material-symbols-outlined">login</span>
@@ -293,6 +293,37 @@ export default function AuditLogs() {
                                             <p className="text-sm text-[#4e7397]">No tenant usage data.</p>
                                         )}
                                     </div>
+
+                                <div className="bg-white p-6 rounded-lg border border-[#d0dbe7] shadow-sm">
+                                    <h3 className="font-bold text-[#0e141b] mb-4 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-blue-500">person</span>
+                                        Top Users
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {analytics?.top_users && analytics.top_users.length > 0 ? (
+                                            analytics.top_users.map((user, i) => (
+                                                <div key={i} className="flex items-center justify-between group">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="w-6 h-6 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold border border-blue-100">
+                                                            {i + 1}
+                                                        </span>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-medium text-[#0e141b] truncate max-w-[120px]" title={user.user_email}>{user.user_email.split('@')[0]}</span>
+                                                            <span className="text-[10px] text-[#4e7397]">{user.user_email.split('@')[1]}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-black text-[#0e141b] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                                                            {user.total}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-sm text-[#4e7397]">No user activity data.</p>
+                                        )}
+                                    </div>
+                                </div>
                                 </div>
 
                                 <div className="bg-white p-6 rounded-lg border border-[#d0dbe7] shadow-sm">

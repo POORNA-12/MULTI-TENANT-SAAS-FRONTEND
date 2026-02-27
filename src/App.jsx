@@ -14,6 +14,7 @@ import SystemMetrics from "./pages/SystemMetrics";
 import RoleManagement from "./pages/RoleManagement.jsx";
 import Workflows from "./pages/Workflows";
 import AuditLogs from "./pages/AuditLogs";
+import GlobalSettings from "./pages/GlobalSettings";
 import { SearchProvider } from "./context/SearchContext";
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/dashboard/roles" element={<RoleManagement />} />
         <Route path="/dashboard/workflows" element={<Workflows />} />
         <Route path="/dashboard/audit" element={<AuditLogs />} />
+        <Route path="/dashboard/settings" element={<GlobalSettings />} />
       </Routes>
     </SearchProvider>
   );

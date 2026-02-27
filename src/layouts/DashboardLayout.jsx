@@ -272,21 +272,7 @@ export default function DashboardLayout({ children }) {
                                             </p>
                                             <p className="text-[10px] text-[#4e7397]">{user?.first_name || "TenantX User"}</p>
                                         </div>
-                                        <Link
-                                            to="/dashboard/profile"
-                                            className="block px-4 py-2 text-sm text-[#0e141b] hover:bg-slate-50 hover:text-primary transition-colors"
-                                            onClick={() => setUserMenuOpen(false)}
-                                        >
-                                            Profile
-                                        </Link>
-                                        <Link
-                                            to="/dashboard/settings"
-                                            className="block px-4 py-2 text-sm text-[#0e141b] hover:bg-slate-50 hover:text-primary transition-colors"
-                                            onClick={() => setUserMenuOpen(false)}
-                                        >
-                                            Settings
-                                        </Link>
-                                        <div className="border-t border-[#d0dbe7] my-1"></div>
+                                        <div className="py-1"></div>
                                         <button
                                             onClick={handleSignOut}
                                             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
