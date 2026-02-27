@@ -159,12 +159,6 @@ export default function AuthService() {
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <button className="px-4 py-2 bg-white border border-[#d0dbe7] hover:bg-slate-50 text-[#0e141b] text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors">
-                            Export OpenAPI
-                        </button>
-                        <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors shadow-orange-500/20">
-                            Authorize
-                        </button>
                     </div>
                 </div>
 
