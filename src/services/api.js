@@ -77,6 +77,16 @@ api.interceptors.response.use(
             }
         }
 
+        // If the error is 402 (Payment Required) - Quota Exceeded or Subscription Inactive
+        if (error.response?.status === 402) {
+            // Dispatch a custom event so the UI can show the Upgrade Modal globally
+            window.dispatchEvent(
+                new CustomEvent("billing:quota_exceeded", {
+                    detail: error.response?.data
+                })
+            );
+        }
+
         return Promise.reject(error);
     }
 );

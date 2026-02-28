@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import organizationService from "../services/organizationService";
+import { useBilling } from "../context/BillingContext";
+import { useNavigate } from "react-router-dom";
 
 export default function GlobalSettings() {
     const [activeOrg, setActiveOrg] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("general");
+    const { billingUsage } = useBilling();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchOrgDetails = async () => {
@@ -88,7 +92,9 @@ export default function GlobalSettings() {
                     ].map(tab => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => {
+                                setActiveTab(tab.id);
+                            }}
                             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === tab.id
                                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
                                 : "text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b]"
@@ -160,7 +166,110 @@ export default function GlobalSettings() {
                             </>
                         )}
 
-                        {activeTab !== "general" && (
+                        {activeTab === "billing" && (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <SettingsCard title="Subscription Overview" icon="payments">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <div className="p-4 bg-slate-50 rounded-2xl border border-[#e2e8f0]">
+                                                <p className="text-xs font-black text-[#4e7397] uppercase tracking-widest mb-1">Current Plan</p>
+                                                <p className="text-2xl font-black text-[#0e141b]">{billingUsage?.subscription_plan || 'Free'}</p>
+                                            </div>
+                                            <div className="p-4 bg-slate-50 rounded-2xl border border-[#e2e8f0]">
+                                                <p className="text-xs font-black text-[#4e7397] uppercase tracking-widest mb-1">Status</p>
+                                                <p className="text-lg font-bold text-green-600 flex items-center gap-2">
+                                                    <span className="size-2 bg-green-500 rounded-full animate-pulse"></span>
+                                                    {billingUsage?.subscription_status || 'Active'}
+                                                </p>
+                                            </div>
+                                            <div className="p-4 bg-slate-50 rounded-2xl border border-[#e2e8f0]">
+                                                <p className="text-xs font-black text-[#4e7397] uppercase tracking-widest mb-1">Plan Expiry</p>
+                                                <p className="text-lg font-bold text-[#0e141b]">
+                                                    {billingUsage?.days_until_expiry ? `Expires in ${billingUsage.days_until_expiry} days` : 'Permanent access'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col justify-center items-center p-8 bg-blue-50/50 rounded-3xl border border-blue-100 text-center">
+                                            <div className="size-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
+                                                <span className="material-symbols-outlined text-3xl">upgrade</span>
+                                            </div>
+                                            <h4 className="text-lg font-black text-[#0e141b] mb-2">Need more power?</h4>
+                                            <p className="text-sm text-[#4e7397] mb-6">Scale your infrastructure instantly with our professional plans.</p>
+                                            <button
+                                                onClick={() => navigate('/dashboard/billing/plans')}
+                                                className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"
+                                            >
+                                                View All Plans
+                                            </button>
+                                        </div>
+                                    </div>
+                                </SettingsCard>
+
+                                <SettingsCard title="Resource Usage" icon="analytics">
+                                    <div className="space-y-8">
+                                        {[
+                                            {
+                                                label: "Organizations",
+                                                usage: billingUsage?.usage?.organizations || 0,
+                                                limit: billingUsage?.limits?.max_organizations || 1,
+                                                icon: "corporate_fare"
+                                            },
+                                            {
+                                                label: "Total Users",
+                                                usage: billingUsage?.usage?.total_users || 0,
+                                                limit: (billingUsage?.limits?.max_users_per_organization * (billingUsage?.limits?.max_organizations || 1)) || 50,
+                                                icon: "groups"
+                                            },
+                                            {
+                                                label: "Workflow Definitions",
+                                                usage: billingUsage?.usage?.total_workflows || 0,
+                                                limit: billingUsage?.limits?.max_workflow_definitions || 10,
+                                                icon: "hub"
+                                            },
+                                            {
+                                                label: "Roles",
+                                                usage: billingUsage?.usage?.total_roles || 0,
+                                                limit: billingUsage?.limits?.max_roles || 5,
+                                                icon: "verified_user"
+                                            }
+                                        ].map((resource, i) => {
+                                            const percentage = Math.min((resource.usage / resource.limit) * 100, 100);
+                                            let barColor = "bg-green-500";
+                                            let textColor = "text-green-600";
+                                            if (percentage >= 90) {
+                                                barColor = "bg-red-500";
+                                                textColor = "text-red-600";
+                                            } else if (percentage >= 70) {
+                                                barColor = "bg-yellow-500";
+                                                textColor = "text-yellow-600";
+                                            }
+
+                                            return (
+                                                <div key={i} className="space-y-3">
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="material-symbols-outlined text-sm text-[#4e7397]">{resource.icon}</span>
+                                                            <span className="text-sm font-bold text-[#0e141b]">{resource.label}</span>
+                                                        </div>
+                                                        <span className={`text-xs font-black ${textColor}`}>
+                                                            {resource.usage} / {resource.limit} ({Math.round(percentage)}%)
+                                                        </span>
+                                                    </div>
+                                                    <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                                                        <div
+                                                            className={`${barColor} h-full rounded-full transition-all duration-1000 ease-out`}
+                                                            style={{ width: `${percentage}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </SettingsCard>
+                            </div>
+                        )}
+
+                        {activeTab !== "general" && activeTab !== "billing" && (
                             <div className="flex flex-col items-center justify-center py-20 px-8 border-2 border-dashed border-[#d0dbe7] rounded-3xl bg-white/50 text-center">
                                 <div className="size-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-6">
                                     <span className="material-symbols-outlined text-4xl">construction</span>
@@ -178,15 +287,22 @@ export default function GlobalSettings() {
                             <div className="absolute top-0 right-0 size-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
                             <h4 className="text-sm font-black text-blue-400 uppercase tracking-widest mb-4">Subscription Plan</h4>
                             <div className="flex items-baseline gap-2 mb-2">
-                                <span className="text-4xl font-black">Enterprise</span>
+                                <span className="text-4xl font-black">{billingUsage?.subscription_plan || 'Free'}</span>
                                 <span className="text-xs text-slate-400">/ Monthly</span>
                             </div>
                             <p className="text-sm text-slate-300 mb-8 leading-relaxed">
-                                Unrestricted access to all modules including Workflows and Audit Analytics.
+                                {billingUsage?.subscription_plan === 'Enterprise'
+                                    ? 'Unrestricted access to all modules including Workflows and Audit Analytics.'
+                                    : 'Upgrade to access more organizations, users, and advanced workflows.'}
                             </p>
-                            <button className="w-full py-3 bg-white text-slate-900 rounded-2xl font-black text-sm hover:bg-blue-50 transition-all shadow-lg active:scale-95">
-                                Upgrade Plan
-                            </button>
+                            {billingUsage?.subscription_plan !== 'Enterprise' && (
+                                <button
+                                    onClick={() => navigate('/dashboard/billing/plans')}
+                                    className="w-full py-3 bg-white text-slate-900 rounded-2xl font-black text-sm hover:bg-blue-50 transition-all shadow-lg active:scale-95"
+                                >
+                                    Upgrade Plan
+                                </button>
+                            )}
                         </div>
 
                         <div className="bg-white border border-[#d0dbe7] rounded-3xl p-6 shadow-sm">

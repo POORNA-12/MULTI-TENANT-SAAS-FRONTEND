@@ -15,29 +15,45 @@ import RoleManagement from "./pages/RoleManagement.jsx";
 import Workflows from "./pages/Workflows";
 import AuditLogs from "./pages/AuditLogs";
 import GlobalSettings from "./pages/GlobalSettings";
+import BillingDashboard from "./pages/BillingDashboard";
+import PricingPlans from "./pages/PricingPlans";
+import PublicPricing from "./pages/PublicPricing";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
+import CheckoutCancelled from "./pages/CheckoutCancelled";
 import { SearchProvider } from "./context/SearchContext";
+import { BillingProvider } from "./context/BillingContext";
+import UpgradeModal from "./components/UpgradeModal";
 
 export default function App() {
   return (
     <SearchProvider>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/features" element={<Features />} />
-        <Route path="/solutions" element={<Solutions />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/set-password" element={<SetPassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dashboard/tenants" element={<Tenants />} />
-        <Route path="/dashboard/auth" element={<AuthService />} />
-        <Route path="/dashboard/metrics" element={<SystemMetrics />} />
-        <Route path="/dashboard/roles" element={<RoleManagement />} />
-        <Route path="/dashboard/workflows" element={<Workflows />} />
-        <Route path="/dashboard/audit" element={<AuditLogs />} />
-        <Route path="/dashboard/settings" element={<GlobalSettings />} />
-      </Routes>
+      <BillingProvider>
+        <UpgradeModal />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/solutions" element={<Solutions />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/set-password" element={<SetPassword />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/tenants" element={<Tenants />} />
+          <Route path="/dashboard/auth" element={<AuthService />} />
+          <Route path="/dashboard/metrics" element={<SystemMetrics />} />
+          <Route path="/dashboard/roles" element={<RoleManagement />} />
+          <Route path="/dashboard/workflows" element={<Workflows />} />
+          <Route path="/dashboard/audit" element={<AuditLogs />} />
+          <Route path="/dashboard/settings" element={<GlobalSettings />} />
+          {/* New Billing Routes */}
+          <Route path="/pricing" element={<PublicPricing />} />
+          <Route path="/dashboard/billing" element={<BillingDashboard />} />
+          <Route path="/dashboard/billing/plans" element={<PricingPlans />} />
+          <Route path="/billing/success" element={<CheckoutSuccess />} />
+          <Route path="/billing/cancelled" element={<CheckoutCancelled />} />
+        </Routes>
+      </BillingProvider>
     </SearchProvider>
   );
 }

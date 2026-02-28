@@ -11,6 +11,7 @@ export default defineConfig({
       '/workflows': 'http://127.0.0.1:8000',
       '/organizations': 'http://127.0.0.1:8000',
       '/tenant_auth': 'http://127.0.0.1:8000',
+      '/billing': 'http://127.0.0.1:8000',
       '/audits': 'http://127.0.0.1:8000',
     }
   }
