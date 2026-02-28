@@ -38,7 +38,7 @@ export default function Workflows() {
         const fetchContext = async () => {
             try {
                 const orgData = await organizationService.getOrganizations();
-                const active = orgData.organizations?.find(org => org.is_active);
+                const active = orgData.organizations?.find(org => org.current);
 
                 if (active) {
                     setActiveOrg(active);

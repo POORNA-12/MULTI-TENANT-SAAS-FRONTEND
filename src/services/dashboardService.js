@@ -16,6 +16,16 @@ const dashboardService = {
         // Combined path: audits/ + saas/audit/analytics/
         const response = await api.get("audits/saas/audit/analytics/");
         return response.data;
+    },
+
+    getTenantAuditLogs: async (tenantSlug, params = {}) => {
+        const response = await api.get(`audits/saas_tenant_scope/${tenantSlug}/audit/activity/`, { params });
+        return response.data;
+    },
+
+    getTenantAuditAnalytics: async (tenantSlug) => {
+        const response = await api.get(`audits/saas_tenant_scope/${tenantSlug}/audit/analytics/`);
+        return response.data;
     }
 };
 

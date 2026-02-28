@@ -182,7 +182,7 @@ export default function RoleAssignments() {
     const fetchActiveOrg = async () => {
         try {
             const data = await organizationService.getOrganizations();
-            const active = data.organizations?.find(org => org.is_active);
+            const active = data.organizations?.find(org => org.current);
             if (active) {
                 setActiveOrg(active);
                 fetchRoles();

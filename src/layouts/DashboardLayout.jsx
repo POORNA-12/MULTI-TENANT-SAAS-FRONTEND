@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }) {
         const fetchActiveOrg = async () => {
             try {
                 const data = await organizationService.getOrganizations();
-                const active = data.organizations?.find(org => org.is_active);
+                const active = data.organizations?.find(org => org.current);
                 setActiveOrg(active || null);
             } catch (error) {
                 console.error("Failed to fetch active organization:", error);

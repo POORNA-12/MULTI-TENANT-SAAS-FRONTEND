@@ -352,13 +352,15 @@ export default function Tenants() {
                 <div className="h-10 flex items-center px-2 text-xs font-bold text-[#4e7397] whitespace-nowrap">
                     {activeTab === "tenants" ? `${filteredOrganizations.length} tenants found` : `${totalUsers} users found in ${activeOrg?.name || 'Organization'}`}
                 </div>
-                <button
-                    onClick={() => activeTab === "tenants" ? setIsCreateModalOpen(true) : setIsAddUserModalOpen(true)}
-                    className="h-10 px-4 w-full sm:w-auto bg-orange-500 rounded text-sm font-bold text-white hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 shadow-sm shadow-orange-500/20"
-                >
-                    <span className="material-symbols-outlined text-[18px]">add</span>
-                    {activeTab === "tenants" ? "Create Tenant" : "Add User"}
-                </button>
+                {activeTab === "tenants" && (
+                    <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="h-10 px-4 w-full sm:w-auto bg-orange-500 rounded text-sm font-bold text-white hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 shadow-sm shadow-orange-500/20"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">add</span>
+                        Create Tenant
+                    </button>
+                )}
             </div>
 
             {/* Table */}
@@ -514,9 +516,6 @@ export default function Tenants() {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-2">
-                                                        <button className="p-1 hover:bg-blue-50 rounded text-[#4e7397] hover:text-blue-600 transition-colors">
-                                                            <span className="material-symbols-outlined text-[18px]">edit</span>
-                                                        </button>
                                                         <button
                                                             onClick={() => handleRemoveUser(user.id)}
                                                             className="p-1 hover:bg-red-50 rounded text-[#4e7397] hover:text-red-600 transition-colors"
