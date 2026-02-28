@@ -277,8 +277,9 @@ export default function Tenants() {
 
     // Filter organizations based on search query
     const filteredOrganizations = organizations.filter(org =>
-        org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        org.slug.toLowerCase().includes(searchQuery.toLowerCase())
+        (org.name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+        (org.slug?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+        (org.email?.toLowerCase() || "").includes(searchQuery.toLowerCase())
     );
 
 
@@ -410,7 +411,7 @@ export default function Tenants() {
                                                     {org.slug}
                                                 </td>
                                                 <td className="px-6 py-4 text-[#0e141b]">
-                                                    {org.created_by || "--"}
+                                                    {org.email || org.created_by || "--"}
                                                 </td>
                                                 <td className="px-6 py-4 text-[#4e7397]">
                                                     {new Date(org.created_at).toLocaleDateString()}
