@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import organizationService from "../services/organizationService";
 import tenantUserService from "../services/tenantUserService";
+import { useOrganizations } from "../hooks/useOrganizations";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../utils/queryKeys";
 import ConfirmationModal from "../components/ConfirmationModal";
 import AlertModal from "../components/AlertModal";
 import { useSearch } from "../context/SearchContext";
@@ -9,8 +12,8 @@ import { useSearch } from "../context/SearchContext";
 export default function Tenants() {
     const { searchQuery, setSearchQuery } = useSearch(); // Use global search
     const [activeTab, setActiveTab] = useState("tenants");
-    const [organizations, setOrganizations] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { data: organizations = [], isLoading: loading } = useOrganizations();
+    const queryClient = useQueryClient();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newOrgName, setNewOrgName] = useState("");
     const [newOrgSlug, setNewOrgSlug] = useState("");
@@ -76,22 +79,6 @@ export default function Tenants() {
         }
     };
 
-    useEffect(() => {
-        fetchOrganizations();
-    }, []);
-
-    const fetchOrganizations = async () => {
-        setLoading(true);
-        try {
-            const data = await organizationService.getOrganizations();
-            setOrganizations(data.organizations || []);
-        } catch (error) {
-            console.error("Failed to fetch organizations:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleCreateTenant = async (e) => {
         e.preventDefault();
         setCreateLoading(true);
@@ -103,7 +90,7 @@ export default function Tenants() {
             setIsCreateModalOpen(false);
             setNewOrgName("");
             setNewOrgSlug("");
-            fetchOrganizations(); // Refresh list
+            queryClient.invalidateQueries(queryKeys.organizations);
             showAlert("success", "Tenant Created", "The new organization has been created successfully.");
         } catch (error) {
             console.error("Failed to create organization:", error);
@@ -131,7 +118,7 @@ export default function Tenants() {
             });
             setIsEditModalOpen(false);
             setEditingTenant(null);
-            fetchOrganizations();
+            queryClient.invalidateQueries(queryKeys.organizations);
             showAlert("success", "Tenant Updated", "The organization details have been updated successfully.");
         } catch (error) {
             console.error("Failed to update organization:", error);
@@ -153,7 +140,7 @@ export default function Tenants() {
                 setConfirmState(prev => ({ ...prev, isLoading: true }));
                 try {
                     await organizationService.restoreOrganization(orgId);
-                    fetchOrganizations();
+                    queryClient.invalidateQueries(queryKeys.organizations);
                     showAlert("success", "Organization Restored", "The organization has been restored successfully.");
                     closeConfirm();
                 } catch (error) {
@@ -176,7 +163,7 @@ export default function Tenants() {
                 setConfirmState(prev => ({ ...prev, isLoading: true }));
                 try {
                     await organizationService.softDeleteOrganization(orgId);
-                    fetchOrganizations();
+                    queryClient.invalidateQueries(queryKeys.organizations);
                     showAlert("success", "Organization Deactivated", "The organization has been deactivated successfully.");
                     closeConfirm();
                 } catch (error) {
@@ -199,7 +186,7 @@ export default function Tenants() {
                 setConfirmState(prev => ({ ...prev, isLoading: true }));
                 try {
                     await organizationService.hardDeleteOrganization(orgId);
-                    fetchOrganizations();
+                    queryClient.invalidateQueries(queryKeys.organizations);
                     showAlert("success", "Organization Deleted", "The organization has been permanently deleted.");
                     closeConfirm();
                 } catch (error) {
@@ -214,10 +201,8 @@ export default function Tenants() {
     const handleSetActive = async (orgId) => {
         try {
             await organizationService.setActiveOrganization(orgId);
-            // Refresh organizations to reflect the change
-            await fetchOrganizations();
+            queryClient.invalidateQueries(queryKeys.organizations);
 
-            // Dispatch event to notify other components (like DashboardLayout)
             window.dispatchEvent(new Event("activeOrgChanged"));
 
             // Also show success message

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import dashboardService from "../services/dashboardService";
 import organizationService from "../services/organizationService";
+import { useOrganizations } from "../hooks/useOrganizations";
 import { useSearch } from "../context/SearchContext";
 
 export default function AuditLogs() {
@@ -60,30 +61,29 @@ export default function AuditLogs() {
         }
     };
 
-    const fetchActiveOrg = async () => {
-        try {
-            const data = await organizationService.getOrganizations();
-            const active = data.organizations?.find(org => org.current);
-            if (active) {
-                setActiveOrg(active);
-                fetchAuditData(active.slug);
-            } else {
-                setError("No active organization found.");
-                setLoading(false);
-            }
-        } catch (error) {
-            console.error("Failed to fetch active organization:", error);
-            setError("Failed to determine active organization context.");
+    const { data: organizations } = useOrganizations();
+
+    const checkActiveOrg = () => {
+        if (!organizations) return;
+        const active = organizations.find(org => org.current);
+        if (active && active.slug !== activeOrg?.slug) {
+            setActiveOrg(active);
+            fetchAuditData(active.slug);
+        } else if (!active) {
+            setError("No active organization found.");
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchActiveOrg();
-        const handleOrgChange = () => fetchActiveOrg();
+        checkActiveOrg();
+    }, [organizations]);
+
+    useEffect(() => {
+        const handleOrgChange = () => checkActiveOrg();
         window.addEventListener("activeOrgChanged", handleOrgChange);
         return () => window.removeEventListener("activeOrgChanged", handleOrgChange);
-    }, []);
+    }, [organizations]);
 
     const [activeFilter, setActiveFilter] = useState("all");
 

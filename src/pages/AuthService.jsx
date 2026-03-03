@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import organizationService from "../services/organizationService";
+import { useOrganizations } from "../hooks/useOrganizations";
 
 const ApiEndpoint = ({ method, url, title, description, body, headers, successResponse, errorResponses }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -108,25 +109,26 @@ const ApiEndpoint = ({ method, url, title, description, body, headers, successRe
 export default function AuthService() {
     const [activeSlug, setActiveSlug] = useState("{tenant_slug}");
 
-    useEffect(() => {
-        const fetchActiveOrg = async () => {
-            try {
-                const data = await organizationService.getOrganizations();
-                const active = data.organizations?.find(org => org.current);
-                if (active) {
-                    setActiveSlug(active.slug);
-                }
-            } catch (error) {
-                console.error("Failed to fetch active organization:", error);
-            }
-        };
-        fetchActiveOrg();
+    const { data: organizations } = useOrganizations();
 
-        // Listen for changes
-        const handleOrgChange = () => fetchActiveOrg();
+    const checkActiveOrg = () => {
+        if (organizations) {
+            const active = organizations.find(org => org.current);
+            if (active && active.slug !== activeSlug) {
+                setActiveSlug(active.slug);
+            }
+        }
+    };
+
+    useEffect(() => {
+        checkActiveOrg();
+    }, [organizations]);
+
+    useEffect(() => {
+        const handleOrgChange = () => checkActiveOrg();
         window.addEventListener("activeOrgChanged", handleOrgChange);
         return () => window.removeEventListener("activeOrgChanged", handleOrgChange);
-    }, []);
+    }, [organizations]);
 
     return (
         <DashboardLayout>

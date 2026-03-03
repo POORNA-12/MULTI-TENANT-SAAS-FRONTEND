@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import roleService from "../services/roleService";
 import organizationService from "../services/organizationService";
+import { useOrganizations } from "../hooks/useOrganizations";
 import tenantUserService from "../services/tenantUserService";
 import ConfirmationModal from "../components/ConfirmationModal";
 import PermissionsViewModal from "../components/PermissionsViewModal";
@@ -443,26 +444,33 @@ export default function RoleManagement() {
         }
     };
 
-    const fetchActiveOrg = async () => {
-        try {
-            const data = await organizationService.getOrganizations();
-            const active = data.organizations?.find(org => org.current);
-            if (active) {
+    const { data: organizations, isLoading: isOrgsLoading } = useOrganizations();
+
+    const checkActiveOrg = () => {
+        if (organizations) {
+            const active = organizations.find(org => org.current);
+            if (active && active.slug !== activeOrg?.slug) {
                 setActiveOrg(active);
                 fetchRoles(active.slug);
                 fetchAssignments(active.slug);
             }
-        } catch (error) {
-            console.error("Failed to fetch active organization:", error);
         }
     };
 
     useEffect(() => {
-        fetchActiveOrg();
-        const handleOrgChange = () => fetchActiveOrg();
+        checkActiveOrg();
+    }, [organizations]);
+
+    useEffect(() => {
+        const handleOrgChange = () => {
+            // Re-evaluating activeOrg manually is obsolete since changing active org 
+            // will invalidate react-query and trigger organizations re-render.
+            // But preserving event listener as fallback.
+            checkActiveOrg();
+        };
         window.addEventListener("activeOrgChanged", handleOrgChange);
         return () => window.removeEventListener("activeOrgChanged", handleOrgChange);
-    }, []);
+    }, [organizations]);
 
     useEffect(() => {
         setSearchQuery("");

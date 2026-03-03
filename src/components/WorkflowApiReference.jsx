@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import organizationService from '../services/organizationService';
+import { useOrganizations } from '../hooks/useOrganizations';
 
 const ApiEndpoint = ({ method, url, title, description, body, headers, successResponse, errorResponses, note }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -117,25 +118,23 @@ const ApiEndpoint = ({ method, url, title, description, body, headers, successRe
 const WorkflowApiReference = () => {
     const [activeSlug, setActiveSlug] = useState("{tenant_slug}");
 
+    const { data: organizations } = useOrganizations();
+
     useEffect(() => {
-        const fetchActiveOrg = async () => {
-            try {
-                const data = await organizationService.getOrganizations();
-                const active = data.organizations?.find(org => org.current);
+        const checkActiveOrg = () => {
+            if (organizations) {
+                const active = organizations.find(org => org.current);
                 if (active) {
                     setActiveSlug(active.slug);
                 }
-            } catch (error) {
-                console.error("Failed to fetch active organization:", error);
             }
         };
-        fetchActiveOrg();
+        checkActiveOrg();
 
         // Listen for changes
-        const handleOrgChange = () => fetchActiveOrg();
-        window.addEventListener("activeOrgChanged", handleOrgChange);
-        return () => window.removeEventListener("activeOrgChanged", handleOrgChange);
-    }, []);
+        window.addEventListener("activeOrgChanged", checkActiveOrg);
+        return () => window.removeEventListener("activeOrgChanged", checkActiveOrg);
+    }, [organizations]);
 
     return (
         <div className="space-y-10 max-w-6xl mx-auto">

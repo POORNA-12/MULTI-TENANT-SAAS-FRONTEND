@@ -3,28 +3,14 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import organizationService from "../services/organizationService";
 import { useBilling } from "../context/BillingContext";
 import { useNavigate } from "react-router-dom";
+import { useOrganizations } from "../hooks/useOrganizations";
 
 export default function GlobalSettings() {
-    const [activeOrg, setActiveOrg] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { data: organizations, isLoading } = useOrganizations();
+    const activeOrg = organizations?.find(org => org.current) || organizations?.find(org => org.is_active) || null;
     const [activeTab, setActiveTab] = useState("general");
     const { billingUsage } = useBilling();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchOrgDetails = async () => {
-            try {
-                const data = await organizationService.getOrganizations();
-                const active = data.organizations?.find(org => org.current) || data.organizations?.find(org => org.is_active);
-                setActiveOrg(active || null);
-            } catch (error) {
-                console.error("Failed to fetch organization details:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchOrgDetails();
-    }, []);
 
     const SettingsCard = ({ title, children, icon }) => (
         <div className="bg-white border border-[#d0dbe7] rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">

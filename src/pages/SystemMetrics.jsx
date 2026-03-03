@@ -3,6 +3,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import { Link } from "react-router-dom";
 import dashboardService from "../services/dashboardService";
 import organizationService from "../services/organizationService"; // Import for name resolution
+import { useOrganizations } from "../hooks/useOrganizations";
 
 // Dynamic SVG Line Chart Component
 const RequestVolumeChart = ({ data }) => {
@@ -161,34 +162,29 @@ export default function SystemMetrics() {
     const [timeRange, setTimeRange] = useState("1d");
     const [organizations, setOrganizations] = useState({}); // Map of slug -> name
     const [activeTenantCount, setActiveTenantCount] = useState(0);
+    const { data: orgData, isLoading: orgLoading } = useOrganizations();
+
+    useEffect(() => {
+        if (orgData) {
+            const orgMap = {};
+            let count = orgData.length;
+            orgData.forEach(org => {
+                orgMap[org.slug] = org.name;
+                orgMap[org.id] = org.name;
+                if (org.slug) orgMap[org.slug.toLowerCase()] = org.name;
+            });
+            setOrganizations(orgMap);
+            setActiveTenantCount(count);
+        }
+    }, [orgData]);
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             setError(null);
             try {
-                // Determine if we need to fetch orgs. 
-                // Only Saas Users can see all orgs, generic users might get 403.
-                // We'll try to fetch, if fail, just ignore (might not have perm)
-                try {
-                    const orgData = await organizationService.getOrganizations();
-                    // Map both 'slug' and 'id' to 'name' for robust lookup
-                    const orgMap = {};
-                    let count = 0;
-                    if (orgData?.organizations) {
-                        count = orgData.organizations.length;
-                        orgData.organizations.forEach(org => {
-                            orgMap[org.slug] = org.name;
-                            orgMap[org.id] = org.name;
-                            // Also map lowercased slug just in case
-                            if (org.slug) orgMap[org.slug.toLowerCase()] = org.name;
-                        });
-                    }
-                    setOrganizations(orgMap);
-                    setActiveTenantCount(count);
-                } catch (e) {
-                    console.warn("Could not fetch organizations for name mapping (might be tenant user)", e);
-                }
+                // Organizations fetch moved to custom hook useOrganizations above
+
 
                 const data = await dashboardService.getAuditAnalytics();
                 setAnalytics(data);

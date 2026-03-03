@@ -3,6 +3,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import workflowService from "../services/workflowService";
 import roleService from "../services/roleService";
 import organizationService from "../services/organizationService";
+import { useOrganizations } from "../hooks/useOrganizations";
 
 import AuthService from "../services/authService";
 import WorkflowWizard, { WORKFLOW_TEMPLATES } from "../components/WorkflowWizard";
@@ -33,12 +34,14 @@ export default function Workflows() {
     // Fetch active organization, roles, and current user permissions
     const [activeTab, setActiveTab] = useState("create");
 
+    const { data: organizations } = useOrganizations();
+
     // Fetch active organization, roles, and current user permissions
     useEffect(() => {
-        const fetchContext = async () => {
+        const checkActiveOrgAndRoles = async () => {
             try {
-                const orgData = await organizationService.getOrganizations();
-                const active = orgData.organizations?.find(org => org.current);
+                if (!organizations) return;
+                const active = organizations.find(org => org.current);
 
                 if (active) {
                     setActiveOrg(active);
@@ -52,38 +55,7 @@ export default function Workflows() {
                         // Identify current user role
                         const myEmail = AuthService.getUserEmail();
                         if (myEmail) {
-                            // Identify current user role
-                            const myEmail = AuthService.getUserEmail();
-                            // We need to fetch users if we want to identify current user role properly if not in roleData
-                            // But wait, the previous code used userList to find 'me'.
-                            // If we remove userList, we can't find 'me' easily unless we fetch users solely for this purpose.
-                            // However, the user asked to "remove current users page".
-                            // Logic for currentUserRole might rely on it.
-                            // Let's check if we can get role from somewhere else or if we should keep fetching users but not store it in state?
-                            // The user said "remove current users page", implying the UI tab.
-                            // But if I remove the fetch, `currentUserRole` calculation breaks.
-                            // I should probably keep fetching users for permission check but not expose it in the UI?
-                            // Or maybe `tenantUserService.getCurrentUser()` exists?
-                            // Looking at the code: `tenantUserService.getTenantUsers` was used to find `me`.
-                            // I will keep the fetch but remove the `users` state.
-                            // Actually, I can just fetch users but not set `users` state.
-
-                            // Revised plan for this chunk:
-                            // I will revert the removal of fetch in step 3/4 above and instead just remove `setUsers`.
-                            // But wait, I already wrote the tool call.
-                            // Let me adjust the Instruction.
-
-                            // Actually, I will just comment out the users *display* logic (already done) and *state*.
-                            // If I remove `userData`, `me` will be undefined.
-                            // `currentUserRole` is used for `hasMonitoringAccess`.
-                            // `hasMonitoringAccess` is currently hardcoded to `true`.
-                            // So removing `currentUserRole` logic is fine for now?
-                            // Use: `if (hasMonitoringAccess())`
-                            // `hasMonitoringAccess` implementation: `return true;`
-                            // So `currentUserRole` is effectively unused for permission check right now.
-                            // So I can safely remove the user fetching logic.
-
-                            if (me) {
+                            if (typeof me !== "undefined" && me) {
                                 setCurrentTenantUserId(me.id);
                                 if (me.role) {
                                     setCurrentUserRole(me.role);
@@ -98,8 +70,8 @@ export default function Workflows() {
                 console.error("Failed to fetch context (org):", error);
             }
         };
-        fetchContext();
-    }, []);
+        checkActiveOrgAndRoles();
+    }, [organizations]);
 
     // Fetch workflow templates
     const fetchTemplates = async () => {

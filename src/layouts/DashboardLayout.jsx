@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import AuthService from "../services/authService";
 import organizationService from "../services/organizationService";
+import { useOrganizations } from "../hooks/useOrganizations";
 import { useSearch } from "../context/SearchContext";
 
 export default function DashboardLayout({ children }) {
@@ -29,25 +30,24 @@ export default function DashboardLayout({ children }) {
 
     // ... (rest of useEffects unchanged)
 
+    const { data: organizations } = useOrganizations();
+
     useEffect(() => {
-        const fetchActiveOrg = async () => {
-            try {
-                const data = await organizationService.getOrganizations();
-                const active = data.organizations?.find(org => org.current);
+        const checkActiveOrg = () => {
+            if (organizations) {
+                const active = organizations.find(org => org.current);
                 setActiveOrg(active || null);
-            } catch (error) {
-                console.error("Failed to fetch active organization:", error);
             }
         };
-        fetchActiveOrg();
+        checkActiveOrg();
 
         // Listen for active org changes from other components
-        window.addEventListener("activeOrgChanged", fetchActiveOrg);
+        window.addEventListener("activeOrgChanged", checkActiveOrg);
 
         return () => {
-            window.removeEventListener("activeOrgChanged", fetchActiveOrg);
+            window.removeEventListener("activeOrgChanged", checkActiveOrg);
         };
-    }, [location.pathname]);
+    }, [location.pathname, organizations]);
 
     // Token Refresh Logic
     useEffect(() => {
