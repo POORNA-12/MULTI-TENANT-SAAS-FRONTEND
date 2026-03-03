@@ -670,285 +670,471 @@ export default function RoleManagement() {
                 message={alertData.message}
                 type={alertData.type}
             />
-            <div className="max-w-6xl mx-auto">
+            <>
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-2xl font-black text-[#0e141b] tracking-tight">
-                        {activeTab === "roles" ? "Role Management Service Hub" : activeTab === "assignment" ? "Role Assignment Management Hub" : "JWT Integration Guide"}
-                    </h1>
-                    <p className="text-sm text-[#4e7397] mt-1">
-                        {activeTab === "jwt" ? "A complete backend integration reference for JWT authentication & permission enforcement." : "Manage granular Role-Based Access Control (RBAC) and assign permissions across your tenants."}
-                    </p>
-                </div>
-
-                {/* Tabs */}
-                <div className="flex border-b border-[#d0dbe7] mb-6">
-                    <button onClick={() => setActiveTab("roles")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "roles" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
-                        Roles
-                    </button>
-                    <button onClick={() => setActiveTab("assignment")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "assignment" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
-                        Role Assignment
-                    </button>
-                    <button onClick={() => setActiveTab("jwt")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "jwt" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
-                        <span className="material-symbols-outlined text-base">key</span>
-                        JWT Guide
-                    </button>
-                </div>
-
-                {/* Content */}
-                {activeTab === "roles" && (
-                    <>
-                        {/* Toolbar */}
-                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                            <div className="relative w-full sm:w-96">
-                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#4e7397] text-lg">search</span>
-                                <input
-                                    type="text"
-                                    placeholder="Filter by role name..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border border-[#d0dbe7] rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                />
-                            </div>
-                            <button
-                                onClick={openCreateModal}
-                                className="w-full sm:w-auto px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded shadow-sm transition-colors flex items-center justify-center gap-2"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">add</span>
-                                Create Role
-                            </button>
-                        </div>
-
-                        {/* Table */}
-                        <RoleTable
-                            roles={filteredRoles}
-                            onDelete={handleDeleteRole}
-                            onEdit={handleEditRole}
-                            onViewPermissions={handleViewPermissions}
-                        />
-                    </>
-                )}
-
-                {activeTab === "assignment" && (
-                    <>
-                        {/* Toolbar */}
-                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                            <div className="relative w-full sm:w-96">
-                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#4e7397] text-lg">search</span>
-                                <input
-                                    type="text"
-                                    placeholder="Filter by user email or role..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border border-[#d0dbe7] rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                />
-                            </div>
-                            <button
-                                onClick={() => setIsAssignModalOpen(true)}
-                                className="w-full sm:w-auto px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded shadow-sm transition-colors flex items-center justify-center gap-2"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">person_add</span>
-                                Assign Role
-                            </button>
-                        </div>
-
-                        {/* Assignment Table */}
-                        <RoleAssignmentTable
-                            assignments={filteredAssignments} // Pass filtered assignments here
-                            roles={roles} // Pass roles to look up permission counts
-                            onEdit={(assignment) => {
-                                setEditingAssignment(assignment);
-                                setIsAssignModalOpen(true);
-                            }}
-                            onRemove={handleRemoveAssignment}
-                        />
-                    </>
-                )}
-
-                {/* ── JWT Integration Guide Tab ── */}
-                {activeTab === "jwt" && (
-                    <div className="space-y-6">
-                        <style>{`pre.jwt-pre::-webkit-scrollbar{height:8px;width:8px} pre.jwt-pre::-webkit-scrollbar-track{background:transparent} pre.jwt-pre::-webkit-scrollbar-thumb{background-color:#334155;border-radius:4px}`}</style>
-
-                        {/* Status bar */}
-                        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-                            <div className="flex items-start gap-4">
-                                <div className="size-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
-                                    <span className="material-symbols-outlined">lock</span>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-wide">Token Algorithm</h3>
-                                    <div className="mt-2 flex items-center gap-2 bg-white px-3 py-2 rounded border border-indigo-200 shadow-sm">
-                                        <code className="text-sm font-mono text-indigo-800">RS256 (RSA Signature with SHA-256)</code>
-                                    </div>
-                                    <p className="text-xs text-indigo-700/70 mt-2">Always use your tenant's public key to verify signatures.</p>
-                                </div>
-                            </div>
-                            <div className="text-right hidden md:block shrink-0">
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
-                                    <span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                    Auth Service Active
-                                </span>
-                                <p className="text-xs text-indigo-800/60 mt-2">v1.2.0 · TAS-Auth-Service</p>
-                            </div>
-                        </div>
-
-                        {/* SECTION 1 — JWT VERIFY */}
-                        <JwtSection id="jwt-verify" icon="key" badgeColor="bg-yellow-100 text-yellow-700" badge="Step 2" title="Verify JWT in Your Backend">
-                            <JwtInfoBox type="danger">Your backend <strong>must verify the JWT signature</strong> before trusting any payload data. Skipping this allows attackers to forge tokens and impersonate any user.</JwtInfoBox>
-                            <p className="text-sm text-[#4e7397] leading-relaxed">After a tenant user authenticates, your backend receives a Bearer token. Use the tenant's <code className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono">public key</code> to verify the RS256 signature before processing any request.</p>
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                <JwtCodeBlock lang="python" code={`import jwt\n\nPUBLIC_KEY = "your-public-key"\n\ndef verify_token(token):\n    return jwt.decode(\n        token,\n        PUBLIC_KEY,\n        algorithms=["RS256"]\n    )`} />
-                                <JwtCodeBlock lang="javascript" code={`const jwt = require("jsonwebtoken");\n\nfunction verifyToken(token) {\n  return jwt.verify(token, PUBLIC_KEY);\n}`} />
-                            </div>
-                            <div className="bg-slate-50 border border-[#d0dbe7] rounded-lg p-4">
-                                <h4 className="text-xs font-bold text-[#0e141b] uppercase tracking-wider mb-3">JWT Payload Fields</h4>
-                                <table className="w-full text-left text-sm">
-                                    <thead><tr className="border-b border-[#d0dbe7] text-[10px] font-bold text-[#4e7397] uppercase tracking-wider"><th className="pb-2 pr-4">Field</th><th className="pb-2">Description</th></tr></thead>
-                                    <tbody className="divide-y divide-[#d0dbe7]">
-                                        {[["tenant_id", "Unique ID for the tenant organisation"], ["tenant_user_id", "Internal ID of the authenticated user"], ["roles", "List of assigned role identifiers"], ["permissions", "Flat list of permission strings"], ["perm_version", "Increments whenever roles/permissions change"], ["exp", "UNIX timestamp of token expiry"]].map(([f, d]) => (
-                                            <tr key={f} className="hover:bg-white transition-colors"><td className="py-2 pr-4"><code className="text-xs font-mono font-bold text-blue-600">{f}</code></td><td className="py-2 text-[#4e7397] text-xs">{d}</td></tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </JwtSection>
-
-                        {/* SECTION 2 — PERMISSION ENFORCEMENT */}
-                        <JwtSection id="perm-enforce" icon="shield" badgeColor="bg-green-100 text-green-700" badge="Step 3" title="Enforce Permissions in Your API">
-                            <JwtInfoBox type="info">Before executing any protected action, check that the verified token contains the required permission. <strong>Never rely on frontend checks alone.</strong></JwtInfoBox>
-                            <p className="text-sm text-[#4e7397] leading-relaxed">Wrap your route handlers with a middleware/decorator that extracts the Bearer token, verifies it, and checks whether the required permission exists in the decoded payload.</p>
-                            <JwtCodeBlock lang="python" code={`def require_permission(permission):\n    def decorator(func):\n        def wrapper(request):\n            token = request.headers["Authorization"].split(" ")[1]\n            decoded = verify_token(token)\n\n            if permission not in decoded.get("permissions", []):\n                return {"error": "Forbidden"}, 403\n\n            return func(request)\n        return wrapper\n    return decorator\n\n\n# Usage\n@require_permission("workflow.create")\ndef create_workflow(request):\n    # ... safe to proceed\n    pass`} />
-                            <JwtInfoBox type="warning">Always validate the <code className="mx-1 px-1.5 py-0.5 bg-amber-100 rounded text-xs font-mono">permissions</code> field from the <em>decoded & verified</em> token — not from a request body or query parameter.</JwtInfoBox>
-                        </JwtSection>
-
-                        {/* SECTION 3 — REFRESH FLOW */}
-                        <JwtSection id="jwt-refresh" icon="refresh" badgeColor="bg-cyan-100 text-cyan-700" badge="Step 4" title="Refresh Access Token">
-                            <div className="flex items-center gap-3 p-3 bg-slate-50 border border-[#d0dbe7] rounded-lg">
-                                <span className="px-2.5 py-1 rounded text-xs font-bold ring-1 ring-inset bg-green-100 text-green-700 border-green-200">POST</span>
-                                <code className="text-sm font-mono text-[#0e141b]">/tenant/refresh/</code>
-                            </div>
-                            <ul className="space-y-2">
-                                {[["timer", "Access token expires in <strong>7 minutes</strong> — plan your refresh strategy accordingly."], ["vpn_key", "Use the refresh token to obtain a new access token without re-authenticating."], ["block", "If a user's <strong>permissions changed</strong> since the refresh token was issued, the refresh may be rejected."]].map(([ic, txt]) => (
-                                    <li key={ic} className="flex items-start gap-3 text-sm text-[#4e7397]"><span className="material-symbols-outlined text-base text-orange-500 shrink-0 mt-0.5">{ic}</span><span dangerouslySetInnerHTML={{ __html: txt }} /></li>
-                                ))}
-                            </ul>
-                            <div><h4 className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-2">Request Body</h4>
-                                <JwtCodeBlock lang="json" code={`{\n  "refresh": "<refresh_token>"\n}`} /></div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">200</span><span className="text-[10px] font-bold text-green-700 uppercase">Success</span></div><JwtCodeBlock lang="json" code={`{\n  "access": "<new_access_token>"\n}`} /></div>
-                                <div><div className="flex items-center gap-2 mb-2"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">401</span><span className="text-[10px] font-bold text-red-700 uppercase">Error</span></div><JwtCodeBlock lang="json" code={`{\n  "message": "Invalid or expired refresh token"\n}`} /></div>
-                            </div>
-                        </JwtSection>
-
-                        {/* SECTION 4 — PERM VERSION */}
-                        <JwtSection id="perm-version" icon="published_with_changes" badgeColor="bg-purple-100 text-purple-700" badge="perm_version" title="Permission Version Behavior">
-                            <JwtInfoBox type="warning">If a user's role or permissions change, <strong>previously issued tokens may be invalidated automatically</strong>. Clients must handle <code className="mx-1 px-1.5 py-0.5 bg-amber-100 rounded text-xs font-mono">401</code> responses and prompt re-authentication if refresh also fails.</JwtInfoBox>
-                            <p className="text-sm text-[#4e7397] leading-relaxed">Each JWT contains a <code className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono text-[#0e141b]">perm_version</code> field. The backend compares the token's version against the stored value. A mismatch means the token is stale and the user must re-authenticate.</p>
-                            <div className="bg-slate-50 border border-[#d0dbe7] rounded-lg p-4 space-y-2">
-                                {[["Role assigned to user", "perm_version increments → old tokens rejected"], ["Role removed from user", "perm_version increments → old tokens rejected"], ["Permission added to a role", "perm_version increments for all users of that role"], ["No permission change", "perm_version unchanged → tokens remain valid"]].map(([ev, res]) => (
-                                    <div key={ev} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-[#d0dbe7] last:border-0">
-                                        <span className="text-xs font-bold text-[#0e141b]">{ev}</span>
-                                        <span className="text-xs text-[#4e7397]">{res}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </JwtSection>
-
-                        {/* SECTION 5 — ERROR HANDLING */}
-                        <JwtSection id="jwt-errors" icon="error" badgeColor="bg-red-100 text-red-700" badge="Errors" title="Error Handling Guide">
-                            <div className="bg-white border border-[#d0dbe7] rounded-lg overflow-hidden">
-                                <table className="w-full text-left text-sm">
-                                    <thead><tr className="bg-gray-50 border-b border-[#d0dbe7]"><th className="p-4 text-xs font-bold text-[#4e7397] uppercase tracking-wider w-24">Status</th><th className="p-4 text-xs font-bold text-[#4e7397] uppercase tracking-wider">Meaning</th><th className="p-4 text-xs font-bold text-[#4e7397] uppercase tracking-wider hidden md:table-cell">Common Cause</th></tr></thead>
-                                    <tbody className="divide-y divide-[#d0dbe7]">
-                                        {[["200", "bg-green-100 text-green-700", "Success", "Request completed successfully"], ["400", "bg-orange-100 text-orange-700", "Bad Request", "Missing or malformed request body"], ["401", "bg-red-100 text-red-700", "Invalid Token", "Token missing, expired, or signature mismatch"], ["403", "bg-red-100 text-red-700", "Permission Denied", "Verified token lacks required permission"], ["500", "bg-gray-100 text-gray-700", "Server Error", "Unexpected backend failure — contact support"]].map(([code, cls, meaning, cause]) => (
-                                            <tr key={code} className="hover:bg-slate-50 transition-colors">
-                                                <td className="p-4"><span className={`px-2 py-0.5 rounded text-[10px] font-bold ${cls}`}>{code}</span></td>
-                                                <td className="p-4 text-sm font-bold text-[#0e141b]">{meaning}</td>
-                                                <td className="p-4 text-sm text-[#4e7397] hidden md:table-cell">{cause}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </JwtSection>
-
-                        {/* SECTION 6 — SECURITY BEST PRACTICES */}
-                        <JwtSection id="jwt-security" icon="verified_user" badgeColor="bg-orange-100 text-orange-700" badge="Security" title="Security Best Practices">
-                            <JwtInfoBox type="success">Following these practices ensures your integration meets enterprise-grade SaaS security standards.</JwtInfoBox>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {[{ ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Always verify JWT signature", d: "Use the RS256 public key on every request — never skip signature verification." }, { ic: "cancel", cl: "text-red-600", bg: "bg-red-50 border-red-200", t: "Never trust frontend permission checks", d: "Frontend checks improve UX only. All access decisions must be enforced server-side." }, { ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Always validate permission server-side", d: "Extract permissions from the verified token payload, not from req.body or query strings." }, { ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Store refresh tokens securely", d: "Use HttpOnly cookies or secure storage. Never store refresh tokens in localStorage." }, { ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Handle token expiry gracefully", d: "Implement background refresh logic. Show re-login prompt only when refresh also fails." }, { ic: "check_circle", cl: "text-green-600", bg: "bg-green-50 border-green-200", t: "Rotate public keys periodically", d: "Subscribe to TenantX JWKS endpoint for automatic key rotation without downtime." }].map(item => (
-                                    <div key={item.t} className={`flex items-start gap-3 p-4 rounded-lg border ${item.bg} hover:shadow-sm transition-shadow`}>
-                                        <span className={`material-symbols-outlined shrink-0 mt-0.5 ${item.cl}`}>{item.ic}</span>
-                                        <div><p className="text-sm font-bold text-[#0e141b]">{item.t}</p><p className="text-xs text-[#4e7397] mt-0.5 leading-relaxed">{item.d}</p></div>
-                                    </div>
-                                ))}
-                            </div>
-                        </JwtSection>
-
-                        <div className="flex items-center justify-between text-xs text-[#4e7397] pb-2">
-                            <span>TenantX Platform · JWT Integration Guide</span>
-                            <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>v1.2.0</span>
-                        </div>
+                <div className="max-w-6xl mx-auto">
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-black text-[#0e141b] tracking-tight">
+                            {activeTab === "roles" ? "Role Management Service Hub" : activeTab === "assignment" ? "Role Assignment Management Hub" : "JWT Integration Guide"}
+                        </h1>
+                        <p className="text-sm text-[#4e7397] mt-1">
+                            {activeTab === "jwt" ? "A complete backend integration reference for JWT authentication & permission enforcement." : "Manage granular Role-Based Access Control (RBAC) and assign permissions across your tenants."}
+                        </p>
                     </div>
-                )}
-            </div>
 
-            <CreateRoleModal
-                isOpen={isCreateModalOpen}
-                onClose={() => {
-                    setIsCreateModalOpen(false);
-                    setEditingRole(null);
-                }}
-                onSubmit={handleSaveRole}
-                isLoading={isLoading}
-                initialData={editingRole}
-                activeOrg={activeOrg}
-            />
+                    {/* Tabs */}
+                    <div className="flex border-b border-[#d0dbe7] mb-6">
+                        <button onClick={() => setActiveTab("roles")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "roles" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
+                            Roles
+                        </button>
+                        <button onClick={() => setActiveTab("assignment")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === "assignment" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
+                            Role Assignment
+                        </button>
+                        <button onClick={() => setActiveTab("jwt")} className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "jwt" ? "border-blue-500 text-blue-600" : "border-transparent text-[#4e7397] hover:text-[#0e141b]"}`}>
+                            <span className="material-symbols-outlined text-base">key</span>
+                            JWT Guide
+                        </button>
+                    </div>
 
-            <AssignRoleModal
-                isOpen={isAssignModalOpen}
-                onClose={() => {
-                    setIsAssignModalOpen(false);
-                    setEditingAssignment(null);
-                }}
-                onSubmit={handleAssignRole}
-                isLoading={isLoading}
-                roles={roles}
-                initialData={editingAssignment}
-            />
+                    {/* Content */}
+                    {activeTab === "roles" && (
+                        <>
+                            {/* Toolbar */}
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                                <div className="relative w-full sm:w-96">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#4e7397] text-lg">search</span>
+                                    <input
+                                        type="text"
+                                        placeholder="Filter by role name..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 border border-[#d0dbe7] rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                    />
+                                </div>
+                                <button
+                                    onClick={openCreateModal}
+                                    className="w-full sm:w-auto px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded shadow-sm transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">add</span>
+                                    Create Role
+                                </button>
+                            </div>
+
+                            {/* Table */}
+                            <RoleTable
+                                roles={filteredRoles}
+                                onDelete={handleDeleteRole}
+                                onEdit={handleEditRole}
+                                onViewPermissions={handleViewPermissions}
+                            />
+                        </>
+                    )}
+
+                    {activeTab === "assignment" && (
+                        <>
+                            {/* Toolbar */}
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                                <div className="relative w-full sm:w-96">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#4e7397] text-lg">search</span>
+                                    <input
+                                        type="text"
+                                        placeholder="Filter by user email or role..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 border border-[#d0dbe7] rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                    />
+                                </div>
+                                <button
+                                    onClick={() => setIsAssignModalOpen(true)}
+                                    className="w-full sm:w-auto px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded shadow-sm transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">person_add</span>
+                                    Assign Role
+                                </button>
+                            </div>
+
+                            {/* Assignment Table */}
+                            <RoleAssignmentTable
+                                assignments={filteredAssignments} // Pass filtered assignments here
+                                roles={roles} // Pass roles to look up permission counts
+                                onEdit={(assignment) => {
+                                    setEditingAssignment(assignment);
+                                    setIsAssignModalOpen(true);
+                                }}
+                                onRemove={handleRemoveAssignment}
+                            />
+                        </>
+                    )}
+
+                    {/* ── JWT Integration Guide Tab ── */}
+                    {activeTab === "jwt" && (
+                        <div className="flex flex-col lg:flex-row gap-8 relative">
+                            <style>{`html { scroll-behavior: smooth; } pre.jwt-pre::-webkit-scrollbar{height:8px;width:8px} pre.jwt-pre::-webkit-scrollbar-track{background:transparent} pre.jwt-pre::-webkit-scrollbar-thumb{background-color:#334155;border-radius:4px}`}</style>
+
+                            {/* Sticky Sidebar */}
+                            <div className="hidden lg:block w-64 shrink-0">
+                                <div className="sticky top-24 bg-white border border-[#d0dbe7] rounded-xl shadow-sm p-5 space-y-1">
+                                    <h4 className="text-xs font-bold text-[#0e141b] uppercase tracking-wider mb-4 px-3">Documentation</h4>
+                                    {[
+                                        { id: "jwt-overview", title: "Overview" },
+                                        { id: "jwt-algorithm", title: "Token Algorithm" },
+                                        { id: "jwt-verify", title: "Verify JWT" },
+                                        { id: "jwt-payload", title: "JWT Payload" },
+                                        { id: "perm-enforce", title: "Permission Enforcement" },
+                                        { id: "jwt-refresh", title: "Refresh Flow" },
+                                        { id: "perm-version", title: "perm_version Behavior" },
+                                        { id: "jwt-errors", title: "Error Handling" },
+                                        { id: "jwt-security", title: "Security Best Practices" }
+                                    ].map((item) => (
+                                        <a
+                                            key={item.id}
+                                            href={`#${item.id}`}
+                                            className="block px-3 py-2 text-sm text-[#4e7397] font-medium rounded-lg hover:bg-slate-50 hover:text-blue-600 transition-colors"
+                                        >
+                                            {item.title}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Main Content Area */}
+                            <div className="flex-1 space-y-8 min-w-0">
+                                {/* SECTION 1 — OVERVIEW */}
+                                <div id="jwt-overview" className="scroll-mt-24 space-y-4">
+                                    <div>
+                                        <h2 className="text-2xl font-black text-[#0e141b] tracking-tight">JWT Integration Guide</h2>
+                                        <p className="text-sm text-[#4e7397] leading-relaxed mt-2 max-w-3xl">
+                                            This guide provides everything you need to know about integrating our Role-Based Access Control (RBAC) securely into your backend services. Learn how tokens are structured, validated, and used to enforce permissions instantly.
+                                        </p>
+                                    </div>
+                                    <div className="bg-slate-50 border border-[#d0dbe7] rounded-xl p-6 flex flex-col md:flex-row items-center justify-center gap-6 shadow-sm">
+                                        <div className="flex flex-col items-center text-center gap-2">
+                                            <div className="size-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined">login</span></div>
+                                            <span className="text-xs font-bold text-[#4e7397]">1. User Authenticates</span>
+                                        </div>
+                                        <span className="material-symbols-outlined text-[#d0dbe7] hidden md:block">arrow_forward</span>
+                                        <div className="flex flex-col items-center text-center gap-2">
+                                            <div className="size-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center"><span className="material-symbols-outlined">token</span></div>
+                                            <span className="text-xs font-bold text-[#4e7397]">2. Receives JWT</span>
+                                        </div>
+                                        <span className="material-symbols-outlined text-[#d0dbe7] hidden md:block">arrow_forward</span>
+                                        <div className="flex flex-col items-center text-center gap-2">
+                                            <div className="size-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><span className="material-symbols-outlined">api</span></div>
+                                            <span className="text-xs font-bold text-[#4e7397]">3. Backend Verifies</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 2 — ALGORITHM */}
+                                <div id="jwt-algorithm" className="scroll-mt-24">
+                                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+                                        <div className="flex items-start gap-4">
+                                            <div className="size-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                                                <span className="material-symbols-outlined">lock</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-wide">Token Algorithm</h3>
+                                                <div className="mt-2 flex items-center gap-2 bg-white px-3 py-2 rounded border border-indigo-200 shadow-sm">
+                                                    <code className="text-sm font-mono text-indigo-800">RS256 (RSA Signature with SHA-256)</code>
+                                                </div>
+                                                <p className="text-xs text-indigo-700/70 mt-2">Always use your tenant's public key to verify signatures.</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right hidden md:block shrink-0">
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                                                <span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                                Auth Service Active
+                                            </span>
+                                            <p className="text-xs text-indigo-800/60 mt-2">v1.2.0 · TAS-Auth-Service</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 1 — JWT VERIFY */}
+                                <div id="jwt-verify" className="scroll-mt-24 space-y-4 pt-6">
+                                    <h3 className="text-lg font-bold text-[#0e141b]">Verify JWT in Backend</h3>
+                                    <JwtInfoBox type="danger">
+                                        Your backend <strong>must verify the JWT signature</strong> using your tenant's public key before trusting payload data. Skipping this allows attackers to forge tokens.
+                                    </JwtInfoBox>
+                                    <p className="text-sm text-[#4e7397] leading-relaxed">
+                                        After a user authenticates, your backend receives a Bearer token. Use the public key to verify the RS256 signature before processing any request.
+                                    </p>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <h4 className="text-xs font-bold text-[#4e7397] uppercase tracking-wider flex items-center gap-1.5">
+                                                <span className="w-2 h-2 rounded-full bg-blue-500"></span> Python Example
+                                            </h4>
+                                            <JwtCodeBlock lang="python" code={`import jwt\n\nPUBLIC_KEY = "your-public-key"\n\ndef verify_token(token):\n    return jwt.decode(\n        token,\n        PUBLIC_KEY,\n        algorithms=["RS256"]\n    )`} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h4 className="text-xs font-bold text-[#4e7397] uppercase tracking-wider flex items-center gap-1.5">
+                                                <span className="w-2 h-2 rounded-full bg-yellow-500"></span> Node.js Example
+                                            </h4>
+                                            <JwtCodeBlock lang="javascript" code={`const jwt = require("jsonwebtoken");\n\nfunction verifyToken(token) {\n  return jwt.verify(token, PUBLIC_KEY);\n}`} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 4 — JWT PAYLOAD */}
+                                <div id="jwt-payload" className="scroll-mt-24 space-y-4 pt-6">
+                                    <h3 className="text-lg font-bold text-[#0e141b]">JWT Payload Structure</h3>
+                                    <p className="text-sm text-[#4e7397] leading-relaxed">
+                                        The decoded JWT payload contains essential user and tenant context. Ensure you only read this data <strong>after</strong> verifying the signature.
+                                    </p>
+                                    <div className="bg-slate-50 border border-[#d0dbe7] rounded-xl overflow-hidden shadow-sm">
+                                        <div className="p-4 border-b border-[#d0dbe7] bg-white">
+                                            <h4 className="text-xs font-bold text-[#0e141b] uppercase tracking-wider">Example Payload</h4>
+                                        </div>
+                                        <div className="p-4">
+                                            <JwtCodeBlock lang="json" code={`{\n  "tenant_id": "uuid",\n  "tenant_user_id": "uuid",\n  "roles": ["manager"],\n  "permissions": ["workflow.create"],\n  "perm_version": 3,\n  "exp": 1734567890\n}`} />
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left text-sm bg-white">
+                                                <thead>
+                                                    <tr className="bg-slate-50 border-y border-[#d0dbe7] text-xs font-bold text-[#4e7397] uppercase tracking-wider">
+                                                        <th className="p-4 w-1/3">Field</th>
+                                                        <th className="p-4">Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-[#d0dbe7]">
+                                                    {[
+                                                        ["tenant_id", "Unique ID for the tenant organisation"],
+                                                        ["tenant_user_id", "Internal ID of the authenticated user"],
+                                                        ["roles", "List of assigned role identifiers"],
+                                                        ["permissions", "Flat list of permission strings"],
+                                                        ["perm_version", "Increments whenever roles/permissions change"],
+                                                        ["exp", "UNIX timestamp of token expiry"]
+                                                    ].map(([f, d]) => (
+                                                        <tr key={f} className="hover:bg-slate-50 transition-colors">
+                                                            <td className="p-4"><code className="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{f}</code></td>
+                                                            <td className="p-4 text-[#4e7397] text-xs">{d}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 5 — PERMISSION ENFORCEMENT */}
+                                <div id="perm-enforce" className="scroll-mt-24 space-y-4 pt-6">
+                                    <h3 className="text-lg font-bold text-[#0e141b]">Enforce Permissions in Your API</h3>
+                                    <JwtInfoBox type="info">
+                                        Before executing any protected action, check that the verified token contains the required permission. <strong>Never rely on frontend checks alone.</strong>
+                                    </JwtInfoBox>
+                                    <p className="text-sm text-[#4e7397] leading-relaxed">
+                                        Create a middleware or decorator in your backend language of choice to streamline permission checks across all your secured API routes.
+                                    </p>
+                                    <div className="space-y-2">
+                                        <h4 className="text-xs font-bold text-[#4e7397] uppercase tracking-wider flex items-center gap-1.5">
+                                            <span className="w-2 h-2 rounded-full bg-blue-500"></span> Python Decorator Example
+                                        </h4>
+                                        <JwtCodeBlock lang="python" code={`def require_permission(permission):\n    def decorator(func):\n        def wrapper(request):\n            token = request.headers["Authorization"].split(" ")[1]\n            decoded = verify_token(token)\n\n            if permission not in decoded.get("permissions", []):\n                return {"error": "Forbidden"}, 403\n\n            return func(request)\n        return wrapper\n    return decorator`} />
+                                    </div>
+                                </div>
+
+                                {/* SECTION 6 — REFRESH FLOW */}
+                                <div id="jwt-refresh" className="scroll-mt-24 space-y-4 pt-6">
+                                    <h3 className="text-lg font-bold text-[#0e141b]">Refresh Flow</h3>
+                                    <p className="text-sm text-[#4e7397] leading-relaxed">
+                                        Access tokens expire quickly to minimize security risks. Use the refresh token endpoint to obtain a new access token without requiring the user to log in again.
+                                    </p>
+                                    <div className="flex flex-wrap items-center gap-3 p-3 bg-slate-50 border border-[#d0dbe7] rounded-lg">
+                                        <span className="px-2.5 py-1 rounded text-xs font-bold ring-1 ring-inset bg-green-100 text-green-700 border-green-200 shadow-sm">POST</span>
+                                        <code className="text-sm font-mono text-[#0e141b] font-bold">/tenant/refresh/</code>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                        <div className="space-y-2 col-span-1 lg:col-span-1">
+                                            <h4 className="text-xs font-bold text-[#4e7397] uppercase tracking-wider">Request Body</h4>
+                                            <JwtCodeBlock lang="json" code={`{\n  "refresh": "<refresh_token>"\n}`} />
+                                        </div>
+                                        <div className="space-y-2 col-span-1 lg:col-span-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">200</span>
+                                                <span className="text-[10px] font-bold text-green-700 uppercase">Success Response</span>
+                                            </div>
+                                            <JwtCodeBlock lang="json" code={`{\n  "access": "<new_auth_token>"\n}`} />
+                                        </div>
+                                        <div className="space-y-2 col-span-1 lg:col-span-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">401</span>
+                                                <span className="text-[10px] font-bold text-red-700 uppercase">Error Response</span>
+                                            </div>
+                                            <JwtCodeBlock lang="json" code={`{\n  "message": "Invalid token"\n}`} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 7 — PERM VERSION */}
+                                <div id="perm-version" className="scroll-mt-24 space-y-4 pt-6">
+                                    <h3 className="text-lg font-bold text-[#0e141b]">perm_version Behavior</h3>
+                                    <JwtInfoBox type="warning">
+                                        If a user's role or permissions change, <strong>previously issued tokens are invalidated automatically</strong>.
+                                    </JwtInfoBox>
+                                    <p className="text-sm text-[#4e7397] leading-relaxed">
+                                        The <code className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono text-[#0e141b]">perm_version</code> claim tracks the exact state of permissions when the token was issued. If an admin edits a role, the central version increments, instantly rendering older tokens invalid during the next backend verification.
+                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                                        <div className="bg-white border border-red-200 rounded-xl p-5 flex flex-col items-center text-center gap-3 shadow-sm relative overflow-hidden group hover:border-red-300 transition-colors">
+                                            <div className="absolute inset-0 bg-red-50/50 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                                            <div className="relative z-10 flex flex-col items-center">
+                                                <div className="size-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-2 border border-red-100">
+                                                    <span className="material-symbols-outlined text-[24px]">manage_accounts</span>
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-900">Role Assigned<br />or Updated</span>
+                                                <span className="material-symbols-outlined text-red-300 my-2">arrow_downward</span>
+                                                <span className="text-[10px] font-bold px-2.5 py-1 bg-red-100 text-red-700 rounded-full border border-red-200 shadow-sm">&rarr; perm_version++</span>
+                                                <span className="text-xs font-bold text-red-600 mt-3">Old Tokens Invalidated</span>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white border border-red-200 rounded-xl p-5 flex flex-col items-center text-center gap-3 shadow-sm relative overflow-hidden group hover:border-red-300 transition-colors">
+                                            <div className="absolute inset-0 bg-red-50/50 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                                            <div className="relative z-10 flex flex-col items-center">
+                                                <div className="size-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-2 border border-red-100">
+                                                    <span className="material-symbols-outlined text-[24px]">add_moderator</span>
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-900">Permission Added<br />to Active Role</span>
+                                                <span className="material-symbols-outlined text-red-300 my-2">arrow_downward</span>
+                                                <span className="text-[10px] font-bold px-2.5 py-1 bg-red-100 text-red-700 rounded-full border border-red-200 shadow-sm">&rarr; perm_version++</span>
+                                                <span className="text-xs font-bold text-red-600 mt-3">Old Tokens Invalidated</span>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white border border-green-200 rounded-xl p-5 flex flex-col items-center text-center gap-3 shadow-sm relative overflow-hidden group hover:border-green-300 transition-colors">
+                                            <div className="absolute inset-0 bg-green-50/50 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                                            <div className="relative z-10 flex flex-col items-center">
+                                                <div className="size-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center mb-2 border border-green-100">
+                                                    <span className="material-symbols-outlined text-[24px]">check_circle</span>
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-900">No Changes<br />(Normal Use)</span>
+                                                <span className="material-symbols-outlined text-green-300 my-2">arrow_downward</span>
+                                                <span className="text-[10px] font-bold px-2.5 py-1 bg-green-100 text-green-700 rounded-full border border-green-200 shadow-sm">&rarr; Unchanged</span>
+                                                <span className="text-xs font-bold text-green-600 mt-3">Tokens Remain Valid</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 8 — ERRORS */}
+                                <div id="jwt-errors" className="scroll-mt-24 space-y-4 pt-6">
+                                    <h3 className="text-lg font-bold text-[#0e141b]">Error Handling Guide</h3>
+                                    <p className="text-sm text-[#4e7397] leading-relaxed">Ensure your frontend properly catches these status codes to handle session expiration or access denial flows gracefully.</p>
+                                    <div className="bg-white border border-[#d0dbe7] rounded-xl overflow-hidden shadow-sm">
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left text-sm">
+                                                <thead>
+                                                    <tr className="bg-slate-50 border-b border-[#d0dbe7] text-xs font-bold text-[#4e7397] uppercase tracking-wider">
+                                                        <th className="p-4 w-28">Status Code</th>
+                                                        <th className="p-4 w-48">Meaning</th>
+                                                        <th className="p-4 min-w-[200px]">Common Cause</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-[#d0dbe7]">
+                                                    {[
+                                                        ["401", "bg-red-100 text-red-700 border-red-200", "Invalid Token", "Token expired or signature mismatch with public key."],
+                                                        ["403", "bg-orange-100 text-orange-700 border-orange-200", "Permission Denied", "Token verified securely but lacks the explicit permission needed."],
+                                                        ["500", "bg-gray-100 text-gray-700 border-gray-200", "Server Error", "Unexpected backend exception during validation flow."]
+                                                    ].map(([code, cls, meaning, cause]) => (
+                                                        <tr key={code} className="hover:bg-slate-50 transition-colors">
+                                                            <td className="p-4"><span className={`px-2 py-1 rounded text-[10px] font-bold border shadow-sm ${cls}`}>{code}</span></td>
+                                                            <td className="p-4 text-sm font-bold text-[#0e141b]">{meaning}</td>
+                                                            <td className="p-4 text-sm text-[#4e7397]">{cause}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 9 — SECURITY */}
+                                <div id="jwt-security" className="scroll-mt-24 space-y-4 pt-6">
+                                    <h3 className="text-lg font-bold text-[#0e141b]">Security Best Practices</h3>
+                                    <p className="text-sm text-[#4e7397] leading-relaxed">Adhere to these patterns to meet enterprise-grade compliance for Multi-Tenant architecture.</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {[
+                                            { ic: "verified_user", c: "text-blue-500", bg: "bg-blue-50 border-blue-100", t: "Always Verify Signature", d: "Use the RS256 public key on every protected request before reading claims." },
+                                            { ic: "gpp_bad", c: "text-red-500", bg: "bg-red-50 border-red-100", t: "Never Trust Frontend", d: "All authorization decisions MUST be securely enforced server-side." },
+                                            { ic: "policy", c: "text-purple-500", bg: "bg-purple-50 border-purple-100", t: "Validate Server-Side", d: "Extract permissions exclusively from the verified token payload." },
+                                            { ic: "lock", c: "text-amber-500", bg: "bg-amber-50 border-amber-100", t: "Secure Refresh Token", d: "Use HttpOnly HTTP cookies. Never store via standard localStorage." },
+                                            { ic: "hourglass_bottom", c: "text-teal-500", bg: "bg-teal-50 border-teal-100", t: "Graceful Expiry Handling", d: "Implement stealth background refresh logic to prevent user interrupts." },
+                                            { ic: "key", c: "text-emerald-500", bg: "bg-emerald-50 border-emerald-100", t: "Periodic Key Rotation", d: "Subscribe to the JWKS endpoint to capture ongoing algorithmic key rotations." }
+                                        ].map((item, idx) => (
+                                            <div key={idx} className={`bg-white border rounded-xl p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-all ${item.bg}`}>
+                                                <div className={`shrink-0 p-2 rounded-lg bg-white shadow-sm border ${item.bg}`}>
+                                                    <span className={`material-symbols-outlined text-[28px] ${item.c}`}>{item.ic}</span>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-[#0e141b]">{item.t}</h4>
+                                                    <p className="text-xs text-[#4e7397] mt-1.5 leading-relaxed">{item.d}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="pt-8 mb-16 flex items-center justify-between text-xs text-[#4e7397] border-t border-[#d0dbe7] mr-4 lg:mr-0 mt-8">
+                                    <span className="font-bold">Developer Portal</span>
+                                    <span className="inline-flex items-center gap-1.5 font-mono"><span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>v1.0.0 Stable</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <CreateRoleModal
+                        isOpen={isCreateModalOpen}
+                        onClose={() => {
+                            setIsCreateModalOpen(false);
+                            setEditingRole(null);
+                        }}
+                        onSubmit={handleSaveRole}
+                        isLoading={isLoading}
+                        initialData={editingRole}
+                        activeOrg={activeOrg}
+                    />
+
+                    <AssignRoleModal
+                        isOpen={isAssignModalOpen}
+                        onClose={() => {
+                            setIsAssignModalOpen(false);
+                            setEditingAssignment(null);
+                        }}
+                        onSubmit={handleAssignRole}
+                        isLoading={isLoading}
+                        roles={roles}
+                        initialData={editingAssignment}
+                    />
 
 
-            <ConfirmationModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => {
-                    setIsDeleteModalOpen(false);
-                    setRoleToDelete(null);
-                    setAssignmentToDelete(null);
-                }}
-                onConfirm={roleToDelete ? confirmDeleteRole : confirmRemoveAssignment}
-                title={roleToDelete ? "Deactivate Role" : "Remove User"}
-                message={
-                    roleToDelete
-                        ? `Are you sure you want to deactivate the role "${roleToDelete?.name}"? Users assigned to this role might lose access.`
-                        : `Are you sure you want to remove access for "${assignmentToDelete?.user_email}"? They will lose all permissions.`
-                }
-                confirmText={isLoading ? (roleToDelete ? "Deactivating..." : "Removing...") : (roleToDelete ? "Deactivate" : "Remove")}
-                isDangerous={true}
-                isLoading={isLoading}
-            />
+                    <ConfirmationModal
+                        isOpen={isDeleteModalOpen}
+                        onClose={() => {
+                            setIsDeleteModalOpen(false);
+                            setRoleToDelete(null);
+                            setAssignmentToDelete(null);
+                        }}
+                        onConfirm={roleToDelete ? confirmDeleteRole : confirmRemoveAssignment}
+                        title={roleToDelete ? "Deactivate Role" : "Remove User"}
+                        message={
+                            roleToDelete
+                                ? `Are you sure you want to deactivate the role "${roleToDelete?.name}"? Users assigned to this role might lose access.`
+                                : `Are you sure you want to remove access for "${assignmentToDelete?.user_email}"? They will lose all permissions.`
+                        }
+                        confirmText={isLoading ? (roleToDelete ? "Deactivating..." : "Removing...") : (roleToDelete ? "Deactivate" : "Remove")}
+                        isDangerous={true}
+                        isLoading={isLoading}
+                    />
 
-            <PermissionsViewModal
-                isOpen={isPermissionsModalOpen}
-                onClose={() => {
-                    setIsPermissionsModalOpen(false);
-                    setViewPermissionsRole(null);
-                }}
-                title={viewPermissionsRole ? `Permissions for ${viewPermissionsRole.name}` : "Role Permissions"}
-                permissions={viewPermissionsRole?.permissions || []}
-            />
-
-
+                    <PermissionsViewModal
+                        isOpen={isPermissionsModalOpen}
+                        onClose={() => {
+                            setIsPermissionsModalOpen(false);
+                            setViewPermissionsRole(null);
+                        }}
+                        title={viewPermissionsRole ? `Permissions for ${viewPermissionsRole.name}` : "Role Permissions"}
+                        permissions={viewPermissionsRole?.permissions || []}
+                    />
+                </div>
+            </>
         </DashboardLayout>
     );
 }
