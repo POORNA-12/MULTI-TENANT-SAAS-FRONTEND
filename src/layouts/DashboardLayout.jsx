@@ -175,7 +175,6 @@ export default function DashboardLayout({ children }) {
                                 </span>
                             </Link>
                             <Link
-                                to="/dashboard/support"
                                 className="flex items-center gap-3 px-3 py-2 rounded-md text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b] font-medium transition-colors overflow-hidden"
                             >
                                 <span className="material-symbols-outlined shrink-0">help</span>

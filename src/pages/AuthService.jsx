@@ -172,7 +172,7 @@ export default function AuthService() {
                         <div>
                             <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wide">Base URL Pattern</h3>
                             <div className="mt-2 flex items-center gap-2 bg-white px-3 py-2 rounded border border-blue-200 shadow-sm">
-                                <code className="text-sm font-mono text-blue-800">/api/{activeSlug}/auth/</code>
+                                <code className="text-sm font-mono text-blue-800">/tenant_auth/{activeSlug}/</code>
                             </div>
                             <p className="text-xs text-blue-700/70 mt-2">
                                 Replace <code>{activeSlug}</code> with your actual tenant slug (e.g. <code>acme-corp</code>)
@@ -199,7 +199,7 @@ export default function AuthService() {
                     {/* 1. Tenant Signup */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/signup/`}
+                        url={`/tenant_auth/${activeSlug}/signup`}
                         title="Tenant Signup"
                         description="Register a new user to a specific tenant. This initiates the process and sends an OTP to the provided email."
                         body={{
@@ -228,7 +228,7 @@ export default function AuthService() {
                     {/* 2. Tenant Signup Verify */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/signup/`}
+                        url={`/tenant_auth/${activeSlug}/signup`}
                         title="Complete Signup (Verify OTP)"
                         description="Complete the registration by verifying the OTP sent to the email. Returns JWT tokens upon success."
                         body={{
@@ -262,7 +262,7 @@ export default function AuthService() {
                     {/* 3. Send Verification Token */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/send-verification/`}
+                        url={`/tenant_auth/${activeSlug}/send-verification`}
                         title="Send Verification Token"
                         description="Resend the email verification code to the user."
                         body={{
@@ -284,7 +284,7 @@ export default function AuthService() {
                     {/* 4. Tenant Signin */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/signin/`}
+                        url={`/tenant_auth/${activeSlug}/signin`}
                         title="Tenant Signin"
                         description="Authenticate a user and retrieve access and refresh tokens."
                         body={{
@@ -313,7 +313,7 @@ export default function AuthService() {
                     {/* 5. Signout */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/signout/`}
+                        url={`/tenant_auth/${activeSlug}/signout`}
                         title="Signout"
                         description="Invalidate the current user session. Requires Refresh Token."
                         headers={{
@@ -337,7 +337,7 @@ export default function AuthService() {
                     {/* 6. Token Refresh */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/token-refresh/`}
+                        url={`/tenant_auth/${activeSlug}/token-refresh`}
                         title="Refresh Access Token"
                         description="Obtain a brand new access token using a valid refresh token."
                         body={{
@@ -358,7 +358,7 @@ export default function AuthService() {
                     {/* 7. Change Password */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/change-password/`}
+                        url={`/tenant_auth/${activeSlug}/change-password`}
                         title="Change Password"
                         description="Update the current user's password."
                         headers={{
@@ -388,7 +388,7 @@ export default function AuthService() {
                     {/* 8. Forgot Password */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/forgot-password/`}
+                        url={`/tenant_auth/${activeSlug}/forgot-password`}
                         title="Forgot Password"
                         description="Initiate password reset process by sending an OTP."
                         body={{
@@ -410,7 +410,7 @@ export default function AuthService() {
                     {/* 9. Reset Password */}
                     <ApiEndpoint
                         method="POST"
-                        url={`/api/${activeSlug}/auth/reset-password/`}
+                        url={`/tenant_auth/${activeSlug}/reset-password`}
                         title="Reset Password"
                         description="Set a new password using the OTP received via email."
                         body={{

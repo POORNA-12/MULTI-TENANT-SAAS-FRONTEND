@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import dashboardService from "../services/dashboardService";
+import { useSearch } from "../context/SearchContext";
 
 export default function Dashboard() {
     const navigate = useNavigate();
+    const { searchQuery } = useSearch();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -92,7 +94,7 @@ export default function Dashboard() {
                     iconBg="bg-green-50 text-green-600"
                 />
 
-                <div onClick={() => navigate('/role-management')} className="cursor-pointer">
+                <div >
                     <StatusCard
                         title="Role Management"
                         status="Secure"
@@ -135,20 +137,32 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className="divide-y divide-[#d0dbe7]">
-                        {stats?.recent_activity?.length > 0 ? (
-                            stats.recent_activity.map((log, index) => (
-                                <LogItem
-                                    key={index}
-                                    time={new Date(log.performed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    type={log.action}
-                                    desc={`${log.workflow} - ${log.performed_by}`}
-                                    status="LOGGED"
-                                    statusColor="text-gray-600"
-                                />
-                            ))
-                        ) : (
-                            <div className="p-4 text-sm text-[#4e7397] text-center">No recent activity</div>
-                        )}
+                        {(() => {
+                            const filteredActivity = (stats?.recent_activity || []).filter(log => {
+                                if (!searchQuery) return true;
+                                const query = searchQuery.toLowerCase();
+                                return (
+                                    log.action?.toLowerCase().includes(query) ||
+                                    log.workflow?.toLowerCase().includes(query) ||
+                                    log.performed_by?.toLowerCase().includes(query)
+                                );
+                            });
+
+                            if (filteredActivity.length > 0) {
+                                return filteredActivity.map((log, index) => (
+                                    <LogItem
+                                        key={index}
+                                        time={new Date(log.performed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        type={log.action}
+                                        desc={`${log.workflow} - ${log.performed_by}`}
+                                        status="LOGGED"
+                                        statusColor="text-gray-600"
+                                    />
+                                ));
+                            }
+
+                            return <div className="p-4 text-sm text-[#4e7397] text-center">{searchQuery ? `No activity matching "${searchQuery}"` : "No recent activity"}</div>;
+                        })()}
                     </div>
                 </div>
 

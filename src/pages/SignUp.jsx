@@ -132,7 +132,7 @@ export default function SignUp() {
                         onChange={handleChange}
                     >
                         <option value="saas-user">SaaS User</option>
-                        <option value="tenant-user">Tenant User</option>
+
                     </select>
                 </div>
                 <div className="pt-2">

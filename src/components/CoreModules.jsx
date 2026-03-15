@@ -4,7 +4,7 @@ const modules = [
     desc: "Complete lifecycle management from provisioning to teardown."
   },
   {
-    title: "Auth Services",
+    title: "Auth Service",
     desc: "Enterprise-grade identity management with SSO & MFA."
   },
   {

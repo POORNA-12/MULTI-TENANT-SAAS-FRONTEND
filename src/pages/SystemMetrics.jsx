@@ -273,11 +273,13 @@ export default function SystemMetrics() {
         <DashboardLayout>
             {/* Breadcrumb & Header */}
             <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
-                <div className="flex gap-2 text-xs font-bold text-[#4e7397] mb-2">
-                    <Link to="/dashboard" className="hover:text-primary">Dashboard</Link>
-                    <span>/</span>
-                    <span className="text-primary">System Metrics</span>
-                </div>
+                <Link 
+                    to="/dashboard" 
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-[#d0dbe7] rounded-md text-xs font-bold text-[#4e7397] hover:bg-slate-50 hover:text-primary transition-all mb-4 shadow-sm group"
+                >
+                    <span className="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">arrow_back</span>
+                    Back to Dashboard
+                </Link>
                 <h1 className="text-2xl font-black text-[#0e141b] tracking-tight">
                     System Metrics Dashboard
                 </h1>
