@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import billingService from '../services/billingService';
+import authService from '../services/authService';
 import { useBilling } from '../context/BillingContext';
 import DashboardLayout from '../layouts/DashboardLayout';
 
@@ -31,6 +32,8 @@ const PricingPlans = () => {
             return;
         }
 
+        const userEmail = authService.getUserEmail() || "";
+
         setCheckoutLoading(plan.id);
         try {
             const orderData = await billingService.createRazorpayOrder(plan.id);
@@ -39,7 +42,7 @@ const PricingPlans = () => {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_XXXX",
                 amount: orderData.amount,
                 currency: orderData.currency,
-                name: "TenantX Enterprise",
+                name: "TenantX",
                 description: `Upgrade to ${plan.name} Plan`,
                 order_id: orderData.order_id,
                 handler: async function (response) {
@@ -59,7 +62,7 @@ const PricingPlans = () => {
                 },
                 prefill: {
                     name: "",
-                    email: "",
+                    email: userEmail,
                 },
                 theme: {
                     color: "#f97316"
