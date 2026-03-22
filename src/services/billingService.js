@@ -45,15 +45,26 @@ const billingService = {
         }
     },
 
-    // Create a Stripe checkout session for upgrading/downgrading
-    createCheckoutSession: async (stripePriceId) => {
+    // Create a Razorpay order
+    createRazorpayOrder: async (planId) => {
         try {
-            const response = await api.post("/billing/checkout/session/", {
-                stripe_price_id: stripePriceId
+            const response = await api.post("/billing/razorpay/create-order/", {
+                plan_id: planId
             });
-            return response.data; // { checkout_url: '...' }
+            return response.data; // { order_id: '...', amount: 12345, currency: 'INR', plan_id: '...' }
         } catch (error) {
-            console.error("Error creating checkout session", error);
+            console.error("Error creating Razorpay order", error);
+            throw error;
+        }
+    },
+
+    // Verify Razorpay payment signature
+    verifyRazorpayPayment: async (paymentData) => {
+        try {
+            const response = await api.post("/billing/razorpay/verify-signature/", paymentData);
+            return response.data; // { status: '...' }
+        } catch (error) {
+            console.error("Error verifying Razorpay payment", error);
             throw error;
         }
     }
