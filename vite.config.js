@@ -6,13 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/auth': 'http://127.0.0.1:8000',
-      '/rbac': 'http://127.0.0.1:8000',
-      '/workflows': 'http://127.0.0.1:8000',
-      '/organizations': 'http://127.0.0.1:8000',
-      '/tenant_auth': 'http://127.0.0.1:8000',
-      '/billing': 'http://127.0.0.1:8000',
-      '/audits': 'http://127.0.0.1:8000',
+      '/auth': 'https://multi-tenant-backend-q9ja.onrender.com',
+      '/rbac': 'https://multi-tenant-backend-q9ja.onrender.com',
+      '/workflows': 'https://multi-tenant-backend-q9ja.onrender.com',
+      '/organizations': 'https://multi-tenant-backend-q9ja.onrender.com',
+      '/tenant_auth': 'https://multi-tenant-backend-q9ja.onrender.com',
+      '/billing': 'https://multi-tenant-backend-q9ja.onrender.com',
+      '/audits': 'https://multi-tenant-backend-q9ja.onrender.com',
     }
   }
 })

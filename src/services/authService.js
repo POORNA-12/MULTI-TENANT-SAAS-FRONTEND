@@ -8,7 +8,7 @@ const AuthService = {
      * @returns {Promise<Object>} Response data
      */
     signUp: async (data) => {
-        const response = await api.post("auth/signup", data);
+        const response = await api.post("/auth/signup/", data);
         if (response.data.data?.access) {
             // Step 2 success: Store tokens
             Cookies.set("accessToken", response.data.data.access);
@@ -25,7 +25,7 @@ const AuthService = {
      * @returns {Promise<Object>} Response data
      */
     signIn: async (email, password) => {
-        const response = await api.post("auth/signin", { email, password });
+        const response = await api.post("/auth/signin/", { email, password });
         if (response.data.data?.access) {
             Cookies.set("accessToken", response.data.data.access);
             Cookies.set("refreshToken", response.data.data.refresh);
@@ -53,7 +53,7 @@ const AuthService = {
         const refreshToken = Cookies.get("refreshToken");
         try {
             if (refreshToken) {
-                await api.post("auth/signout", { refresh: refreshToken });
+                await api.post("/auth/signout/", { refresh: refreshToken });
             }
         } catch (error) {
             console.error("Signout error:", error);
@@ -74,7 +74,7 @@ const AuthService = {
         const refreshToken = Cookies.get("refreshToken");
         if (!refreshToken) throw new Error("No refresh token available");
 
-        const response = await api.post("auth/refresh-access", { refresh: refreshToken });
+        const response = await api.post("/auth/refresh-access/", { refresh: refreshToken });
 
         if (response.data.access) {
             Cookies.set("accessToken", response.data.access);
@@ -92,7 +92,7 @@ const AuthService = {
      * @returns {Promise<Object>} Response data
      */
     changePassword: async (data) => {
-        const response = await api.post("auth/change-password", data);
+        const response = await api.post("/auth/change-password/", data);
         return response.data;
     },
 
@@ -102,7 +102,7 @@ const AuthService = {
      * @returns {Promise<Object>} Response data
      */
     forgotPassword: async (email) => {
-        const response = await api.post("auth/forgot-password", { email });
+        const response = await api.post("/auth/forgot-password/", { email });
         return response.data;
     },
 
@@ -112,7 +112,7 @@ const AuthService = {
      * @returns {Promise<Object>} Response data
      */
     resetPassword: async (data) => {
-        const response = await api.post("auth/reset-password", data);
+        const response = await api.post("/auth/reset-password/", data);
         return response.data;
     },
 
@@ -122,7 +122,7 @@ const AuthService = {
      * @returns {Promise<Object>} Response data
      */
     sendVerificationToken: async (email) => {
-        const response = await api.post("auth/send-verification", { email });
+        const response = await api.post("/auth/send-verification/", { email });
         return response.data;
     },
 

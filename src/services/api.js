@@ -1,9 +1,11 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "https://multi-tenant-backend-q9ja.onrender.com";
+
 // Create an Axios instance with base configuration
 const api = axios.create({
-    baseURL: "/", // Use relative path for Vite proxy
+    baseURL: API_URL,
     headers: {
         "Content-Type": "application/json",
     },
@@ -49,7 +51,8 @@ api.interceptors.response.use(
 
                 // Call the refresh endpoint using axios directly to avoid circular dependency
                 // or infinite loops if the refresh endpoint itself returns 401
-                const response = await axios.post("/auth/refresh-access", {
+                const refreshUrl = API_URL.endsWith('/') ? `${API_URL}auth/refresh-access` : `${API_URL}/auth/refresh-access`;
+                const response = await axios.post(refreshUrl, {
                     refresh: refreshToken
                 });
 

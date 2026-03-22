@@ -11,7 +11,8 @@ const PublicPricing = () => {
     useEffect(() => {
         const fetchPlans = async () => {
             try {
-                const response = await axios.get("/billing/plans/");
+                const baseURL = import.meta.env.VITE_API_BASE_URL || "";
+                const response = await axios.get(`${baseURL}/billing/plans/`);
                 if (Array.isArray(response.data)) {
                     setPlans(response.data);
                 } else {

@@ -2,17 +2,17 @@ import api from "./api";
 
 const organizationService = {
     createOrganization: async (data) => {
-        const response = await api.post("/tenant_auth/organization/create", data);
+        const response = await api.post("/tenant_auth/organization/create/", data);
         return response.data;
     },
 
     getOrganizations: async () => {
-        const response = await api.get("/tenant_auth/organization/list");
+        const response = await api.get("/tenant_auth/organization/list/");
         return response.data;
     },
 
     setActiveOrganization: async (organizationId) => {
-        const response = await api.post("/tenant_auth/organization/set-active", {
+        const response = await api.post("/tenant_auth/organization/set-active/", {
             organization_id: organizationId
         });
         return response.data;
