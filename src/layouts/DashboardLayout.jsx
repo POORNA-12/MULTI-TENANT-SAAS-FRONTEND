@@ -4,6 +4,8 @@ import AuthService from "../services/authService";
 import organizationService from "../services/organizationService";
 import { useOrganizations } from "../hooks/useOrganizations";
 import { useSearch } from "../context/SearchContext";
+import { useNotifications } from "../hooks/useNotifications";
+import NotificationDropdown from "../components/NotificationDropdown";
 
 export default function DashboardLayout({ children }) {
     const navigate = useNavigate();
@@ -14,6 +16,14 @@ export default function DashboardLayout({ children }) {
     const [activeOrg, setActiveOrg] = useState(null);
     const [user, setUser] = useState(null);
     const { searchQuery, setSearchQuery } = useSearch();
+    const {
+        notifications,
+        unreadCount,
+        markAsRead,
+        markAllRead,
+        isConnected,
+        loading
+    } = useNotifications();
 
     useEffect(() => {
         // Reset search query on route change
@@ -232,10 +242,14 @@ export default function DashboardLayout({ children }) {
                         </div>
 
                         <div className="flex items-center gap-2 lg:gap-4 text-[#4e7397]">
-                            <button className="hover:text-[#0e141b] relative">
-                                <span className="material-symbols-outlined">notifications</span>
-                                <span className="absolute top-0 right-0 size-2 bg-red-500 rounded-full border border-white"></span>
-                            </button>
+                            <NotificationDropdown 
+                                notifications={notifications}
+                                unreadCount={unreadCount}
+                                markAsRead={markAsRead}
+                                markAllRead={markAllRead}
+                                isConnected={isConnected}
+                                loading={loading}
+                            />
                             <button className="hover:text-[#0e141b] hidden sm:block">
                                 <span className="material-symbols-outlined">help</span>
                             </button>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
 import AuthService from "../services/authService";
+import PasswordInput from "../components/PasswordInput";
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -83,41 +84,24 @@ export default function SignUp() {
                         required
                     />
                 </div>
-                <div>
-                    <label
-                        className="block text-sm font-bold text-[#0e141b] mb-1"
-                        htmlFor="password"
-                    >
-                        Password
-                    </label>
-                    <input
-                        className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
-                        id="password"
-                        placeholder="At least 8 characters"
-                        type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
-                    <div className="mt-2"></div>
-                    <div>
-                        <label
-                            className="block text-sm font-bold text-[#0e141b] mb-1"
-                            htmlFor="reenter_password"
-                        >
-                            Confirm Password
-                        </label>
-                        <input
-                            className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
-                            id="reenter_password"
-                            placeholder="Re-enter password"
-                            type="password"
-                            value={formData.reenter_password}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                </div>
+                <PasswordInput
+                    label="Password"
+                    id="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="At least 8 characters"
+                    showStrength={true}
+                    required
+                />
+                
+                <PasswordInput
+                    label="Confirm Password"
+                    id="reenter_password"
+                    value={formData.reenter_password}
+                    onChange={handleChange}
+                    placeholder="Re-enter password"
+                    required
+                />
                 <div>
                     <label
                         className="block text-sm font-bold text-[#0e141b] mb-1"

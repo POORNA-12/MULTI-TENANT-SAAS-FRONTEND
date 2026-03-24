@@ -4,13 +4,74 @@ import organizationService from "../services/organizationService";
 import { useBilling } from "../context/BillingContext";
 import { useNavigate } from "react-router-dom";
 import { useOrganizations } from "../hooks/useOrganizations";
+import notificationService from "../services/notificationService";
 
 export default function GlobalSettings() {
     const { data: organizations, isLoading } = useOrganizations();
     const activeOrg = organizations?.find(org => org.current) || organizations?.find(org => org.is_active) || null;
     const [activeTab, setActiveTab] = useState("general");
+    const [preferences, setPreferences] = useState({
+        email_billing: true,
+        email_security: true,
+        email_workflows: true,
+        in_app_billing: true,
+        in_app_security: true,
+        in_app_workflows: true
+    });
+    const [prefsLoading, setPrefsLoading] = useState(false);
     const { billingUsage } = useBilling();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchPrefs = async () => {
+            if (activeTab === "notifications") {
+                setPrefsLoading(true);
+                try {
+                    const data = await notificationService.getPreferences();
+                    setPreferences(data);
+                } catch (error) {
+                    console.error("Failed to fetch preferences", error);
+                } finally {
+                    setPrefsLoading(false);
+                }
+            }
+        };
+        fetchPrefs();
+    }, [activeTab]);
+
+    const handlePreferenceToggle = async (key) => {
+        const oldValue = preferences[key];
+        const newValue = !oldValue;
+
+        // Optimistic Update
+        setPreferences(prev => ({ ...prev, [key]: newValue }));
+
+        try {
+            await notificationService.updatePreferences({ [key]: newValue });
+        } catch (error) {
+            // Rollback on failure
+            setPreferences(prev => ({ ...prev, [key]: oldValue }));
+            alert("Failed to update preference. Please try again.");
+        }
+    };
+
+    const Toggle = ({ label, description, checked, onChange, disabled }) => (
+        <div className="flex items-center justify-between py-4 border-b border-[#f1f5f9] last:border-0">
+            <div className="max-w-md">
+                <p className="text-sm font-bold text-[#0e141b]">{label}</p>
+                <p className="text-xs text-[#4e7397] mt-1">{description}</p>
+            </div>
+            <button
+                onClick={onChange}
+                disabled={disabled}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${checked ? 'bg-blue-600' : 'bg-slate-200'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+                <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${checked ? 'translate-x-5' : 'translate-x-0'}`}
+                />
+            </button>
+        </div>
+    );
 
     const SettingsCard = ({ title, children, icon }) => (
         <div className="bg-white border border-[#d0dbe7] rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -255,7 +316,63 @@ export default function GlobalSettings() {
                             </div>
                         )}
 
-                        {activeTab !== "general" && activeTab !== "billing" && (
+                        {activeTab === "notifications" && (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <SettingsCard title="Email Notifications" icon="mail">
+                                    <div className="space-y-2">
+                                        <Toggle 
+                                            label="Billing Alerts" 
+                                            description="Receive emails for quotas reaching 80%, subscription renewals, and invoice issues."
+                                            checked={preferences.email_billing}
+                                            onChange={() => handlePreferenceToggle('email_billing')}
+                                            disabled={prefsLoading}
+                                        />
+                                        <Toggle 
+                                            label="Security Alerts" 
+                                            description="Get notified about new logins from unrecognized devices and sensitive role changes."
+                                            checked={preferences.email_security}
+                                            onChange={() => handlePreferenceToggle('email_security')}
+                                            disabled={prefsLoading}
+                                        />
+                                        <Toggle 
+                                            label="Workflow Approvals" 
+                                            description="Receive emails when a workflow requires your manual intervention or approval."
+                                            checked={preferences.email_workflows}
+                                            onChange={() => handlePreferenceToggle('email_workflows')}
+                                            disabled={prefsLoading}
+                                        />
+                                    </div>
+                                </SettingsCard>
+
+                                <SettingsCard title="In-App Notifications" icon="notifications_active">
+                                    <div className="space-y-2">
+                                        <Toggle 
+                                            label="Billing & Quotas" 
+                                            description="Show high-priority badges when resources are running low."
+                                            checked={preferences.in_app_billing}
+                                            onChange={() => handlePreferenceToggle('in_app_billing')}
+                                            disabled={prefsLoading}
+                                        />
+                                        <Toggle 
+                                            label="System Security" 
+                                            description="Real-time alerts for policy violations or configuration changes."
+                                            checked={preferences.in_app_security}
+                                            onChange={() => handlePreferenceToggle('in_app_security')}
+                                            disabled={prefsLoading}
+                                        />
+                                        <Toggle 
+                                            label="Workflow Updates" 
+                                            description="Visual indicators when a business process progresses or completes."
+                                            checked={preferences.in_app_workflows}
+                                            onChange={() => handlePreferenceToggle('in_app_workflows')}
+                                            disabled={prefsLoading}
+                                        />
+                                    </div>
+                                </SettingsCard>
+                            </div>
+                        )}
+
+                        {activeTab !== "general" && activeTab !== "billing" && activeTab !== "notifications" && (
                             <div className="flex flex-col items-center justify-center py-20 px-8 border-2 border-dashed border-[#d0dbe7] rounded-3xl bg-white/50 text-center">
                                 <div className="size-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-6">
                                     <span className="material-symbols-outlined text-4xl">construction</span>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
 import AuthService from "../services/authService";
+import PasswordInput from "../components/PasswordInput";
 
 export default function SetPassword() {
     const navigate = useNavigate();
@@ -108,49 +109,24 @@ export default function SetPassword() {
                         Check your inbox for a code from TenantX Support.
                     </p>
                 </div>
-                <div>
-                    <label
-                        className="block text-sm font-bold text-[#0e141b] mb-1"
-                        htmlFor="new-password"
-                    >
-                        New Password
-                    </label>
-                    <input
-                        className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
-                        id="new-password"
-                        placeholder="At least 8 characters"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        required
-                    />
-                    <div className="mt-2 flex gap-1">
-                        <div className="h-1.5 flex-1 bg-aws-orange rounded-full"></div>
-                        <div className="h-1.5 flex-1 bg-aws-orange rounded-full"></div>
-                        <div className="h-1.5 flex-1 bg-aws-orange rounded-full"></div>
-                        <div className="h-1.5 flex-1 bg-gray-200 rounded-full"></div>
-                    </div>
-                    <p className="text-[10px] text-[#4e7397] mt-1 font-medium">
-                        Password strength: <span className="text-aws-orange">Strong</span>
-                    </p>
-                </div>
-                <div>
-                    <label
-                        className="block text-sm font-bold text-[#0e141b] mb-1"
-                        htmlFor="confirm-password"
-                    >
-                        Confirm New Password
-                    </label>
-                    <input
-                        className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
-                        id="confirm-password"
-                        placeholder="Repeat new password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                    />
-                </div>
+                <PasswordInput
+                    label="New Password"
+                    id="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                    showStrength={true}
+                    required
+                />
+                
+                <PasswordInput
+                    label="Confirm New Password"
+                    id="confirm-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repeat new password"
+                    required
+                />
                 <div className="pt-2">
                     <button
                         className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm shadow-sm disabled:opacity-50"

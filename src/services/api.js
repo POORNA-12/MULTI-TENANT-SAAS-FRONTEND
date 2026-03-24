@@ -1,7 +1,8 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || "https://multi-tenant-backend-q9ja.onrender.com";
+export const API_URL = import.meta.env.VITE_API_BASE_URL;
+console.log("🚀 API Base URL initialized:", API_URL);
 
 // Create an Axios instance with base configuration
 const api = axios.create({
