@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import organizationService from "../services/organizationService";
 import AuthService from "../services/authService";
+import { useOrganizations } from "./useOrganizations";
 
 export function useActiveTenant() {
     const { slug } = useParams();
     const [activeOrg, setActiveOrg] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { data: organizations, isLoading: orgLoading, error: orgError } = useOrganizations();
 
     useEffect(() => {
         let isMounted = true;
@@ -22,23 +24,28 @@ export function useActiveTenant() {
                     // Tenant Platform Context
                     // We don't need to fetch list or set active. We are bound to the tenant in the token.
                     // We assume the URL slug matches the tenant we are logged into (or backend will 403).
-                    setActiveOrg({
-                        id: token.tenant_id,
-                        slug: slug, // Trust URL slug for now (backend validates)
-                        name: token.tenant_name || slug // Fallback name
-                    });
-                    setLoading(false);
+                    if (isMounted) {
+                        setActiveOrg({
+                            id: token.tenant_id,
+                            slug: slug, // Trust URL slug for now (backend validates)
+                            name: token.tenant_name || slug // Fallback name
+                        });
+                        setLoading(false);
+                    }
                     return;
                 }
 
                 // SaaS Platform Context (Existing Logic)
-                const data = await organizationService.getOrganizations();
+                if (orgLoading) return; // Wait until global organizations are loaded
+
+                if (orgError) throw orgError;
+
                 const activeOrgId = token?.active_organization_id;
 
                 let active = null;
 
-                if (activeOrgId) {
-                    active = data.organizations?.find(org => org.id === activeOrgId);
+                if (activeOrgId && organizations) {
+                    active = organizations.find(org => org.id === activeOrgId);
                 }
 
                 // Virtual Switching Logic for SaaS Admins
@@ -50,8 +57,8 @@ export function useActiveTenant() {
                     targetSlug = localStorage.getItem('virtual_context_slug');
                 }
 
-                if (targetSlug) {
-                    const requestedOrg = data.organizations?.find(o => o.slug === targetSlug);
+                if (targetSlug && organizations) {
+                    const requestedOrg = organizations.find(o => o.slug === targetSlug);
                     if (requestedOrg) {
                         // "Virtual" Switch - Update local state
                         active = requestedOrg;
@@ -90,7 +97,7 @@ export function useActiveTenant() {
             window.removeEventListener("virtualContextChanged", handleOrgChange);
         };
 
-    }, [slug]);
+    }, [slug, organizations, orgLoading, orgError]);
 
     return { activeOrg, loading, error };
 }

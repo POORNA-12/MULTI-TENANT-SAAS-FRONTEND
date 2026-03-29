@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import dashboardService from "../services/dashboardService";
+import organizationService from "../services/organizationService";
+import { useOrganizations } from "../hooks/useOrganizations";
 import { useSearch } from "../context/SearchContext";
 
 export default function AuditLogs() {
@@ -10,57 +12,78 @@ export default function AuditLogs() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [activeOrg, setActiveOrg] = useState(null);
     const itemsPerPage = 15;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                // Fetch both logs and analytics in parallel
-                const [logsData, analyticsData] = await Promise.all([
-                    dashboardService.getAuditLogs(),
-                    dashboardService.getAuditAnalytics()
-                ]);
-                // Handle logs data (support both array and paginated response)
-                let rawLogs = [];
-                if (Array.isArray(logsData)) {
-                    rawLogs = logsData;
-                } else if (logsData && Array.isArray(logsData.results)) {
-                    rawLogs = logsData.results;
-                } else if (logsData && Array.isArray(logsData.activity)) {
-                    rawLogs = logsData.activity;
-                } else {
-                    console.warn("Unexpected logs data format:", logsData);
-                }
+    const fetchAuditData = async (orgSlug) => {
+        setLoading(true);
+        setError(null);
+        try {
+            // Fetch both logs and analytics in parallel using dynamic orgSlug
+            const [logsData, analyticsData] = await Promise.all([
+                dashboardService.getTenantAuditLogs(orgSlug),
+                dashboardService.getTenantAuditAnalytics(orgSlug)
+            ]);
 
-                // Normalize logs
-                // Normalize logs
-                const processedLogs = rawLogs.map((log, index) => ({
-                    id: log.id || `log-${index}-${Date.now()}`,
-                    created_at: log.time || log.created_at,
-                    user_email: log.user_email,
-                    user_type: log.user_type,
-                    tenant_name: log.tenant_name || "-",
-                    action: log.action,
-                    resource: log.resource,
-                    status: log.success ? "Success" : "Failure",
-                    status_code: log.status_code,
-                    details: log.details || `${log.method} ${log.endpoint}`,
-                    ip_address: log.ip_address
-                }));
-                setLogs(processedLogs);
-
-                setAnalytics(analyticsData || null);
-            } catch (err) {
-                console.error("Error fetching audit data:", err);
-                setError("Failed to load audit data.");
-            } finally {
-                setLoading(false);
+            // Handle logs data
+            let rawLogs = [];
+            if (Array.isArray(logsData)) {
+                rawLogs = logsData;
+            } else if (logsData && Array.isArray(logsData.results)) {
+                rawLogs = logsData.results;
+            } else if (logsData && Array.isArray(logsData.activity)) {
+                rawLogs = logsData.activity;
+            } else {
+                console.warn("Unexpected logs data format:", logsData);
             }
-        };
 
-        fetchData();
-    }, []);
+            // Normalize logs
+            const processedLogs = rawLogs.map((log, index) => ({
+                id: log.id || `log-${index}-${Date.now()}`,
+                created_at: log.time || log.created_at,
+                user_email: log.user_email,
+                user_type: log.user_type,
+                role: log.role || "-",
+                action: log.action,
+                resource: log.resource,
+                status: log.success ? "Success" : "Failure",
+                status_code: log.status_code,
+                details: log.message || "-",
+                ip_address: log.ip_address
+            }));
+            setLogs(processedLogs);
+            setAnalytics(analyticsData || null);
+        } catch (err) {
+            console.error("Error fetching audit data:", err);
+            setError("Failed to load audit data.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const { data: organizations } = useOrganizations();
+
+    const checkActiveOrg = () => {
+        if (!organizations) return;
+        const active = organizations.find(org => org.current);
+        if (active && active.slug !== activeOrg?.slug) {
+            setActiveOrg(active);
+            fetchAuditData(active.slug);
+        } else if (!active) {
+            setError("No active organization found.");
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        checkActiveOrg();
+    }, [organizations]);
+
+    useEffect(() => {
+        const handleOrgChange = () => checkActiveOrg();
+        window.addEventListener("activeOrgChanged", handleOrgChange);
+        return () => window.removeEventListener("activeOrgChanged", handleOrgChange);
+    }, [organizations]);
 
     const [activeFilter, setActiveFilter] = useState("all");
 
@@ -137,7 +160,7 @@ export default function AuditLogs() {
                 ) : analytics ? (
                     <>
                         {/* KPI Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="bg-white p-5 rounded-lg border border-[#d0dbe7] shadow-sm flex flex-col justify-between h-32 hover:border-blue-300 transition-colors group">
                                 <div className="flex justify-between items-start">
                                     <div>
@@ -150,30 +173,6 @@ export default function AuditLogs() {
                                 </div>
                                 <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden mt-2">
                                     <div className="bg-blue-500 h-full w-3/4 rounded-full"></div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-5 rounded-lg border border-[#d0dbe7] shadow-sm flex flex-col justify-between h-32 hover:border-purple-300 transition-colors group">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-1">Active Tenants</p>
-                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-purple-600 transition-colors">{analytics?.kpis?.active_tenants || 0}</h3>
-                                    </div>
-                                    <div className="bg-purple-50 p-2 rounded-md text-purple-600 group-hover:bg-purple-100 transition-colors">
-                                        <span className="material-symbols-outlined">domain</span>
-                                    </div>
-                                </div>
-                                <div className="flex -space-x-2 mt-2">
-                                    {[...Array(Math.min(3, analytics?.kpis?.active_tenants || 0))].map((_, i) => (
-                                        <div key={i} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-gray-600">
-                                            {String.fromCharCode(65 + i)}
-                                        </div>
-                                    ))}
-                                    {(analytics?.kpis?.active_tenants || 0) > 3 && (
-                                        <div className="w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] text-gray-500">
-                                            +{(analytics?.kpis?.active_tenants || 0) - 3}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 
@@ -220,9 +219,9 @@ export default function AuditLogs() {
                         </div>
 
                         {/* Charts Section */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 gap-6">
                             {/* Activity Chart */}
-                            <div className="bg-white p-6 rounded-lg border border-[#d0dbe7] shadow-sm lg:col-span-2">
+                            <div className="bg-white p-6 rounded-lg border border-[#d0dbe7] shadow-sm w-full">
                                 <div className="flex items-center justify-between mb-6">
                                     <h3 className="font-bold text-[#0e141b] flex items-center gap-2">
                                         <span className="material-symbols-outlined text-blue-500">bar_chart</span>
@@ -258,92 +257,6 @@ export default function AuditLogs() {
                                             No activity data available for the last 7 days.
                                         </div>
                                     )}
-                                </div>
-                            </div>
-
-                            {/* Top Tenants & Resources */}
-                            <div className="space-y-6">
-                                <div className="bg-white p-6 rounded-lg border border-[#d0dbe7] shadow-sm">
-                                    <h3 className="font-bold text-[#0e141b] mb-4 flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-purple-500">leaderboard</span>
-                                        Top Tenants
-                                    </h3>
-                                    <div className="space-y-3">
-                                        {analytics?.top_tenants && analytics.top_tenants.length > 0 ? (
-                                            analytics.top_tenants.map((tenant, i) => (
-                                                <div key={i} className="flex items-center justify-between group">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="w-6 h-6 rounded bg-purple-50 text-purple-600 flex items-center justify-center text-xs font-bold border border-purple-100">
-                                                            {i + 1}
-                                                        </span>
-                                                        <span className="text-sm font-medium text-[#0e141b]">{tenant.tenant_name || "Unknown"}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                            <div
-                                                                className="h-full bg-purple-500 rounded-full"
-                                                                style={{ width: `${Math.min((tenant.total / (analytics.top_tenants[0]?.total || 1)) * 100, 100)}%` }}
-                                                            ></div>
-                                                        </div>
-                                                        <span className="text-xs font-bold text-[#4e7397] w-8 text-right">{tenant.total || 0}</span>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-[#4e7397]">No tenant usage data.</p>
-                                        )}
-                                    </div>
-
-                                <div className="bg-white p-6 rounded-lg border border-[#d0dbe7] shadow-sm">
-                                    <h3 className="font-bold text-[#0e141b] mb-4 flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-blue-500">person</span>
-                                        Top Users
-                                    </h3>
-                                    <div className="space-y-3">
-                                        {analytics?.top_users && analytics.top_users.length > 0 ? (
-                                            analytics.top_users.map((user, i) => (
-                                                <div key={i} className="flex items-center justify-between group">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="w-6 h-6 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold border border-blue-100">
-                                                            {i + 1}
-                                                        </span>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-medium text-[#0e141b] truncate max-w-[120px]" title={user.user_email}>{user.user_email.split('@')[0]}</span>
-                                                            <span className="text-[10px] text-[#4e7397]">{user.user_email.split('@')[1]}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-black text-[#0e141b] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                                                            {user.total}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-[#4e7397]">No user activity data.</p>
-                                        )}
-                                    </div>
-                                </div>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-lg border border-[#d0dbe7] shadow-sm">
-                                    <h3 className="font-bold text-[#0e141b] mb-4 flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-orange-500">pie_chart</span>
-                                        Resource Usage
-                                    </h3>
-                                    <div className="space-y-3">
-                                        {analytics?.resource_distribution && analytics.resource_distribution.slice(0, 5).map((resource, i) => (
-                                            <div key={i} className="flex items-center justify-between">
-                                                <span className="text-sm text-[#4e7397] capitalize flex items-center gap-2">
-                                                    <span className={`w-2 h-2 rounded-full ${['bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400', 'bg-red-400'][i % 5]}`}></span>
-                                                    {resource.resource}
-                                                </span>
-                                                <span className="text-xs font-bold text-[#0e141b] bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
-                                                    {resource.total}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -393,7 +306,7 @@ export default function AuditLogs() {
                                             <tr className="bg-[#f6f7f8] border-b border-[#d0dbe7] text-[#4e7397] text-xs uppercase tracking-wider">
                                                 <th className="p-4 font-semibold">Time</th>
                                                 <th className="p-4 font-semibold">User</th>
-                                                <th className="p-4 font-semibold">Tenant</th>
+                                                <th className="p-4 font-semibold">Role</th>
                                                 <th className="p-4 font-semibold">Action</th>
                                                 <th className="p-4 font-semibold">Resource</th>
                                                 <th className="p-4 font-semibold">Status</th>
@@ -418,7 +331,7 @@ export default function AuditLogs() {
                                                             </div>
                                                         </td>
                                                         <td className="p-4 whitespace-nowrap text-sm text-[#0e141b]">
-                                                            {log.tenant_name}
+                                                            {log.role}
                                                         </td>
                                                         <td className="p-4 whitespace-nowrap text-sm text-[#0e141b]">
                                                             {log.action}

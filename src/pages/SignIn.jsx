@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
 import AuthService from "../services/authService";
+import PasswordInput from "../components/PasswordInput";
 
 export default function SignIn() {
     const navigate = useNavigate();
@@ -70,57 +71,49 @@ export default function SignIn() {
                         required
                     />
                 </div>
-                <div>
-                    <div className="flex justify-between items-center mb-1">
-                        <label
-                            className="block text-sm font-bold text-[#0e141b]"
-                            htmlFor="password"
-                        >
-                            Password
-                        </label>
-                    </div>
-                    <input
-                        className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
-                        id="password"
-                        placeholder="Enter your password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center">
-                            <input
-                                id="remember-me"
-                                name="remember-me"
-                                type="checkbox"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
-                                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded cursor-pointer"
-                            />
-                            <label htmlFor="remember-me" className="ml-2 block text-sm text-[#0e141b] cursor-pointer select-none">
-                                Remember me
-                            </label>
-                        </div>
-                        <div className="text-right">
-                            <Link
-                                to="/reset-password"
-                                className="text-xs text-primary hover:underline font-medium"
-                            >
-                                Forgot password?
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-                <div className="pt-2">
-                    <button
-                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? "Signing In..." : "Sign In"}
-                    </button>
-                </div>
+                <PasswordInput
+                    label="Password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                />
+                
+<div className="flex items-center justify-between mt-4">
+    <div className="flex items-center">
+        <input
+            id="remember-me"
+            name="remember-me"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded cursor-pointer"
+        />
+        <label htmlFor="remember-me" className="ml-2 block text-sm text-[#0e141b] cursor-pointer select-none">
+            Remember me
+        </label>
+    </div>
+    <div className="text-right">
+        <Link
+            to="/reset-password"
+            className="text-xs text-primary hover:underline font-medium"
+        >
+            Forgot password?
+        </Link>
+    </div>
+</div>
+<div className="pt-2">
+    <button
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 px-4 rounded transition-all duration-200 text-sm shadow-md shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        type="submit"
+        disabled={loading}
+    >
+        {loading ? (
+            <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+        ) : "Sign In to Platform"}
+    </button>
+</div>
                 <div className="border-t border-[#d0dbe7] pt-4 mt-6 flex flex-col items-center">
                     <p className="text-sm text-[#0e141b]">
                         Don't have an account?

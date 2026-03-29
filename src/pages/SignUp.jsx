@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
 import AuthService from "../services/authService";
+import PasswordInput from "../components/PasswordInput";
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -83,41 +84,24 @@ export default function SignUp() {
                         required
                     />
                 </div>
-                <div>
-                    <label
-                        className="block text-sm font-bold text-[#0e141b] mb-1"
-                        htmlFor="password"
-                    >
-                        Password
-                    </label>
-                    <input
-                        className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
-                        id="password"
-                        placeholder="At least 8 characters"
-                        type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
-                    <div className="mt-2"></div>
-                    <div>
-                        <label
-                            className="block text-sm font-bold text-[#0e141b] mb-1"
-                            htmlFor="reenter_password"
-                        >
-                            Confirm Password
-                        </label>
-                        <input
-                            className="w-full h-10 px-3 py-2 text-sm border border-[#d0dbe7] rounded bg-white focus:ring-primary focus:border-primary"
-                            id="reenter_password"
-                            placeholder="Re-enter password"
-                            type="password"
-                            value={formData.reenter_password}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                </div>
+                <PasswordInput
+                    label="Password"
+                    id="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="At least 8 characters"
+                    showStrength={true}
+                    required
+                />
+                
+                <PasswordInput
+                    label="Confirm Password"
+                    id="reenter_password"
+                    value={formData.reenter_password}
+                    onChange={handleChange}
+                    placeholder="Re-enter password"
+                    required
+                />
                 <div>
                     <label
                         className="block text-sm font-bold text-[#0e141b] mb-1"
@@ -132,18 +116,20 @@ export default function SignUp() {
                         onChange={handleChange}
                     >
                         <option value="saas-user">SaaS User</option>
-                        <option value="tenant-user">Tenant User</option>
+
                     </select>
                 </div>
-                <div className="pt-2">
-                    <button
-                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm shadow-sm disabled:opacity-50"
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? "Signing Up..." : "Sign Up"}
-                    </button>
-                </div>
+<div className="pt-2">
+    <button
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 px-4 rounded transition-all duration-200 text-sm shadow-md shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        type="submit"
+        disabled={loading}
+    >
+        {loading ? (
+            <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+        ) : "Create Account"}
+    </button>
+</div>
                 <p className="text-xs text-[#4e7397] text-center mt-4">
                     By signing up, you agree to the{" "}
                     <a className="text-primary hover:underline" href="#">

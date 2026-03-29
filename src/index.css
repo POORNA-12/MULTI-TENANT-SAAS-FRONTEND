@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+@theme {
+  --color-portal-primary: #e86c25;
+  --color-portal-primary-hover: #d05d1a;
+  --color-portal-primary-light: #fdf2ec;
+  --color-portal-cardbg: #ffffff;
+  --color-portal-bg: #f3f4f6;
+  --color-portal-textprimary: #1f2937;
+  --color-portal-textsecondary: #6b7280;
+  --color-portal-textmuted: #9ca3af;
+  --color-portal-border: #e5e7eb;
+  --color-portal-inputbg: #f9fafb;
+  --color-portal-sidebar: #1e293b;
+  --color-portal-sidebar-hover: #334155;
+  --color-portal-sidebar-active: #e86c25;
+  --color-portal-navy: #0f172a;
+  --color-portal-success: #16a34a;
+  --color-portal-warning: #f59e0b;
+  --color-portal-danger: #ef4444;
+}
+
 @layer utilities {
   .animate-in {
     animation-duration: 0.3s;
@@ -84,4 +104,29 @@
   .zoom-in-95 {
     animation-name: zoomIn;
   }
+}
+
+/* ── Portal Scoped Theme (Matched with Main SaaS Admin) ── */
+.portal-theme {
+  --portal-primary: #ea580c;        /* orange-600 */
+  --portal-primary-hover: #c2410c;  /* orange-700 */
+  --portal-primary-light: #fff7ed;  /* orange-50 */
+  --portal-cardbg: #ffffff;
+  --portal-bg: #f6f7f8;             /* Matched */
+  --portal-textprimary: #0e141b;    /* Matched */
+  --portal-textsecondary: #4e7397;  /* Matched */
+  --portal-textmuted: #94a3b8;
+  --portal-border: #d0dbe7;         /* Matched */
+  --portal-inputbg: #f8fafc;
+  --portal-sidebar: #ffffff;        /* Restored to light sidebar like admin */
+  --portal-sidebar-hover: #f1f5f9;
+  --portal-sidebar-active: #ea580c;
+  --portal-navy: #0e141b;
+  --portal-success: #16a34a;
+  --portal-warning: #f59e0b;
+  --portal-danger: #ef4444;
+
+  /* Global baseline resets for portal */
+  background-color: var(--portal-bg);
+  color: var(--portal-textprimary);
 }

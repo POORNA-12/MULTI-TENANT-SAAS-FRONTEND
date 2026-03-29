@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import roleService from "../services/roleService";
 import organizationService from "../services/organizationService";
+import { useOrganizations } from "../hooks/useOrganizations";
 import tenantUserService from "../services/tenantUserService";
 import AlertModal from "../components/AlertModal";
 
@@ -179,26 +180,28 @@ export default function RoleAssignments() {
         }
     };
 
-    const fetchActiveOrg = async () => {
-        try {
-            const data = await organizationService.getOrganizations();
-            const active = data.organizations?.find(org => org.is_active);
-            if (active) {
+    const { data: organizations } = useOrganizations();
+
+    const checkActiveOrg = () => {
+        if (organizations) {
+            const active = organizations.find(org => org.current);
+            if (active && active.slug !== activeOrg?.slug) {
                 setActiveOrg(active);
                 fetchRoles();
                 fetchAssignments(active.slug);
             }
-        } catch (error) {
-            console.error("Failed to fetch active organization:", error);
         }
     };
 
     useEffect(() => {
-        fetchActiveOrg();
-        const handleOrgChange = () => fetchActiveOrg();
+        checkActiveOrg();
+    }, [organizations]);
+
+    useEffect(() => {
+        const handleOrgChange = () => checkActiveOrg();
         window.addEventListener("activeOrgChanged", handleOrgChange);
         return () => window.removeEventListener("activeOrgChanged", handleOrgChange);
-    }, []);
+    }, [organizations]);
 
     const handleAssignRole = async (assignData) => {
         if (!activeOrg) return;

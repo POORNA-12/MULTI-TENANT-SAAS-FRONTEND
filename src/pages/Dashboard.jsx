@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import dashboardService from "../services/dashboardService";
+import { useSearch } from "../context/SearchContext";
 
 export default function Dashboard() {
     const navigate = useNavigate();
+    const { searchQuery } = useSearch();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -52,14 +54,14 @@ export default function Dashboard() {
                         <span className="hidden sm:inline">View Metrics</span>
                         <span className="sm:hidden">Metrics</span>
                     </button>
-                    <button
-                        onClick={() => navigate("/dashboard/tenants")}
-                        className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 bg-orange-500 rounded text-sm font-bold text-white hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/20"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">add</span>
-                        <span className="hidden sm:inline">Create New Tenant</span>
-                        <span className="sm:hidden">New Tenant</span>
-                    </button>
+<button
+    onClick={() => navigate("/dashboard/tenants")}
+    className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 bg-orange-600 rounded text-sm font-bold text-white hover:bg-orange-700 transition-all duration-200 shadow-sm shadow-orange-500/20"
+>
+    <span className="material-symbols-outlined text-[18px]">add</span>
+    <span className="hidden sm:inline">Create New Tenant</span>
+    <span className="sm:hidden">New Tenant</span>
+</button>
                 </div>
             </div>
 
@@ -92,7 +94,7 @@ export default function Dashboard() {
                     iconBg="bg-green-50 text-green-600"
                 />
 
-                <div onClick={() => navigate('/role-management')} className="cursor-pointer">
+                <div >
                     <StatusCard
                         title="Role Management"
                         status="Secure"
@@ -108,19 +110,19 @@ export default function Dashboard() {
                     />
                 </div>
 
-                <StatusCard
-                    title="Workflow Engine"
-                    status="Processing"
-                    statusColor="bg-orange-100 text-orange-700"
-                    desc="Automate tenant operations and complex business logic using the TenantX engine."
-                    stats={[
-                        { label: "TOTAL REQUESTS", value: stats?.workflows?.total?.toLocaleString() || "0" },
-                        { label: "PENDING", value: stats?.workflows?.submitted?.toLocaleString() || "0", valueColor: "text-orange-500" }
-                    ]}
-                    links={["Visual Designer", "Execution History"]}
-                    icon="hub"
-                    iconBg="bg-yellow-50 text-yellow-600"
-                />
+<StatusCard
+    title="Workflow Engine"
+    status="Active"
+    statusColor="bg-orange-100 text-orange-700"
+    desc="Automate tenant operations and complex business logic using the TenantX engine."
+    stats={[
+        { label: "TOTAL REQUESTS", value: stats?.workflows?.total?.toLocaleString() || "0" },
+        { label: "PENDING", value: stats?.workflows?.submitted?.toLocaleString() || "0", valueColor: "text-orange-600" }
+    ]}
+    links={["Visual Designer", "Execution History"]}
+    icon="hub"
+    iconBg="bg-yellow-50 text-yellow-600"
+/>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -135,20 +137,32 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className="divide-y divide-[#d0dbe7]">
-                        {stats?.recent_activity?.length > 0 ? (
-                            stats.recent_activity.map((log, index) => (
-                                <LogItem
-                                    key={index}
-                                    time={new Date(log.performed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    type={log.action}
-                                    desc={`${log.workflow} - ${log.performed_by}`}
-                                    status="LOGGED"
-                                    statusColor="text-gray-600"
-                                />
-                            ))
-                        ) : (
-                            <div className="p-4 text-sm text-[#4e7397] text-center">No recent activity</div>
-                        )}
+                        {(() => {
+                            const filteredActivity = (stats?.recent_activity || []).filter(log => {
+                                if (!searchQuery) return true;
+                                const query = searchQuery.toLowerCase();
+                                return (
+                                    log.action?.toLowerCase().includes(query) ||
+                                    log.workflow?.toLowerCase().includes(query) ||
+                                    log.performed_by?.toLowerCase().includes(query)
+                                );
+                            });
+
+                            if (filteredActivity.length > 0) {
+                                return filteredActivity.map((log, index) => (
+                                    <LogItem
+                                        key={index}
+                                        time={new Date(log.performed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        type={log.action}
+                                        desc={`${log.workflow} - ${log.performed_by}`}
+                                        status="LOGGED"
+                                        statusColor="text-gray-600"
+                                    />
+                                ));
+                            }
+
+                            return <div className="p-4 text-sm text-[#4e7397] text-center">{searchQuery ? `No activity matching "${searchQuery}"` : "No recent activity"}</div>;
+                        })()}
                     </div>
                 </div>
 
@@ -180,16 +194,16 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex gap-3">
-                        <span className="material-symbols-outlined text-orange-500 shrink-0">warning</span>
-                        <div>
-                            <h4 className="font-bold text-orange-800 text-sm">Upcoming Maintenance</h4>
-                            <p className="text-xs text-orange-700 mt-1">
-                                TenantX Workflow Engine update scheduled for Sunday, 02:00 AM UTC.
-                            </p>
-                            <span className="text-xs font-bold text-orange-800 mt-2 block hover:underline cursor-pointer">View Maintenance Window</span>
-                        </div>
-                    </div>
+<div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex gap-3">
+    <span className="material-symbols-outlined text-orange-500 shrink-0">info</span>
+    <div>
+        <h4 className="font-bold text-orange-800 text-sm">Upcoming Platform Sync</h4>
+        <p className="text-xs text-orange-700 mt-1">
+            TenantX Cloud update scheduled for Sunday. No downtime expected.
+        </p>
+        <span className="text-xs font-bold text-orange-800 mt-2 block hover:underline cursor-pointer">Platform Updates</span>
+    </div>
+</div>
                 </div>
             </div>
         </DashboardLayout>

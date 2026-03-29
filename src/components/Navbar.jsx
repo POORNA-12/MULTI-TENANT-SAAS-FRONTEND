@@ -32,7 +32,11 @@ export default function Navbar() {
                 Solutions
               </NavLink>
             </li>
-            <li className="text-gray-700 font-medium hover:text-black cursor-pointer">Pricing</li>
+            <li>
+              <NavLink to="/pricing" className={linkClasses}>
+                Pricing
+              </NavLink>
+            </li>
             <li className="text-gray-700 font-medium hover:text-black cursor-pointer">Documentation</li>
           </ul>
 
