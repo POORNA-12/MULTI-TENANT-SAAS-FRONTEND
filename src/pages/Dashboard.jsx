@@ -54,14 +54,14 @@ export default function Dashboard() {
                         <span className="hidden sm:inline">View Metrics</span>
                         <span className="sm:hidden">Metrics</span>
                     </button>
-                    <button
-                        onClick={() => navigate("/dashboard/tenants")}
-                        className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 bg-orange-500 rounded text-sm font-bold text-white hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/20"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">add</span>
-                        <span className="hidden sm:inline">Create New Tenant</span>
-                        <span className="sm:hidden">New Tenant</span>
-                    </button>
+<button
+    onClick={() => navigate("/dashboard/tenants")}
+    className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 bg-orange-600 rounded text-sm font-bold text-white hover:bg-orange-700 transition-all duration-200 shadow-sm shadow-orange-500/20"
+>
+    <span className="material-symbols-outlined text-[18px]">add</span>
+    <span className="hidden sm:inline">Create New Tenant</span>
+    <span className="sm:hidden">New Tenant</span>
+</button>
                 </div>
             </div>
 
@@ -110,19 +110,19 @@ export default function Dashboard() {
                     />
                 </div>
 
-                <StatusCard
-                    title="Workflow Engine"
-                    status="Processing"
-                    statusColor="bg-orange-100 text-orange-700"
-                    desc="Automate tenant operations and complex business logic using the TenantX engine."
-                    stats={[
-                        { label: "TOTAL REQUESTS", value: stats?.workflows?.total?.toLocaleString() || "0" },
-                        { label: "PENDING", value: stats?.workflows?.submitted?.toLocaleString() || "0", valueColor: "text-orange-500" }
-                    ]}
-                    links={["Visual Designer", "Execution History"]}
-                    icon="hub"
-                    iconBg="bg-yellow-50 text-yellow-600"
-                />
+<StatusCard
+    title="Workflow Engine"
+    status="Active"
+    statusColor="bg-orange-100 text-orange-700"
+    desc="Automate tenant operations and complex business logic using the TenantX engine."
+    stats={[
+        { label: "TOTAL REQUESTS", value: stats?.workflows?.total?.toLocaleString() || "0" },
+        { label: "PENDING", value: stats?.workflows?.submitted?.toLocaleString() || "0", valueColor: "text-orange-600" }
+    ]}
+    links={["Visual Designer", "Execution History"]}
+    icon="hub"
+    iconBg="bg-yellow-50 text-yellow-600"
+/>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -194,16 +194,16 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex gap-3">
-                        <span className="material-symbols-outlined text-orange-500 shrink-0">warning</span>
-                        <div>
-                            <h4 className="font-bold text-orange-800 text-sm">Upcoming Maintenance</h4>
-                            <p className="text-xs text-orange-700 mt-1">
-                                TenantX Workflow Engine update scheduled for Sunday, 02:00 AM UTC.
-                            </p>
-                            <span className="text-xs font-bold text-orange-800 mt-2 block hover:underline cursor-pointer">View Maintenance Window</span>
-                        </div>
-                    </div>
+<div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex gap-3">
+    <span className="material-symbols-outlined text-orange-500 shrink-0">info</span>
+    <div>
+        <h4 className="font-bold text-orange-800 text-sm">Upcoming Platform Sync</h4>
+        <p className="text-xs text-orange-700 mt-1">
+            TenantX Cloud update scheduled for Sunday. No downtime expected.
+        </p>
+        <span className="text-xs font-bold text-orange-800 mt-2 block hover:underline cursor-pointer">Platform Updates</span>
+    </div>
+</div>
                 </div>
             </div>
         </DashboardLayout>

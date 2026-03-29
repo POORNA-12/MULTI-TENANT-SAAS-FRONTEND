@@ -119,15 +119,17 @@ export default function SignUp() {
 
                     </select>
                 </div>
-                <div className="pt-2">
-                    <button
-                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm shadow-sm disabled:opacity-50"
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? "Signing Up..." : "Sign Up"}
-                    </button>
-                </div>
+<div className="pt-2">
+    <button
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 px-4 rounded transition-all duration-200 text-sm shadow-md shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        type="submit"
+        disabled={loading}
+    >
+        {loading ? (
+            <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+        ) : "Create Account"}
+    </button>
+</div>
                 <p className="text-xs text-[#4e7397] text-center mt-4">
                     By signing up, you agree to the{" "}
                     <a className="text-primary hover:underline" href="#">

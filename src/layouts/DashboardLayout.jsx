@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
 import AuthService from "../services/authService";
 import organizationService from "../services/organizationService";
 import { useOrganizations } from "../hooks/useOrganizations";
@@ -59,28 +59,54 @@ export default function DashboardLayout({ children }) {
         };
     }, [location.pathname, organizations]);
 
-    // Token Refresh Logic
+    // Bulletproof Session Management (Heartbeat + Sync)
     useEffect(() => {
-        // Check authentication on mount
-        if (!AuthService.isAuthenticated()) {
-            navigate("/signin");
-            return;
-        }
-
-        // Setup interval to refresh token periodically
-        const refreshInterval = setInterval(async () => {
-            try {
-                console.log("Refreshing access token...");
-                await AuthService.refreshToken();
-                console.log("Access token refreshed successfully.");
-            } catch (error) {
-                console.error("Failed to refresh token", error);
-                // User requested to NOT auto-logout on error.
-                // AuthService.signOut().then(() => navigate("/signin"));
+        // 1. Cross-Tab Logout Synchronization
+        const handleStorageChange = (e) => {
+            if (e.key === 'saas_logout_signal') {
+                console.log("Logout signal received from another tab. Redirecting...");
+                navigate("/signin");
             }
-        }, 5 * 60 * 1000);
+        };
+        window.addEventListener('storage', handleStorageChange);
 
-        return () => clearInterval(refreshInterval);
+        // 2. Smart Heartbeat (Check every 60 seconds)
+        const checkSession = async () => {
+            if (!AuthService.isAuthenticated()) {
+                navigate("/signin");
+                return;
+            }
+
+            try {
+                const token = AuthService.getAccessToken();
+                if (!token) return;
+
+                // Manual JWT decode for expiry
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const exp = payload.exp;
+                const now = Date.now() / 1000;
+
+                // If less than 5 minutes remaining, refresh now
+                if (exp - now < 300) {
+                    console.log("Token nearing expiry (< 5 min). Triggering smart refresh...");
+                    await AuthService.refreshToken();
+                }
+            } catch (error) {
+                console.error("Session check failed:", error);
+                // If it's a genuine auth error, the API interceptor will handle the redirect.
+            }
+        };
+
+        // Run immediately on mount
+        checkSession();
+        
+        // Then every minute
+        const heartbeatInterval = setInterval(checkSession, 60000);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            clearInterval(heartbeatInterval);
+        };
     }, [navigate]);
 
     // Close mobile menu on route change
@@ -91,6 +117,8 @@ export default function DashboardLayout({ children }) {
     const handleSignOut = async () => {
         try {
             await AuthService.signOut();
+            // Signal logout to other tabs
+            localStorage.setItem('saas_logout_signal', Date.now());
             navigate("/");
         } catch (error) {
             console.error("Sign out failed", error);
@@ -127,14 +155,14 @@ export default function DashboardLayout({ children }) {
             >
                 {/* ... (Sidebar Content Unchanged) ... */}
                 <div className="h-16 flex items-center px-4 border-b border-[#d0dbe7] justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="size-8 bg-orange-600 rounded flex items-center justify-center text-white shrink-0">
-                            <span className="material-symbols-outlined text-xl">hub</span>
-                        </div>
-                        {(sidebarOpen || mobileMenuOpen) && (
-                            <span className="font-bold text-lg tracking-tight">TenantX</span>
-                        )}
-                    </div>
+<div className="flex items-center gap-2">
+    <div className="size-8 bg-orange-600 rounded flex items-center justify-center text-white shrink-0 shadow-sm shadow-orange-500/20">
+        <span className="material-symbols-outlined text-xl">hub</span>
+    </div>
+    {(sidebarOpen || mobileMenuOpen) && (
+        <span className="font-bold text-lg tracking-tight text-[#0e141b]">TenantX AI</span>
+    )}
+</div>
                     {/* Mobile Close Button */}
                     <button
                         className="lg:hidden text-[#4e7397]"
@@ -262,13 +290,15 @@ export default function DashboardLayout({ children }) {
                                 className="flex items-center gap-3 cursor-pointer select-none"
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                             >
-                                <div className="text-right hidden sm:block">
+<div className="text-right hidden sm:block">
                                     <p className="text-xs font-bold text-[#0e141b]">
                                         {user?.email || "User"}
                                     </p>
-                                    <p className="text-[10px] text-[#4e7397]">{user?.first_name || "TenantX User"}</p>
+                                    <p className="text-[10px] text-[#4e7397] font-medium">{user?.first_name || "Platform Admin"}</p>
                                 </div>
-                                <div className="size-9 rounded-full bg-gradient-to-tr from-orange-400 to-yellow-400 border-2 border-white shadow-sm shrink-0"></div>
+                                <div className="size-9 rounded-full bg-gradient-to-tr from-orange-400 to-yellow-400 border-2 border-white shadow-sm shrink-0 flex items-center justify-center text-white">
+                                    <span className="material-symbols-outlined text-[20px]">person</span>
+                                </div>
                             </div>
 
                             {/* Dropdown */}
@@ -288,10 +318,17 @@ export default function DashboardLayout({ children }) {
                                         <div className="py-1"></div>
                                         <button
                                             onClick={handleSignOut}
-                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium border-b border-[#d0dbe7]"
                                         >
                                             Sign Out
                                         </button>
+                                        <Link
+                                            to="/portal/dashboard"
+                                            onClick={() => setUserMenuOpen(false)}
+                                            className="block w-full text-left px-4 py-2 text-sm text-primary hover:bg-blue-50 transition-colors font-bold"
+                                        >
+                                            Switch to Tenant Portal
+                                        </Link>
                                     </div>
                                 </>
                             )}
@@ -304,7 +341,7 @@ export default function DashboardLayout({ children }) {
                     key={location.pathname}
                     className="p-4 lg:p-8 flex-1 overflow-x-hidden animate-in fade-in slide-in-from-top-2"
                 >
-                    {children}
+                    {children || <Outlet />}
                 </main>
             </div>
         </div>

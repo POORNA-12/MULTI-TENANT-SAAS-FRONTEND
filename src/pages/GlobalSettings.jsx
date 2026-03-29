@@ -76,9 +76,9 @@ export default function GlobalSettings() {
     const SettingsCard = ({ title, children, icon }) => (
         <div className="bg-white border border-[#d0dbe7] rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="p-6 border-b border-[#f1f5f9] flex items-center gap-3">
-                <div className="size-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined">{icon}</span>
-                </div>
+<div className="size-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center shrink-0">
+    <span className="material-symbols-outlined">{icon}</span>
+</div>
                 <h3 className="text-lg font-bold text-[#0e141b]">{title}</h3>
             </div>
             <div className="p-6 space-y-6">
@@ -112,20 +112,20 @@ export default function GlobalSettings() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-black text-[#0e141b] tracking-tight flex items-center gap-3">
-                            <span className="material-symbols-outlined text-4xl text-blue-600">settings</span>
-                            Global System Settings
-                        </h1>
-                        <p className="text-[#4e7397] mt-2 font-medium">
-                            Configure your organization profile, environment variables, and tenant-wide security policies.
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        <button className="px-6 py-2.5 bg-white border border-[#d0dbe7] text-[#0e141b] text-sm font-bold rounded-xl hover:bg-slate-50 transition-all shadow-sm">
-                            Discard
-                        </button>
-                        <button className="px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20">
-                            Save Changes
-                        </button>
+                            <span className="material-symbols-outlined text-4xl text-orange-600">settings</span>
+Global System Settings
+</h1>
+<p className="text-[#4e7397] mt-2 font-medium">
+    Configure your organization profile, environment variables, and tenant-wide security policies.
+</p>
+</div>
+<div className="flex gap-3">
+<button className="px-6 py-2.5 bg-white border border-[#d0dbe7] text-[#0e141b] text-sm font-bold rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+    Discard
+</button>
+<button className="px-6 py-2.5 bg-orange-600 text-white text-sm font-bold rounded-xl hover:bg-orange-700 transition-all shadow-md shadow-orange-500/20">
+    Save Changes
+</button>
                     </div>
                 </div>
 
@@ -143,9 +143,9 @@ export default function GlobalSettings() {
                                 setActiveTab(tab.id);
                             }}
                             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === tab.id
-                                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                                : "text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b]"
-                                }`}
+    ? "bg-orange-600 text-white shadow-md shadow-orange-500/20"
+    : "text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b]"
+    }`}
                         >
                             <span className="material-symbols-outlined text-lg">{tab.icon}</span>
                             {tab.label}
@@ -161,11 +161,11 @@ export default function GlobalSettings() {
                                 <SettingsCard title="Organization Profile" icon="corporate_fare">
                                     <div className="grid grid-cols-1 gap-6">
                                         <div className="flex flex-col gap-4">
-                                            <div className="size-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center text-white text-3xl font-black shadow-lg">
-                                                {activeOrg?.name?.[0] || "?"}
-                                            </div>
-                                            <div>
-                                                <button className="text-sm font-bold text-blue-600 hover:text-blue-700">Change Logo</button>
+    <div className="size-24 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-3xl flex items-center justify-center text-white text-3xl font-black shadow-lg">
+        {activeOrg?.name?.[0] || "?"}
+    </div>
+    <div>
+        <button className="text-sm font-bold text-orange-600 hover:text-orange-700">Change Logo</button>
                                                 <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">Max size 2MB, .png or .jpg</p>
                                             </div>
                                         </div>
@@ -386,9 +386,9 @@ export default function GlobalSettings() {
                     </div>
 
                     <div className="space-y-8">
-                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 text-white shadow-2xl overflow-hidden relative group">
-                            <div className="absolute top-0 right-0 size-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
-                            <h4 className="text-sm font-black text-blue-400 uppercase tracking-widest mb-4">Subscription Plan</h4>
+<div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 text-white shadow-2xl overflow-hidden relative group">
+    <div className="absolute top-0 right-0 size-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+    <h4 className="text-sm font-black text-orange-400 uppercase tracking-widest mb-4">Subscription Plan</h4>
                             <div className="flex items-baseline gap-2 mb-2">
                                 <span className="text-4xl font-black">{billingUsage?.subscription_plan || 'Free'}</span>
                                 <span className="text-xs text-slate-400">/ Monthly</span>

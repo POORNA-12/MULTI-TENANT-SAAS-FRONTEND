@@ -9,7 +9,23 @@ export const useBilling = () => {
 };
 
 export const BillingProvider = ({ children }) => {
-    const [billingUsage, setBillingUsage] = useState(null);
+    const [billingUsage, setBillingUsage] = useState({
+        subscription_plan: 'Enterprise',
+        subscription_status: 'Active',
+        days_until_expiry: null,
+        limits: {
+            max_organizations: 10,
+            max_users_per_organization: 100,
+            max_workflow_definitions: 50,
+            max_roles: 20
+        },
+        usage: {
+            organizations: 0,
+            total_users: 0,
+            total_workflows: 0,
+            total_roles: 0
+        }
+    });
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [upgradeModalMessage, setUpgradeModalMessage] = useState("");
     const [loading, setLoading] = useState(true);

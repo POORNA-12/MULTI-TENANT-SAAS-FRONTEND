@@ -11,9 +11,9 @@ const AuthService = {
         const response = await api.post("/auth/signup/", data);
         if (response.data.data?.access) {
             // Step 2 success: Store tokens
-            Cookies.set("accessToken", response.data.data.access);
-            Cookies.set("refreshToken", response.data.data.refresh);
-            Cookies.set("userEmail", data.email);
+            Cookies.set("accessToken", response.data.data.access, { expires: 1 });
+            Cookies.set("refreshToken", response.data.data.refresh, { expires: 7 });
+            Cookies.set("userEmail", data.email, { expires: 7 });
         }
         return response.data;
     },
@@ -27,11 +27,11 @@ const AuthService = {
     signIn: async (email, password) => {
         const response = await api.post("/auth/signin/", { email, password });
         if (response.data.data?.access) {
-            Cookies.set("accessToken", response.data.data.access);
-            Cookies.set("refreshToken", response.data.data.refresh);
-            Cookies.set("userEmail", email);
+            Cookies.set("accessToken", response.data.data.access, { expires: 1 });
+            Cookies.set("refreshToken", response.data.data.refresh, { expires: 7 });
+            Cookies.set("userEmail", email, { expires: 7 });
             if (response.data.user_type) {
-                Cookies.set("userType", response.data.user_type);
+                Cookies.set("userType", response.data.user_type, { expires: 7 });
             }
         }
         return response.data;
@@ -74,14 +74,15 @@ const AuthService = {
         const refreshToken = Cookies.get("refreshToken");
         if (!refreshToken) throw new Error("No refresh token available");
 
+        // BACKEND FIX: Added trailing slash to auth/refresh-access/
         const response = await api.post("/auth/refresh-access/", { refresh: refreshToken });
 
         if (response.data.access) {
-            Cookies.set("accessToken", response.data.access);
+            Cookies.set("accessToken", response.data.access, { expires: 1 });
         }
         // If backend rotates refresh token, it might return a new one. Update if present.
         if (response.data.refresh) {
-            Cookies.set("refreshToken", response.data.refresh);
+            Cookies.set("refreshToken", response.data.refresh, { expires: 7 });
         }
         return response.data;
     },
