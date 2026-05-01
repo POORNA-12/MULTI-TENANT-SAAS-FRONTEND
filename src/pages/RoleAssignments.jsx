@@ -97,12 +97,12 @@ const RoleAssignmentTable = ({ assignments, onEdit, onRemove }) => (
                                 <span className="font-bold text-[#0e141b] text-sm">{assignment.user_email}</span>
                             </td>
                             <td className="p-4">
-                                <button className="text-sm font-bold text-blue-600 hover:underline">
+                                <button className="text-sm font-bold text-orange-600 hover:underline">
                                     {assignment.role_name}
                                 </button>
                             </td>
                             <td className="p-4">
-                                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${assignment.scope === 'Global' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${assignment.scope === 'Global' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
                                     {assignment.scope || 'Tenant'}
                                 </span>
                             </td>
@@ -113,7 +113,7 @@ const RoleAssignmentTable = ({ assignments, onEdit, onRemove }) => (
                                 <div className="flex items-center justify-end gap-2">
                                     <button
                                         onClick={() => onEdit(assignment)}
-                                        className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-wider"
+                                        className="text-[10px] font-bold text-orange-600 hover:text-orange-800 uppercase tracking-wider"
                                     >
                                         Edit
                                     </button>

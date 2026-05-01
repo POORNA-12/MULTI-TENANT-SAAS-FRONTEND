@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import billingService from '../services/billingService';
 import authService from '../services/authService';
 import { useBilling } from '../context/BillingContext';
@@ -9,6 +10,14 @@ const PricingPlans = () => {
     const [loading, setLoading] = useState(true);
     const [checkoutLoading, setCheckoutLoading] = useState(null);
     const { billingUsage } = useBilling();
+    const navigate = useNavigate();
+    const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+    const [confirmModal, setConfirmModal] = useState({ show: false, plan: null });
+
+    const showToast = (message, type = "success") => {
+        setToast({ show: true, message, type });
+        setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
+    };
 
     useEffect(() => {
         const fetchPlans = async () => {
@@ -27,8 +36,44 @@ const PricingPlans = () => {
     const handleUpgrade = async (plan) => {
         if (!plan?.id) return;
 
+        // Find current plan to compare tiers
+        const currentPlan = plans.find(p => p.name === billingUsage?.subscription_plan);
+        const isFreePlan = parseFloat(plan.price_monthly) === 0;
+        const isDowngrade = currentPlan && parseFloat(plan.price_monthly) < parseFloat(currentPlan.price_monthly);
+
+        // ONLY show the blocking modal if downgrading to the FREE tier
+        if (isFreePlan && isDowngrade && !confirmModal.show) {
+            setConfirmModal({ show: true, plan });
+            return;
+        }
+
+        // Close modal if it was open
+        setConfirmModal({ show: false, plan: null });
+
+        if (isFreePlan) {
+            // Special handling for Free tier (don't use Razorpay)
+            showToast("Transitioning to Free Tier...");
+            try {
+                setCheckoutLoading(plan.id);
+                // Assuming backend handles free transition via the same verification endpoint or a specific one
+                // For now, we'll try to use the verify endpoint with dummy data or just show a message
+                // In a real app, you'd have billingService.downgradeToFree(plan.id)
+                await billingService.verifyRazorpayPayment({
+                    plan_id: plan.id,
+                    is_free_tier: true
+                });
+                showToast("Downgrade successful!", "success");
+                setTimeout(() => navigate('/billing/success'), 1000);
+            } catch (error) {
+                showToast(error.response?.data?.detail || "Downgrade failed. Please contact support.", "error");
+            } finally {
+                setCheckoutLoading(null);
+            }
+            return;
+        }
+
         if (!window.Razorpay) {
-            alert("Razorpay SDK failed to load. Please check your internet connection or disable ad-blockers and refresh the page.");
+            showToast("Razorpay SDK failed to load. Please check your connection or disable ad-blockers.", "error");
             return;
         }
 
@@ -37,27 +82,46 @@ const PricingPlans = () => {
         setCheckoutLoading(plan.id);
         try {
             const orderData = await billingService.createRazorpayOrder(plan.id);
+            console.log("🟢 Razorpay Order Data received from Backend:", orderData);
+
+            // Fallback to orderData.id if the backend sends the raw Razorpay native format
+            const safeOrderId = orderData.order_id || orderData.id;
+
+            if (!safeOrderId) {
+                showToast("Backend did not return a valid order ID. Check console.", "error");
+                setCheckoutLoading(null);
+                return;
+            }
 
             const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_XXXX",
                 amount: orderData.amount,
-                currency: orderData.currency,
+                currency: orderData.currency || "INR",
                 name: "TenantX",
                 description: `Upgrade to ${plan.name} Plan`,
-                order_id: orderData.order_id,
+                order_id: safeOrderId,
                 handler: async function (response) {
                     try {
+                        // 1. Show 'Verifying' state in the UI
+                        setCheckoutLoading("verifying"); 
+                        
                         await billingService.verifyRazorpayPayment({
                             plan_id: plan.id,
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature
                         });
-                        alert("Upgrade successful!");
-                        window.location.reload();
+
+                        // 2. Clear loading and Navigate to the Success Page
+                        showToast("Payment Verified! Synchronizing your account...", "success");
+                        setTimeout(() => {
+                            navigate('/billing/success'); 
+                        }, 1000);
                     } catch (error) {
                         console.error("Verification failed", error);
-                        alert("Payment verification failed. Please contact support.");
+                        showToast("Payment verification failed. Please contact support.", "error");
+                    } finally {
+                        setCheckoutLoading(null);
                     }
                 },
                 prefill: {
@@ -71,13 +135,13 @@ const PricingPlans = () => {
 
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', function (response) {
-                alert("Payment Failed: " + response.error.description);
+                showToast("Payment Failed: " + response.error.description, "error");
             });
             rzp.open();
 
         } catch (error) {
             console.error("Failed to start checkout", error);
-            alert(error.response?.data?.detail || "Checkout failed. Please try again.");
+            showToast(error.response?.data?.detail || "Checkout failed. Please try again.", "error");
         } finally {
             setCheckoutLoading(null);
         }
@@ -95,6 +159,50 @@ const PricingPlans = () => {
 
     return (
         <DashboardLayout>
+            {/* Custom Toast Notification */}
+            {toast.show && (
+                <div className={`fixed bottom-8 right-8 px-6 py-4 rounded-xl shadow-2xl border z-50 flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 ${toast.type === "success" ? "bg-white border-green-200" : "bg-white border-red-200"}`}>
+                    <div className={`size-8 rounded-full flex items-center justify-center shrink-0 ${toast.type === "success" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}>
+                        <span className="material-symbols-outlined text-[20px]">
+                            {toast.type === "success" ? "check_circle" : "error"}
+                        </span>
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-slate-900">{toast.type === "success" ? "Success" : "Error"}</p>
+                        <p className="text-xs text-slate-500">{toast.message}</p>
+                    </div>
+                    <button onClick={() => setToast({ show: false, message: "", type: "success" })} className="ml-4 text-slate-400 hover:text-slate-600">
+                        <span className="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </div>
+            )}
+
+            {/* Downgrade Confirmation Modal */}
+            {confirmModal.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setConfirmModal({ show: false, plan: null })}></div>
+                    <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden relative z-10 animate-in zoom-in-95 duration-300">
+                        <div className="p-8 text-center">
+                            <div className="size-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <span className="material-symbols-outlined text-4xl">info</span>
+                            </div>
+                            <h3 className="text-2xl font-black text-slate-900 mb-2">Smart Tier Protection</h3>
+                            <p className="text-slate-500 text-sm leading-relaxed mb-8">
+                                You're currently on the <span className="font-bold text-orange-600">{billingUsage?.subscription_plan}</span> plan. 
+                                To maintain your current performance and resource limits, downgrading is restricted. 
+                                Keep your current plan for the best experience.
+                            </p>
+                            <div className="flex justify-center">
+                                <button 
+                                    onClick={() => setConfirmModal({ show: false, plan: null })}
+                                    className="px-10 py-3 bg-orange-600 text-white rounded-2xl font-bold text-sm hover:bg-orange-700 transition-all shadow-lg shadow-orange-500/20 active:scale-95">
+                                    Keep My Plan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="min-h-screen bg-slate-50 py-16 px-4 sm:px-6 lg:px-8 font-sans">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16 space-y-4">
@@ -167,19 +275,21 @@ const PricingPlans = () => {
 
                                     <button
                                         onClick={() => handleUpgrade(plan)}
-                                        disabled={isCurrentPlan || checkoutLoading === plan.id}
+                                        disabled={isCurrentPlan || checkoutLoading !== null}
                                         className={`mt-auto block w-full py-3 px-6 rounded-lg text-center text-sm font-bold transition-all duration-200 ${isCurrentPlan
                                             ? 'bg-slate-100 text-slate-500 cursor-not-allowed border border-slate-200'
                                             : isPopular
                                                 ? 'bg-orange-600 text-white hover:bg-orange-700 shadow-md shadow-orange-500/30'
                                                 : 'bg-white text-slate-700 border border-slate-300 hover:border-slate-400 hover:text-slate-900'
-                                            }`}
+                                            } ${checkoutLoading !== null ? "opacity-50" : ""}`}
                                     >
-                                        {checkoutLoading === plan.id
-                                            ? 'Processing...'
-                                            : isCurrentPlan
-                                                ? 'Active Plan'
-                                                : 'Upgrade to ' + plan.name}
+                                        {checkoutLoading === "verifying" 
+                                            ? 'Verifying...' 
+                                            : checkoutLoading === plan.id 
+                                                ? 'Processing...'
+                                                : isCurrentPlan
+                                                    ? 'Active Plan'
+                                                    : 'Upgrade to ' + plan.name}
                                     </button>
 
                                     <div className="mt-8 pt-8 border-t border-slate-100">

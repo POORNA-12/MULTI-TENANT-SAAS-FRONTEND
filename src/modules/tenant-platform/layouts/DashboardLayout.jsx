@@ -17,12 +17,12 @@ import {
     ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTenantNotifications } from '../hooks/useTenantNotifications';
 
 const mainNav = [
     { to: '/portal/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/portal/my-requests', label: 'My Requests', icon: FileText },
     { to: '/portal/my-approvals', label: 'My Approvals', icon: CheckCircle2 },
-    { to: '/portal/requests', label: 'All Requests', icon: FileText },
     { to: '/portal/drafts', label: 'Drafts', icon: FileEdit },
 ];
 
@@ -35,6 +35,18 @@ export default function DashboardLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { user, tenantSlug, logout, getAccessToken, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+
+    const { unreadCount, latestNotification, clearLatestNotification } = useTenantNotifications(tenantSlug);
+
+    // Auto-clear toast after 5 seconds
+    useEffect(() => {
+        if (latestNotification) {
+            const timer = setTimeout(() => {
+                clearLatestNotification();
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [latestNotification, clearLatestNotification]);
 
     // ── Bulletproof Session Management (Portal Isolation & Rotation) ──
     useEffect(() => {
@@ -97,6 +109,27 @@ export default function DashboardLayout() {
 
     return (
         <div className="min-h-screen bg-portal-bg flex">
+            {/* Simple Toast Notification */}
+            {latestNotification && (
+                <div className="fixed top-4 right-4 z-[100] animate-in slide-in-from-top-4 fade-in duration-300">
+                    <div className="bg-white border border-portal-border shadow-xl shadow-portal-primary/5 rounded-xl p-4 w-80 max-w-[calc(100vw-2rem)] flex gap-3">
+                        <div className="bg-portal-primary/10 text-portal-primary rounded-full w-8 h-8 flex items-center justify-center shrink-0">
+                            <Bell className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-bold text-portal-navy mb-0.5 truncate">{latestNotification.subject || 'New Notification'}</h4>
+                            <p className="text-xs text-portal-textsecondary line-clamp-2">{latestNotification.message}</p>
+                        </div>
+                        <button 
+                            onClick={clearLatestNotification}
+                            className="text-portal-textmuted hover:text-portal-textprimary self-start transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Mobile overlay */}
             {sidebarOpen && (
                 <div
@@ -115,7 +148,7 @@ export default function DashboardLayout() {
     <div className="size-8 bg-orange-600 rounded flex items-center justify-center text-white shrink-0 shadow-sm shadow-orange-500/20">
         <Workflow className="w-5 h-5 text-white" />
     </div>
-    <span className="font-bold text-lg tracking-tight text-portal-navy">TenantX AI</span>
+    <span className="font-bold text-lg tracking-tight text-portal-navy">TenantX</span>
                     {/* Close button (mobile) */}
                     <button
                         onClick={() => setSidebarOpen(false)}
@@ -225,9 +258,13 @@ export default function DashboardLayout() {
 
     <div className="h-6 w-px bg-portal-border mx-1 hidden md:block"></div>
 
-    <button className="relative p-2 rounded-lg hover:bg-slate-50 text-portal-textsecondary transition-colors cursor-pointer">
+    <button className="relative p-2 rounded-lg hover:bg-slate-50 text-portal-textsecondary transition-colors cursor-pointer" title="Notifications">
         <Bell className="w-5 h-5" />
-        <span className="absolute top-2 right-2 w-2 h-2 bg-portal-primary rounded-full border-2 border-white" />
+        {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 w-4 h-4 bg-portal-primary text-white text-[9px] font-bold rounded-full border-2 border-white flex items-center justify-center">
+                {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+        )}
     </button>
     
     <div className="size-8 rounded-full bg-gradient-to-tr from-orange-400 to-yellow-400 border-2 border-white shadow-sm shrink-0 flex items-center justify-center text-white text-[10px] font-bold ml-1 cursor-pointer">

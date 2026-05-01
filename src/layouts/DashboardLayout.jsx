@@ -160,7 +160,7 @@ export default function DashboardLayout({ children }) {
         <span className="material-symbols-outlined text-xl">hub</span>
     </div>
     {(sidebarOpen || mobileMenuOpen) && (
-        <span className="font-bold text-lg tracking-tight text-[#0e141b]">TenantX AI</span>
+        <span className="font-bold text-lg tracking-tight text-[#0e141b]">TenantX</span>
     )}
 </div>
                     {/* Mobile Close Button */}
@@ -205,18 +205,33 @@ export default function DashboardLayout({ children }) {
                         <nav className="space-y-1 px-2">
                             <Link
                                 to="/dashboard/settings"
-                                className="flex items-center gap-3 px-3 py-2 rounded-md text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b] font-medium transition-colors overflow-hidden"
+                                className={`relative flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group overflow-hidden ${location.pathname === "/dashboard/settings"
+                                    ? "text-primary font-bold bg-blue-50"
+                                    : "text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b] font-medium"
+                                    }`}
+                                title={(!sidebarOpen && !mobileMenuOpen) ? "Global Settings" : ""}
                             >
-                                <span className="material-symbols-outlined shrink-0">settings</span>
-                                <span className={`whitespace-nowrap transition-all duration-300 ${(!sidebarOpen && !mobileMenuOpen) ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
+                                {location.pathname === "/dashboard/settings" && (
+                                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></span>
+                                )}
+                                <span className={`material-symbols-outlined relative z-10 shrink-0 transition-transform duration-200 ${location.pathname === "/dashboard/settings" ? "scale-110" : "group-hover:scale-110"}`}>settings</span>
+                                <span className={`relative z-10 whitespace-nowrap transition-all duration-300 ${(!sidebarOpen && !mobileMenuOpen) ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"}`}>
                                     Global Settings
                                 </span>
                             </Link>
                             <Link
-                                className="flex items-center gap-3 px-3 py-2 rounded-md text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b] font-medium transition-colors overflow-hidden"
+                                to="/dashboard/support"
+                                className={`relative flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group overflow-hidden ${location.pathname === "/dashboard/support"
+                                    ? "text-primary font-bold bg-blue-50"
+                                    : "text-[#4e7397] hover:bg-slate-50 hover:text-[#0e141b] font-medium"
+                                    }`}
+                                title={(!sidebarOpen && !mobileMenuOpen) ? "Support Center" : ""}
                             >
-                                <span className="material-symbols-outlined shrink-0">help</span>
-                                <span className={`whitespace-nowrap transition-all duration-300 ${(!sidebarOpen && !mobileMenuOpen) ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
+                                {location.pathname === "/dashboard/support" && (
+                                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></span>
+                                )}
+                                <span className={`material-symbols-outlined relative z-10 shrink-0 transition-transform duration-200 ${location.pathname === "/dashboard/support" ? "scale-110" : "group-hover:scale-110"}`}>help</span>
+                                <span className={`relative z-10 whitespace-nowrap transition-all duration-300 ${(!sidebarOpen && !mobileMenuOpen) ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"}`}>
                                     Support Center
                                 </span>
                             </Link>

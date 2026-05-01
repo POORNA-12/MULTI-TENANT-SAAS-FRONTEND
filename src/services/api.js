@@ -111,10 +111,22 @@ api.interceptors.response.use(
 
         // If the error is 402 (Payment Required) - Quota Exceeded or Subscription Inactive
         if (error.response?.status === 402) {
+            const errorData = error.response?.data;
+            const errorDetail = errorData?.detail || "";
+            const isExpired = errorDetail.toLowerCase().includes('expired');
+            const isMutation = ['post', 'put', 'patch', 'delete'].includes(error.config?.method?.toLowerCase());
+
+            // If subscription is expired and user attempts a mutation, redirect to billing immediately
+            if (isExpired && isMutation) {
+                // Instantly relocate to plan upgrade page as requested
+                window.location.href = "/dashboard/billing";
+                return Promise.reject(error);
+            }
+
             // Dispatch a custom event so the UI can show the Upgrade Modal globally
             window.dispatchEvent(
                 new CustomEvent("billing:quota_exceeded", {
-                    detail: error.response?.data
+                    detail: errorData
                 })
             );
         }

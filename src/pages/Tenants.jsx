@@ -8,9 +8,11 @@ import { queryKeys } from "../utils/queryKeys";
 import ConfirmationModal from "../components/ConfirmationModal";
 import AlertModal from "../components/AlertModal";
 import { useSearch } from "../context/SearchContext";
+import { useBilling } from "../context/BillingContext";
 
 export default function Tenants() {
     const { searchQuery, setSearchQuery } = useSearch(); // Use global search
+    const { canCreateResource, setIsUpgradeModalOpen, setUpgradeModalMessage, billingUsage, fetchBillingUsage } = useBilling();
     const [activeTab, setActiveTab] = useState("tenants");
     const { data: organizations = [], isLoading: loading } = useOrganizations();
     const queryClient = useQueryClient();
@@ -58,6 +60,11 @@ export default function Tenants() {
     // Derived Active Organization
     const activeOrg = organizations.find(org => org.current);
 
+    // Silently refresh billing limits when Tenants page is opened
+    useEffect(() => {
+        fetchBillingUsage();
+    }, []);
+
     useEffect(() => {
         if (activeTab === "users" && activeOrg) {
             fetchUsers();
@@ -94,7 +101,15 @@ export default function Tenants() {
             showAlert("success", "Tenant Created", "The new organization has been created successfully.");
         } catch (error) {
             console.error("Failed to create organization:", error);
-            showAlert("error", "Creation Failed", error.response?.data?.message || "Failed to create organization");
+            if (error?.response?.status === 402) {
+                setIsCreateModalOpen(false);
+                setTimeout(() => {
+                    setUpgradeModalMessage(`Usage limit reached (${billingUsage?.limits?.max_organizations || 5} tenants). Please upgrade.`);
+                    setIsUpgradeModalOpen(true);
+                }, 120);
+            } else {
+                showAlert("error", "Creation Failed", error.response?.data?.message || "Failed to create organization");
+            }
         } finally {
             setCreateLoading(false);
         }
@@ -300,20 +315,20 @@ export default function Tenants() {
             <div className="border-b border-[#d0dbe7] mb-6 flex gap-8">
                 <button
                     onClick={() => setActiveTab("tenants")}
-                    className={`pb-3 text-sm font-bold relative transition-colors ${activeTab === "tenants" ? "text-blue-600" : "text-[#4e7397] hover:text-[#0e141b]"}`}
+                    className={`pb-3 text-sm font-bold relative transition-colors ${activeTab === "tenants" ? "text-orange-600" : "text-[#4e7397] hover:text-[#0e141b]"}`}
                 >
                     Tenants
                     {activeTab === "tenants" && (
-                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-600 rounded-t-full"></span>
                     )}
                 </button>
                 <button
                     onClick={() => setActiveTab("users")}
-                    className={`pb-3 text-sm font-bold relative transition-colors ${activeTab === "users" ? "text-blue-600" : "text-[#4e7397] hover:text-[#0e141b]"}`}
+                    className={`pb-3 text-sm font-bold relative transition-colors ${activeTab === "users" ? "text-orange-600" : "text-[#4e7397] hover:text-[#0e141b]"}`}
                 >
                     Users
                     {activeTab === "users" && (
-                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-600 rounded-t-full"></span>
                     )}
                 </button>
             </div>
@@ -334,8 +349,35 @@ export default function Tenants() {
                     <span className="material-symbols-outlined text-[18px]">filter_list</span>
                     Filter
                 </button>
-                <div className="h-10 flex items-center px-2 text-xs font-bold text-[#4e7397] whitespace-nowrap">
-                    {activeTab === "tenants" ? `${filteredOrganizations.length} tenants found` : `${totalUsers} users found in ${activeOrg?.name || 'Organization'}`}
+                <div className="h-10 px-4 py-1 bg-slate-50 border border-[#d0dbe7] rounded-md min-w-[210px] flex flex-col justify-center shadow-sm">
+                    <div className="flex items-center justify-between leading-none mb-0.5">
+                        <span className="text-[9px] font-bold text-[#4e7397] uppercase tracking-tighter">
+                            {activeTab === "tenants" ? "Organization Usage" : "Users in Context"}
+                        </span>
+                        {activeTab === "tenants" && organizations.length >= (billingUsage?.limits?.max_organizations || 5) && (
+                            <span className="text-[8px] bg-red-100 text-red-700 px-1 py-0.5 rounded-full font-black border border-red-200 leading-none">MAXED</span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-3 leading-none">
+                        <div className="flex items-baseline gap-0.5">
+                            <span className="text-xs font-black text-[#0e141b]">
+                                {activeTab === "tenants" ? organizations.length : totalUsers}
+                            </span>
+                            {activeTab === "tenants" && (
+                                <span className="text-[10px] font-bold text-[#8ba1b6]">
+                                    / {billingUsage?.limits?.max_organizations || 5}
+                                </span>
+                            )}
+                        </div>
+                        {activeTab === "tenants" && (
+                            <div className="flex-1 h-1 bg-[#d0dbe7] rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-full ${organizations.length >= (billingUsage?.limits?.max_organizations || 5) ? 'bg-red-500' : 'bg-orange-500'}`}
+                                    style={{ width: `${Math.min(100, (organizations.length / (billingUsage?.limits?.max_organizations || 5)) * 100)}%` }}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
                 {activeTab === "tenants" && (
                     <button
@@ -390,7 +432,7 @@ export default function Tenants() {
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-bold text-[#0e141b]">{org.name}</span>
                                                         {org.current && (
-                                                            <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-bold uppercase rounded border border-blue-100">Current</span>
+                                                            <span className="px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-bold uppercase rounded border border-orange-100">Current</span>
                                                         )}
                                                     </div>
                                                 </td>
@@ -416,7 +458,7 @@ export default function Tenants() {
                                                         )}
                                                         <button
                                                             onClick={() => handleEditClick(org)}
-                                                            className="p-1 hover:bg-blue-50 rounded text-[#4e7397] hover:text-blue-600 transition-colors"
+                                                            className="p-1 hover:bg-orange-50 rounded text-[#4e7397] hover:text-orange-600 transition-colors"
                                                             title="Edit"
                                                         >
                                                             <span className="material-symbols-outlined text-[18px]">edit</span>
@@ -487,7 +529,7 @@ export default function Tenants() {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div>
-                                                        <p className="font-bold text-blue-600">{user.email}</p>
+                                                        <p className="font-bold text-orange-600">{user.email}</p>
                                                         <p className="text-xs text-[#4e7397]">{user.first_name || user.username || user.email.split('@')[0]}</p>
                                                     </div>
                                                 </td>
@@ -539,7 +581,7 @@ export default function Tenants() {
                     <>
                         <div className="bg-white border border-[#d0dbe7] rounded-lg p-6 shadow-sm">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="material-symbols-outlined text-blue-500">bar_chart</span>
+                                <span className="material-symbols-outlined text-orange-500">bar_chart</span>
                                 <h3 className="text-xs font-bold text-[#0e141b] uppercase tracking-wider">Storage Usage</h3>
                             </div>
                             <div className="flex items-end justify-between">
@@ -548,11 +590,11 @@ export default function Tenants() {
                                     <p className="text-xs font-bold text-green-600 mt-1">+12% THIS MONTH</p>
                                 </div>
                                 <div className="flex gap-1 items-end h-8">
-                                    <div className="w-1.5 bg-blue-100 h-3 rounded-t-sm"></div>
-                                    <div className="w-1.5 bg-blue-200 h-5 rounded-t-sm"></div>
-                                    <div className="w-1.5 bg-blue-300 h-4 rounded-t-sm"></div>
-                                    <div className="w-1.5 bg-blue-400 h-6 rounded-t-sm"></div>
-                                    <div className="w-1.5 bg-blue-500 h-8 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-100 h-3 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-200 h-5 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-300 h-4 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-400 h-6 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-500 h-8 rounded-t-sm"></div>
                                 </div>
                             </div>
                         </div>
@@ -592,7 +634,7 @@ export default function Tenants() {
                     <>
                         <div className="bg-white border border-[#d0dbe7] rounded-lg p-6 shadow-sm">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="material-symbols-outlined text-blue-500">group</span>
+                                <span className="material-symbols-outlined text-orange-500">group</span>
                                 <h3 className="text-xs font-bold text-[#0e141b] uppercase tracking-wider">User Retention</h3>
                             </div>
                             <div className="flex items-end justify-between">
@@ -601,11 +643,11 @@ export default function Tenants() {
                                     <p className="text-xs font-bold text-green-600 mt-1">+2% THIS QUARTER</p>
                                 </div>
                                 <div className="flex gap-1 items-end h-8">
-                                    <div className="w-1.5 bg-blue-100 h-2 rounded-t-sm"></div>
-                                    <div className="w-1.5 bg-blue-200 h-3 rounded-t-sm"></div>
-                                    <div className="w-1.5 bg-blue-300 h-5 rounded-t-sm"></div>
-                                    <div className="w-1.5 bg-blue-400 h-4 rounded-t-sm"></div>
-                                    <div className="w-1.5 bg-blue-500 h-7 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-100 h-2 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-200 h-3 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-300 h-5 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-400 h-4 rounded-t-sm"></div>
+                                    <div className="w-1.5 bg-orange-500 h-7 rounded-t-sm"></div>
                                 </div>
                             </div>
                         </div>
@@ -646,7 +688,7 @@ export default function Tenants() {
             {/* Create Tenant Modal */}
             {
                 isCreateModalOpen && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
                             <div className="px-6 py-4 border-b border-[#d0dbe7] flex items-center justify-between bg-[#f6f7f8]">
                                 <h3 className="text-lg font-bold text-[#0e141b]">Create New Tenant</h3>
@@ -704,7 +746,7 @@ export default function Tenants() {
             {/* Add User Modal */}
             {
                 isAddUserModalOpen && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
                             <div className="px-6 py-4 border-b border-[#d0dbe7] flex items-center justify-between bg-[#f6f7f8]">
                                 <h3 className="text-lg font-bold text-[#0e141b]">{activeOrg ? `Add User to ${activeOrg.name}` : "Add User"}</h3>
@@ -762,7 +804,7 @@ export default function Tenants() {
             {/* Edit Tenant Modal */}
             {
                 isEditModalOpen && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
                             <div className="px-6 py-4 border-b border-[#d0dbe7] flex items-center justify-between bg-[#f6f7f8]">
                                 <h3 className="text-lg font-bold text-[#0e141b]">Edit Tenant</h3>

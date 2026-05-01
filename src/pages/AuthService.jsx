@@ -8,7 +8,7 @@ const ApiEndpoint = ({ method, url, title, description, body, headers, successRe
 
     const methodColors = {
         POST: "bg-green-100 text-green-700 border-green-200",
-        GET: "bg-blue-100 text-blue-700 border-blue-200",
+        GET: "bg-orange-100 text-orange-700 border-orange-200",
         PUT: "bg-orange-100 text-orange-700 border-orange-200",
         DELETE: "bg-red-100 text-red-700 border-red-200",
     };
@@ -164,17 +164,17 @@ export default function AuthService() {
                     </div>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                <div className="bg-orange-50 border border-orange-100 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
                     <div className="flex items-start gap-4">
-                        <div className="size-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                        <div className="size-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center shrink-0">
                             <span className="material-symbols-outlined">dns</span>
                         </div>
                         <div>
-                            <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wide">Base URL Pattern</h3>
-                            <div className="mt-2 flex items-center gap-2 bg-white px-3 py-2 rounded border border-blue-200 shadow-sm">
-                                <code className="text-sm font-mono text-blue-800">/tenant_auth/{activeSlug}/</code>
+                            <h3 className="text-sm font-bold text-orange-900 uppercase tracking-wide">Base URL Pattern</h3>
+                            <div className="mt-2 flex items-center gap-2 bg-white px-3 py-2 rounded border border-orange-200 shadow-sm">
+                                <code className="text-sm font-mono text-orange-800">/tenant_auth/{activeSlug}/</code>
                             </div>
-                            <p className="text-xs text-blue-700/70 mt-2">
+                            <p className="text-xs text-orange-700/70 mt-2">
                                 Replace <code>{activeSlug}</code> with your actual tenant slug (e.g. <code>acme-corp</code>)
                             </p>
                         </div>
@@ -184,7 +184,7 @@ export default function AuthService() {
                             <span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>
                             System Operational
                         </span>
-                        <p className="text-xs text-blue-800/60 mt-2">v1.2.0 • TAS-Auth-Service</p>
+                        <p className="text-xs text-orange-800/60 mt-2">v1.2.0 • TAS-Auth-Service</p>
                     </div>
                 </div>
 

@@ -49,7 +49,7 @@ export async function getMyWorkflows(slug) {
  * Get the current user's workflow requests (My Requests)
  */
 export async function getMyRequests(slug, status = null) {
-    let url = `/workflows/${slug}/my-requests/`;
+    let url = `/workflows/${slug}/workflows/my/`;
     if (status) {
         url += `?status=${status}`;
     }
@@ -61,25 +61,10 @@ export async function getMyRequests(slug, status = null) {
 }
 
 /**
- * Get workflow approvals for the current user (My Approvals)
+ * Get unified workflow approvals dashboard data
  */
-export async function getMyApprovals(slug, status = null) {
-    let url = `/workflows/${slug}/my-approvals/`;
-    if (status) {
-        url += `?status=${status}`;
-    }
-    return apiClient(url, {
-        method: 'GET',
-        auth: true,
-        slug,
-    });
-}
-
-/**
- * Get pending approvals for the current user
- */
-export async function getPendingApprovals(slug) {
-    return apiClient(`/workflows/${slug}/workflows/pending/`, {
+export async function getApprovalsDashboard(slug) {
+    return apiClient(`/workflows/${slug}/approvals/dashboard/`, {
         method: 'GET',
         auth: true,
         slug,

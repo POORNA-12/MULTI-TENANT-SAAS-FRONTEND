@@ -202,7 +202,7 @@ export default function Workflows() {
                     <button
                         onClick={() => setActiveTab("create")}
                         className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === "create"
-                            ? "border-blue-500 text-blue-600"
+                            ? "border-orange-500 text-orange-600"
                             : "border-transparent text-[#4e7397] hover:text-[#0e141b]"
                             }`}
                     >
@@ -215,7 +215,7 @@ export default function Workflows() {
                             fetchTemplates();
                         }}
                         className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === "templates"
-                            ? "border-blue-500 text-blue-600"
+                            ? "border-orange-500 text-orange-600"
                             : "border-transparent text-[#4e7397] hover:text-[#0e141b]"
                             }`}
                     >
@@ -225,7 +225,7 @@ export default function Workflows() {
                     <button
                         onClick={() => setActiveTab("api")}
                         className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === "api"
-                            ? "border-blue-500 text-blue-600"
+                            ? "border-orange-500 text-orange-600"
                             : "border-transparent text-[#4e7397] hover:text-[#0e141b]"
                             }`}
                     >
@@ -262,18 +262,18 @@ export default function Workflows() {
                                 {/* Controls */}
                                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-[#d0dbe7] shadow-sm">
                                     <div className="relative w-full sm:w-96 group">
-                                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#9ba5b1] group-focus-within:text-blue-500 transition-colors">search</span>
+                                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#9ba5b1] group-focus-within:text-orange-500 transition-colors">search</span>
                                         <input
                                             type="text"
                                             placeholder="Search templates..."
-                                            className="w-full pl-10 pr-4 py-2.5 border border-[#e2e8f0] rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium placeholder:text-slate-400"
+                                            className="w-full pl-10 pr-4 py-2.5 border border-[#e2e8f0] rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium placeholder:text-slate-400"
                                             value={searchQuery || ""}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                         />
                                     </div>
                                     <button
                                         onClick={fetchTemplates}
-                                        className="p-2.5 text-[#4e7397] hover:text-blue-600 hover:bg-blue-50 transition-all border border-[#d0dbe7] rounded-lg shadow-sm active:scale-95"
+                                        className="p-2.5 text-[#4e7397] hover:text-orange-600 hover:bg-orange-50 transition-all border border-[#d0dbe7] rounded-lg shadow-sm active:scale-95"
                                         title="Refresh List"
                                     >
                                         <span className="material-symbols-outlined text-xl">refresh</span>
@@ -284,7 +284,7 @@ export default function Workflows() {
                                 <div className="grid grid-cols-1 gap-6">
                                     {filteredTemplates.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed border-[#d0dbe7] rounded-2xl bg-white/50 backdrop-blur-sm">
-                                            <div className="size-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
+                                            <div className="size-16 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-4">
                                                 <span className="material-symbols-outlined text-3xl">inbox</span>
                                             </div>
                                             <h3 className="text-lg font-bold text-[#0e141b] mb-1">
@@ -298,11 +298,11 @@ export default function Workflows() {
                                         filteredTemplates.map((template, idx) => (
                                             <div
                                                 key={template.definition_id}
-                                                className="group bg-white rounded-2xl p-6 border border-slate-200 hover:border-blue-300 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
+                                                className="group bg-white rounded-2xl p-6 border border-slate-200 hover:border-orange-300 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
                                                 style={{ animationDelay: `${idx * 100}ms` }}
                                             >
                                                 {/* Decorative background gradient */}
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-bl-full -mr-10 -mt-10 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-50 to-transparent rounded-bl-full -mr-10 -mt-10 opacity-50 group-hover:opacity-100 transition-opacity"></div>
 
                                                 {/* Header & Actions */}
                                                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8 relative z-10">
@@ -312,7 +312,7 @@ export default function Workflows() {
                                                             ${template.workflow_type.toLowerCase().includes("leave") ? "bg-amber-50 text-amber-600 border-amber-100" :
                                                                 template.workflow_type.toLowerCase().includes("fund") ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
                                                                     template.workflow_type.toLowerCase().includes("promo") ? "bg-purple-50 text-purple-600 border-purple-100" :
-                                                                        "bg-blue-50 text-blue-600 border-blue-100"}
+                                                                        "bg-orange-50 text-orange-600 border-orange-100"}
                                                         `}>
                                                             <span className="material-symbols-outlined text-3xl">
                                                                 {template.workflow_type.toLowerCase().includes("leave") ? "calendar_month" :
@@ -321,7 +321,7 @@ export default function Workflows() {
                                                             </span>
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                                                            <h3 className="text-xl font-bold text-slate-800 group-hover:text-orange-600 transition-colors">
                                                                 {template.template_name || template.definition_name}
                                                             </h3>
                                                             <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -329,7 +329,7 @@ export default function Workflows() {
                                                                     <span className="size-1.5 rounded-full bg-slate-400"></span>
                                                                     {template.workflow_type}
                                                                 </span>
-                                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-600 border border-orange-100">
                                                                     <span className="material-symbols-outlined text-[14px]">layers</span>
                                                                     {template.steps.length} Steps
                                                                 </span>
@@ -346,7 +346,7 @@ export default function Workflows() {
                                                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 self-start sm:self-auto translate-x-4 group-hover:translate-x-0">
                                                         <button
                                                             onClick={() => handleEdit(template)}
-                                                            className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
+                                                            className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-all shadow-sm"
                                                             title="Edit Template"
                                                         >
                                                             <span className="material-symbols-outlined text-lg">edit</span>
@@ -374,7 +374,7 @@ export default function Workflows() {
 
                                                         {/* Animated Flow Line (Gradient) */}
                                                         <div className="absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0 overflow-hidden">
-                                                            <div className="w-full h-full bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-[shimmer_2s_infinite_linear]"></div>
+                                                            <div className="w-full h-full bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-[shimmer_2s_infinite_linear]"></div>
                                                         </div>
 
                                                         {/* Start Node */}
@@ -390,11 +390,11 @@ export default function Workflows() {
                                                             <div key={sIdx} className="relative z-10 flex flex-col items-center gap-3 flex-1 px-4 group/step">
                                                                 {/* Connector arrow */}
                                                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex justify-center -z-10 opacity-0 group-hover/step:opacity-100 transition-opacity delay-100">
-                                                                    <span className="material-symbols-outlined text-blue-300 text-xs">arrow_forward</span>
+                                                                    <span className="material-symbols-outlined text-orange-300 text-xs">arrow_forward</span>
                                                                 </div>
 
                                                                 <div className="relative">
-                                                                    <div className="h-10 px-5 bg-white border-2 border-blue-500 text-blue-700 rounded-full shadow-md flex items-center justify-center font-bold text-xs whitespace-nowrap relative group-hover/step:scale-105 transition-transform duration-300 z-10 min-w-[100px]">
+                                                                    <div className="h-10 px-5 bg-white border-2 border-orange-500 text-orange-700 rounded-full shadow-md flex items-center justify-center font-bold text-xs whitespace-nowrap relative group-hover/step:scale-105 transition-transform duration-300 z-10 min-w-[100px]">
                                                                         {getRoleName(step.role)}
                                                                         {/* Status Point */}
                                                                         <div className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -403,11 +403,11 @@ export default function Workflows() {
                                                                         </div>
                                                                     </div>
                                                                     {/* Ripple effect */}
-                                                                    <div className="absolute top-0 left-0 w-full h-full bg-blue-100 rounded-full -z-10 animate-ping opacity-0 group-hover:opacity-30"></div>
+                                                                    <div className="absolute top-0 left-0 w-full h-full bg-orange-100 rounded-full -z-10 animate-ping opacity-0 group-hover:opacity-30"></div>
                                                                 </div>
 
                                                                 <div className="flex flex-col items-center text-center">
-                                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 group-hover:border-blue-100 transition-colors">
+                                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 group-hover:border-orange-100 transition-colors">
                                                                         Step {step.step}
                                                                     </span>
                                                                 </div>

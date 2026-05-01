@@ -17,9 +17,16 @@ const CloseIcon = () => (
 
 const UpgradeModal = () => {
     const navigate = useNavigate();
-    const { isUpgradeModalOpen, setIsUpgradeModalOpen, upgradeModalMessage } = useBilling();
+    const { isUpgradeModalOpen, setIsUpgradeModalOpen, setModalDismissed, upgradeModalMessage, billingUsage } = useBilling();
 
     if (!isUpgradeModalOpen) return null;
+
+    const isExpired = billingUsage?.subscription_status === 'Expired';
+
+    const handleDismiss = () => {
+        setIsUpgradeModalOpen(false);
+        setModalDismissed(true);
+    };
 
     const handleUpgradeClick = () => {
         setIsUpgradeModalOpen(false);
@@ -27,10 +34,10 @@ const UpgradeModal = () => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden relative">
                 <button
-                    onClick={() => setIsUpgradeModalOpen(false)}
+                    onClick={handleDismiss}
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none"
                     aria-label="Close modal"
                 >
@@ -43,11 +50,13 @@ const UpgradeModal = () => {
                     </div>
 
                     <h3 className="text-lg leading-6 font-medium text-gray-900 mb-2">
-                        Upgrade Required
+                        {isExpired ? "Subscription Expired" : "Upgrade Required"}
                     </h3>
 
                     <p className="text-sm text-gray-500 mb-6">
-                        {upgradeModalMessage || "You've reached the limits of your current subscription. Upgrade your plan to unlock more capacity."}
+                        {upgradeModalMessage || (isExpired 
+                            ? "Your subscription has expired. Please renew your plan to continue using all features." 
+                            : "You've reached the limits of your current subscription. Upgrade your plan to unlock more capacity.")}
                     </p>
 
                     <div className="flex flex-col space-y-3">
@@ -61,7 +70,7 @@ const UpgradeModal = () => {
                         <button
                             type="button"
                             className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
-                            onClick={() => setIsUpgradeModalOpen(false)}
+                            onClick={handleDismiss}
                         >
                             Maybe Later
                         </button>

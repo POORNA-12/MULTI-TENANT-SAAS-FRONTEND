@@ -168,7 +168,7 @@ export default function WorkflowDashboard() {
 
                                     <button
                                         onClick={() => setSelectedTemplate(tpl)}
-                                        className="w-full mt-4 py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-primary bg-primary/5 border border-primary/10 rounded-xl group-hover:bg-primary group-hover:text-white transition-all duration-300"
+                                        className="w-full mt-4 py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-portal-navy bg-white border border-portal-border rounded-xl group-hover:bg-portal-primary group-hover:text-white group-hover:border-portal-primary transition-all duration-300"
                                     >
                                         Use Template
                                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

@@ -12,7 +12,7 @@ import {
     ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getMyApprovals, approveWorkflowRequest, rejectWorkflowRequest } from '../services/workflowService';
+import { getApprovalsDashboard, approveWorkflowRequest, rejectWorkflowRequest } from '../services/workflowService';
 import WorkflowActionModal from '../components/Workflows/WorkflowActionModal';
 
 export default function MyApprovals() {
@@ -25,14 +25,26 @@ export default function MyApprovals() {
     const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, requestId: null });
     const [actionLoading, setActionLoading] = useState(false);
 
-    const fetchData = async (status) => {
+    const fetchData = async () => {
         if (!tenantSlug) return;
         try {
             setLoading(true);
-            const data = await getMyApprovals(tenantSlug, status);
-            setApprovals(data.results || []);
+            const data = await getApprovalsDashboard(tenantSlug);
+            
+            // Map the unified array directly based on active filter
+            let filteredList = [];
+            if (filterStatus === 'pending') {
+                filteredList = data.pending || [];
+            } else if (filterStatus === 'approved') {
+                filteredList = data.approved || [];
+            } else if (filterStatus === 'rejected') {
+                filteredList = data.rejected || [];
+            } else {
+                filteredList = [...(data.pending||[]), ...(data.approved||[]), ...(data.rejected||[])];
+            }
+            setApprovals(filteredList);
         } catch (err) {
-            console.error("Failed to fetch my approvals:", err);
+            console.error("Failed to fetch approvals dashboard:", err);
             setApprovals([]);
         } finally {
             setLoading(false);
@@ -40,7 +52,7 @@ export default function MyApprovals() {
     };
 
     useEffect(() => {
-        fetchData(filterStatus);
+        fetchData();
     }, [tenantSlug, filterStatus]);
 
     const handleActionClick = (type, requestId) => {
@@ -59,7 +71,7 @@ export default function MyApprovals() {
             }
 
             setModalConfig({ isOpen: false, type: null, requestId: null });
-            await fetchData(filterStatus);
+            await fetchData();
 
         } catch (error) {
             console.error(`Failed to ${modalConfig.type} request:`, error);

@@ -28,6 +28,7 @@ export const BillingProvider = ({ children }) => {
     });
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [upgradeModalMessage, setUpgradeModalMessage] = useState("");
+    const [modalDismissed, setModalDismissed] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const checkAuthStatus = () => {
@@ -63,7 +64,23 @@ export const BillingProvider = ({ children }) => {
     // Listen for custom 402 error event from api.js
     useEffect(() => {
         const handleQuotaExceeded = (e) => {
-            const errorDetail = e.detail?.detail || "You have reached your subscription limit.";
+            const errorData = e.detail;
+            const errorDetail = errorData?.detail || "You have reached your subscription limit.";
+            const isExpired = errorDetail.toLowerCase().includes('expired');
+
+            // If expired, update global billing status so UI can react (show "Expired" next to plan)
+            if (isExpired) {
+                setBillingUsage(prev => ({
+                    ...prev,
+                    subscription_status: 'Expired'
+                }));
+            }
+
+            // Prevent auto-opening if user dismissed it OR is already on the billing page
+            if (modalDismissed || window.location.pathname === '/dashboard/billing' || window.location.pathname === '/dashboard/billing/plans') {
+                return;
+            }
+
             setUpgradeModalMessage(errorDetail);
             setIsUpgradeModalOpen(true);
 
@@ -73,7 +90,7 @@ export const BillingProvider = ({ children }) => {
 
         window.addEventListener("billing:quota_exceeded", handleQuotaExceeded);
         return () => window.removeEventListener("billing:quota_exceeded", handleQuotaExceeded);
-    }, [fetchBillingUsage]);
+    }, [fetchBillingUsage, modalDismissed]);
 
     const canCreateResource = useCallback((resourceType, orgId = null) => {
         if (!billingUsage) return true; // Fail open if no data (backend still protects)
@@ -109,6 +126,8 @@ export const BillingProvider = ({ children }) => {
         fetchBillingUsage,
         isUpgradeModalOpen,
         setIsUpgradeModalOpen,
+        modalDismissed,
+        setModalDismissed,
         upgradeModalMessage,
         canCreateResource
     };

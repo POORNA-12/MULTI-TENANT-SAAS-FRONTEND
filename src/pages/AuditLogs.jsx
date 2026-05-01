@@ -161,18 +161,18 @@ export default function AuditLogs() {
                     <>
                         {/* KPI Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-white p-5 rounded-lg border border-[#d0dbe7] shadow-sm flex flex-col justify-between h-32 hover:border-blue-300 transition-colors group">
+                            <div className="bg-white p-5 rounded-lg border border-[#d0dbe7] shadow-sm flex flex-col justify-between h-32 hover:border-orange-300 transition-colors group">
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-xs font-bold text-[#4e7397] uppercase tracking-wider mb-1">Total Requests</p>
-                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-blue-600 transition-colors">{analytics?.kpis?.total_requests || 0}</h3>
+                                        <h3 className="text-2xl font-black text-[#0e141b] group-hover:text-orange-600 transition-colors">{analytics?.kpis?.total_requests || 0}</h3>
                                     </div>
-                                    <div className="bg-blue-50 p-2 rounded-md text-blue-600 group-hover:bg-blue-100 transition-colors">
+                                    <div className="bg-orange-50 p-2 rounded-md text-orange-600 group-hover:bg-orange-100 transition-colors">
                                         <span className="material-symbols-outlined">dataset</span>
                                     </div>
                                 </div>
                                 <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden mt-2">
-                                    <div className="bg-blue-500 h-full w-3/4 rounded-full"></div>
+                                    <div className="bg-orange-500 h-full w-3/4 rounded-full"></div>
                                 </div>
                             </div>
 
@@ -224,7 +224,7 @@ export default function AuditLogs() {
                             <div className="bg-white p-6 rounded-lg border border-[#d0dbe7] shadow-sm w-full">
                                 <div className="flex items-center justify-between mb-6">
                                     <h3 className="font-bold text-[#0e141b] flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-blue-500">bar_chart</span>
+                                        <span className="material-symbols-outlined text-orange-500">bar_chart</span>
                                         Activity (Last 7 Days)
                                     </h3>
                                 </div>
@@ -239,7 +239,7 @@ export default function AuditLogs() {
                                                 <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
                                                     <div className="w-full relative h-[150px] flex items-end justify-center">
                                                         <div
-                                                            className="w-full max-w-[40px] bg-blue-500 rounded-t-sm group-hover:bg-blue-600 transition-all relative"
+                                                            className="w-full max-w-[40px] bg-orange-500 rounded-t-sm group-hover:bg-orange-600 transition-all relative"
                                                             style={{ height: `${heightPercentage}%` }}
                                                         >
                                                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#0e141b] text-white text-[10px] font-bold px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">

@@ -15,6 +15,7 @@ import RoleManagement from "./pages/RoleManagement.jsx";
 import Workflows from "./pages/Workflows";
 import AuditLogs from "./pages/AuditLogs";
 import GlobalSettings from "./pages/GlobalSettings";
+import SupportCenter from "./pages/SupportCenter";
 import BillingDashboard from "./pages/BillingDashboard";
 import PricingPlans from "./pages/PricingPlans";
 import PublicPricing from "./pages/PublicPricing";
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/dashboard/workflows" element={<Workflows />} />
           <Route path="/dashboard/audit" element={<AuditLogs />} />
           <Route path="/dashboard/settings" element={<GlobalSettings />} />
+          <Route path="/dashboard/support" element={<SupportCenter />} />
           <Route path="/dashboard/billing" element={<BillingDashboard />} />
           <Route path="/dashboard/billing/plans" element={<PricingPlans />} />
 

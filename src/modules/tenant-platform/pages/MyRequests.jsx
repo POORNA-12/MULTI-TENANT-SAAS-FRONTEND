@@ -29,7 +29,7 @@ export default function MyRequests() {
         try {
             setLoading(true);
             const data = await getMyRequests(tenantSlug, status);
-            setRequests(data.results || []);
+            setRequests(Array.isArray(data) ? data : (data.results ?? data.workflows ?? []));
             if (!status) {
                 setStats({ total: data.count || 0 });
             }

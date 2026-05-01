@@ -67,6 +67,34 @@ const notificationService = {
             console.error("Error updating notification preferences", error);
             throw error;
         }
+    },
+
+    /**
+     * Fetch support requests raised by the tenant user.
+     * @returns {Promise<Array>} List of support requests
+     */
+    getSupportRequests: async () => {
+        try {
+            const response = await api.get("/notifications/support/");
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching support requests", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Submit a new support request.
+     * @param {Object} data - Contains category and description
+     */
+    createSupportRequest: async (data) => {
+        try {
+            const response = await api.post("/notifications/support/", data);
+            return response.data;
+        } catch (error) {
+            console.error("Error creating support request", error);
+            throw error;
+        }
     }
 };
 

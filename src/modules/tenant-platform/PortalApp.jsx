@@ -35,7 +35,7 @@ export default function PortalApp() {
                         {/* These match the original project's paths redirected into the /portal namespace */}
                         <Route path="dashboard" element={<WorkflowDashboard />} />
                         <Route path="my-requests" element={<MyRequests />} />
-                        <Route path="my-approvals" element={<MyApprovals />} />
+                        <Route path="my-approvals" element={<PendingApprovals />} />
                         <Route path="requests" element={<MyRequests />} />
 
                         {/* Management & Status */}

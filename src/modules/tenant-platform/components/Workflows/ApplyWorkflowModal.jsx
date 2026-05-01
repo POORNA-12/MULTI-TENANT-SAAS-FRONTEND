@@ -89,7 +89,7 @@ export default function ApplyWorkflowModal({ template, onClose, onSuccess }) {
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all"
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-portal-primary/20 focus:border-portal-primary focus:outline-none transition-all"
                                     placeholder="e.g., Q4 Marketing Budget Approval"
                                     required
                                 />
@@ -103,7 +103,7 @@ export default function ApplyWorkflowModal({ template, onClose, onSuccess }) {
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     rows={4}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all resize-none"
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-portal-primary/20 focus:border-portal-primary focus:outline-none transition-all resize-none"
                                     placeholder="Provide details about your request..."
                                     required
                                 />
@@ -137,7 +137,7 @@ export default function ApplyWorkflowModal({ template, onClose, onSuccess }) {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium text-sm shadow-sm hover:shadow transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="px-6 py-2 bg-portal-primary hover:bg-portal-primary/90 text-white rounded-lg font-medium text-sm shadow-sm hover:shadow transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? (
                                         <>

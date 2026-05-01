@@ -1,8 +1,37 @@
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
+import notificationService from "../services/notificationService";
 
 export default function Solutions() {
+    const [email, setEmail] = useState("");
+    const [companySize, setCompanySize] = useState("10-50 employees");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!email) {
+            alert("Please enter your work email.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await notificationService.createSupportRequest({
+                category: "OTHER",
+                description: `Consultation Request\nEmail: ${email}\nCompany Size: ${companySize}`
+            });
+            alert("Consultation request submitted successfully!");
+            setEmail("");
+            setCompanySize("10-50 employees");
+        } catch (error) {
+            console.error("Failed to submit request", error);
+            alert("Failed to submit request. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
     return (
         <>
             <Navbar />
@@ -27,14 +56,7 @@ export default function Solutions() {
                         technical scales.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg shadow-sm transition-colors">
-                            Talk to an Architect
-                        </button>
-                        <button className="bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 px-8 rounded-lg border border-slate-300 shadow-sm transition-colors">
-                            View Use Cases
-                        </button>
-                    </div>
+
                 </div>
             </section>
 
@@ -137,7 +159,7 @@ export default function Solutions() {
                                 </p>
                                 <div className="flex items-center gap-3 text-blue-100 font-semibold">
                                     <span>📞</span>
-                                    <span>+1 (888) TENANT-X</span>
+                                    <span>+91 9133159867</span>
                                 </div>
                             </div>
 
@@ -147,21 +169,31 @@ export default function Solutions() {
                                         <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-blue-100">Work Email</label>
                                         <input
                                             type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
                                             placeholder="name@company.com"
                                             className="w-full px-4 py-3 rounded-lg bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-blue-100">Company Size</label>
-                                        <select className="w-full px-4 py-3 rounded-lg bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400 appearance-none cursor-pointer">
+                                        <select 
+                                            value={companySize}
+                                            onChange={(e) => setCompanySize(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-lg bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400 appearance-none cursor-pointer"
+                                        >
                                             <option>10-50 employees</option>
                                             <option>50-200 employees</option>
                                             <option>200-1000 employees</option>
                                             <option>1000+ employees</option>
                                         </select>
                                     </div>
-                                    <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-md transition-colors mt-2">
-                                        Request Consultation
+                                    <button 
+                                        onClick={handleSubmit}
+                                        disabled={isSubmitting}
+                                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-md transition-colors mt-2 disabled:opacity-50"
+                                    >
+                                        {isSubmitting ? "Submitting..." : "Request Consultation"}
                                     </button>
                                 </div>
                             </div>
@@ -189,9 +221,6 @@ function UseCaseCard({ icon, iconBg, title, desc, linkText }) {
             <p className="text-slate-600 mb-6 leading-relaxed">
                 {desc}
             </p>
-            <a href="#" className="flex items-center gap-2 text-blue-600 font-bold hover:gap-3 transition-all text-sm">
-                {linkText} <span className="text-lg">→</span>
-            </a>
         </div>
     );
 }

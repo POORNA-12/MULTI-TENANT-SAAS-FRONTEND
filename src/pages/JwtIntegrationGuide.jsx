@@ -176,8 +176,8 @@ export default function JwtIntegrationGuide() {
                     </header>
 
                     <div className="lg:grid lg:grid-cols-12 gap-6 items-start">
-                        <aside className="lg:col-span-3 mb-4 lg:mb-0">
-                            <div className="lg:sticky lg:top-6 rounded-2xl border border-[#e8dccd] bg-white p-4 shadow-sm">
+                        <aside className="lg:col-span-3 mb-4 lg:mb-0 lg:sticky lg:top-6">
+                            <div className="rounded-2xl border border-[#e8dccd] bg-white p-4 shadow-sm">
                                 <p className="text-[10px] uppercase tracking-[0.15em] font-bold text-[#9a6f3c] mb-3">On this page</p>
                                 <div className="space-y-1.5">
                                     {sections.map((s, i) => (

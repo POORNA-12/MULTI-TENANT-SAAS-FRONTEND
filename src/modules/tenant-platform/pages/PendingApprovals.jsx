@@ -16,7 +16,7 @@ import {
     History
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getPendingApprovals, getMyWorkflows, approveWorkflowRequest, rejectWorkflowRequest } from '../services/workflowService';
+import { getApprovalsDashboard, getMyWorkflows, approveWorkflowRequest, rejectWorkflowRequest } from '../services/workflowService';
 import WorkflowActionModal from '../components/Workflows/WorkflowActionModal';
 
 export default function PendingApprovals() {
@@ -38,10 +38,10 @@ export default function PendingApprovals() {
             if (user?.role === 'member') {
                 // Members: Fetch "My Requests"
                 const data = await getMyWorkflows(tenantSlug);
-                mergedRequests = Array.isArray(data) ? data : (data.workflows || []);
+                mergedRequests = Array.isArray(data) ? data : (data.results ?? data.workflows ?? []);
             } else {
                 // Approvers: Fetch "Pending Approvals" (Backend filtered)
-                const data = await getPendingApprovals(tenantSlug);
+                const data = await getApprovalsDashboard(tenantSlug);
                 const pending = data.pending || [];
                 const approved = data.approved || [];
                 const rejected = data.rejected || [];
@@ -212,7 +212,7 @@ export default function PendingApprovals() {
                     </p>
                 )}
                 <div className="lg:hidden mt-2 space-y-1 text-xs text-portal-textsecondary">
-                    <p>By: {req.submitted_by}</p>
+                    <p>By: {req.submitted_by || 'Me'}</p>
                     <div className="flex items-center gap-2 mt-2">
                         {getStatusBadge(req.status)}
                     </div>
@@ -222,16 +222,16 @@ export default function PendingApprovals() {
             {/* Submitted By */}
             <div className="hidden lg:flex items-center gap-2 text-sm text-portal-textprimary">
                 <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500">
-                    {req.submitted_by.charAt(0).toUpperCase()}
+                    {(req.submitted_by ? req.submitted_by.charAt(0) : 'M').toUpperCase()}
                 </div>
-                <span className="truncate max-w-[140px]" title={req.submitted_by}>
-                    {req.submitted_by}
+                <span className="truncate max-w-[140px]" title={req.submitted_by || 'Me'}>
+                    {req.submitted_by || 'Me'}
                 </span>
             </div>
 
             {/* Submitted At */}
             <div className="hidden lg:block text-sm text-portal-textsecondary">
-                {new Date(req.submitted_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                {new Date(req.submitted_at || req.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
             </div>
 
             {/* Status / Role Badge */}

@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
 
 export default function Features() {
   return (
@@ -56,7 +57,7 @@ export default function Features() {
 
           {/* 3 */}
           <FeatureRow
-            title="Dynamic RBAC & ABAC"
+            title="Dynamic RBAC"
             desc="Real-time permission evaluation using role and attribute based access control."
             bullets={[
               "Hierarchical Role Inheritance",
@@ -88,12 +89,12 @@ export default function Features() {
             Join thousands of developers building scalable, secure platforms.
           </p>
           <div className="flex justify-center gap-4">
-            <button className="bg-orange-500 px-8 py-4 rounded-lg font-bold">
+            <Link to="/signup" className="bg-orange-500 px-8 py-4 rounded-lg font-bold inline-block text-center">
               Get Started for Free
-            </button>
-            <button className="bg-white/10 px-8 py-4 rounded-lg font-bold border border-white/20">
+            </Link>
+            <Link to="/signup" className="bg-white/10 px-8 py-4 rounded-lg font-bold border border-white/20 inline-block text-center">
               Book a Demo
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -168,13 +169,12 @@ function MiniCard({ active, dot }) {
     >
       <div className="flex items-center gap-3 mb-2">
         <span
-          className={`h-2 w-2 rounded-full ${
-            dot === "green"
+          className={`h-2 w-2 rounded-full ${dot === "green"
               ? "bg-green-500"
               : dot === "red"
-              ? "bg-red-400"
-              : "bg-blue-500 animate-pulse"
-          }`}
+                ? "bg-red-400"
+                : "bg-blue-500 animate-pulse"
+            }`}
         />
         <div className="h-2 w-24 bg-slate-200 rounded" />
       </div>
@@ -234,9 +234,8 @@ function RBACMock() {
       {["👤", "🔑", "🛡️", "⚙️"].map((icon, i) => (
         <div
           key={i}
-          className={`bg-white p-6 rounded-2xl shadow-md border ${
-            i % 2 ? "mt-6" : "-mt-2"
-          }`}
+          className={`bg-white p-6 rounded-2xl shadow-md border ${i % 2 ? "mt-6" : "-mt-2"
+            }`}
         >
           <div className="text-orange-500 text-xl mb-3">{icon}</div>
           <div className="h-2 w-16 bg-slate-200 rounded mb-2" />
@@ -278,10 +277,9 @@ function Step({ icon, active, disabled }) {
   return (
     <div
       className={`h-16 w-16 flex items-center justify-center rounded-2xl shadow border
-        ${
-          active
-            ? "bg-white border-purple-500"
-            : disabled
+        ${active
+          ? "bg-white border-purple-500"
+          : disabled
             ? "bg-slate-200 text-slate-400"
             : "bg-white"
         }`}
@@ -294,9 +292,8 @@ function Step({ icon, active, disabled }) {
 function DashedLine({ gray }) {
   return (
     <div
-      className={`flex-1 border-t-2 border-dashed ${
-        gray ? "border-slate-300" : "border-purple-400"
-      }`}
+      className={`flex-1 border-t-2 border-dashed ${gray ? "border-slate-300" : "border-purple-400"
+        }`}
     />
   );
 }
@@ -306,9 +303,8 @@ function MockFrame({ children, grid }) {
     <div className="relative bg-slate-50 border border-slate-200 rounded-3xl p-8 h-[400px] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#197fe6_1px,transparent_1px)] [background-size:20px_20px]" />
       <div
-        className={`relative z-10 ${
-          grid ? "grid grid-cols-2 gap-4" : ""
-        }`}
+        className={`relative z-10 ${grid ? "grid grid-cols-2 gap-4" : ""
+          }`}
       >
         {children}
       </div>

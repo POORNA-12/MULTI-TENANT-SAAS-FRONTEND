@@ -12,9 +12,9 @@ const dashboardService = {
         return response.data;
     },
 
-    getAuditAnalytics: async () => {
+    getAuditAnalytics: async (params = {}) => {
         // Combined path: audits/ + saas/audit/analytics/
-        const response = await api.get("audits/saas/audit/analytics/");
+        const response = await api.get("audits/saas/audit/analytics/", { params });
         return response.data;
     },
 
@@ -23,8 +23,8 @@ const dashboardService = {
         return response.data;
     },
 
-    getTenantAuditAnalytics: async (tenantSlug) => {
-        const response = await api.get(`audits/saas_tenant_scope/${tenantSlug}/audit/analytics/`);
+    getTenantAuditAnalytics: async (tenantSlug, params = {}) => {
+        const response = await api.get(`audits/saas_tenant_scope/${tenantSlug}/audit/analytics/`, { params });
         return response.data;
     }
 };
